@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Quick Test - Room 5502</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      .instructions {
+        background: #f0f0f0;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 5px;
+      }
+      .step {
+        margin: 10px 0;
+        padding: 10px;
+        background: #e8f4f8;
+        border-left: 4px solid #1976d2;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Quick Test for Room 5502</h1>
+
+    <div class="instructions">
+      <h3>Testing Instructions:</h3>
+      <div class="step">
+        <strong>Step 1:</strong> Open lobby.html in your browser
+      </div>
+      <div class="step">
+        <strong>Step 2:</strong> Enter your name and room code "5502"
+      </div>
+      <div class="step"><strong>Step 3:</strong> Click "Go to Room"</div>
+      <div class="step">
+        <strong>Step 4:</strong> Click "Join Stream" button (this is crucial!)
+      </div>
+      <div class="step">
+        <strong>Step 5:</strong> Check participants count - should show both
+        users
+      </div>
+    </div>
+
+    <div class="instructions">
+      <h3>For Your Friend:</h3>
+      <p>
+        Your friend should follow the exact same steps using the same room code
+        "5502"
+      </p>
+      <p>
+        <strong>Important:</strong> Both users must click "Join Stream" to see
+        each other's video!
+      </p>
+    </div>
+
+    <div class="instructions">
+      <h3>Debugging:</h3>
+      <p>Open Developer Tools (F12) and check the Console for debug messages</p>
+      <p>Look for messages like:</p>
+      <ul>
+        <li>"Current user UID: [number]"</li>
+        <li>"Total members in room: 2"</li>
+        <li>"User published: [UID] Media type: video"</li>
+      </ul>
+    </div>
+
+    <a
+      href="lobby.html"
+      style="
+        display: inline-block;
+        padding: 15px 30px;
+        background: #1976d2;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        margin-top: 20px;
+      "
+    >
+      Go to Lobby
+    </a>
+  </body>
+</html>

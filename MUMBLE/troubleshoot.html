@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Mumble Troubleshooting</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .error-section {
+        background: #ffe6e6;
+        border: 1px solid #ff9999;
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 5px;
+      }
+      .solution {
+        background: #e6ffe6;
+        border: 1px solid #99ff99;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 5px;
+      }
+      .step {
+        background: #f0f8ff;
+        border-left: 4px solid #1976d2;
+        padding: 10px;
+        margin: 10px 0;
+      }
+      .warning {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 5px;
+      }
+      code {
+        background: #f4f4f4;
+        padding: 2px 5px;
+        border-radius: 3px;
+      }
+      .test-button {
+        background: #1976d2;
+        color: white;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 5px;
+        display: inline-block;
+        margin: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🔧 Mumble Video Call Troubleshooting</h1>
+
+    <div class="warning">
+      <strong>⚠️ Important:</strong> Make sure you're testing with
+      <code>http://localhost:8000</code> not file:// URLs for proper
+      permissions.
+    </div>
+
+    <h2>🚨 Most Common Issues & Solutions</h2>
+
+    <div class="error-section">
+      <h3>1. Camera/Microphone Permission Issues</h3>
+      <strong>Symptoms:</strong> Browser doesn't ask for permissions, or shows
+      permission denied errors
+      <div class="solution">
+        <strong>Solutions:</strong>
+        <ul>
+          <li>
+            Open browser settings → Privacy & Security → Camera/Microphone →
+            Allow for localhost
+          </li>
+          <li>Clear browser data and try again</li>
+          <li>Try in incognito/private mode</li>
+          <li>Make sure no other app is using camera/microphone</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="error-section">
+      <h3>2. Agora App ID Issues</h3>
+      <strong>Symptoms:</strong> Console shows "Invalid App ID" or connection
+      errors
+      <div class="solution">
+        <strong>Check:</strong> The App ID
+        <code>3c19963cb8ca48228834ee38bee6e70f</code> might be expired or
+        invalid
+        <ul>
+          <li>
+            Visit
+            <a href="https://console.agora.io" target="_blank">Agora Console</a>
+          </li>
+          <li>Create a new project and get a fresh App ID</li>
+          <li>Replace the APP_ID in room_rtc.js</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="error-section">
+      <h3>3. Network/Firewall Blocking</h3>
+      <strong>Symptoms:</strong> Can't connect to Agora servers, timeouts
+      <div class="solution">
+        <strong>Try:</strong>
+        <ul>
+          <li>Disable antivirus/firewall temporarily</li>
+          <li>Try on different network (mobile hotspot)</li>
+          <li>Check if corporate firewall blocks WebRTC</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="error-section">
+      <h3>4. Browser Compatibility</h3>
+      <strong>Symptoms:</strong> Features don't work, console errors about
+      missing APIs
+      <div class="solution">
+        <strong>Use:</strong> Chrome, Firefox, or Edge (latest versions)
+        <br /><strong>Avoid:</strong> Internet Explorer, very old browser
+        versions
+      </div>
+    </div>
+
+    <h2>📋 Step-by-Step Testing Process</h2>
+
+    <div class="step">
+      <strong>Step 1: Basic Setup</strong>
+      <ol>
+        <li>Start local server: <code>python -m http.server 8000</code></li>
+        <li>Open <code>http://localhost:8000/lobby.html</code></li>
+        <li>Open Developer Tools (F12) and watch Console tab</li>
+      </ol>
+    </div>
+
+    <div class="step">
+      <strong>Step 2: First User Test</strong>
+      <ol>
+        <li>Enter name: "User1"</li>
+        <li>Enter room: "5502"</li>
+        <li>Click "Go to Room"</li>
+        <li>Look for console messages:</li>
+        <ul>
+          <li>✅ "Current user UID: [timestamp]"</li>
+          <li>✅ "RTM login successful"</li>
+          <li>✅ "Successfully joined RTC channel"</li>
+        </ul>
+        <li>Click "Join Stream" and allow camera/microphone</li>
+        <li>Look for: ✅ "Successfully published audio and video tracks"</li>
+      </ol>
+    </div>
+
+    <div class="step">
+      <strong>Step 3: Second User Test</strong>
+      <ol>
+        <li>Open second browser/incognito window</li>
+        <li>Go to <code>http://localhost:8000/lobby.html</code></li>
+        <li>Enter name: "User2"</li>
+        <li>Enter room: "5502" (same room!)</li>
+        <li>Watch console for:</li>
+        <ul>
+          <li>✅ "A new member has joined the room"</li>
+          <li>✅ "Total members in room: 2"</li>
+        </ul>
+        <li>Click "Join Stream"</li>
+        <li>Both users should see:</li>
+        <ul>
+          <li>✅ "User published: [other_user_uid] Media type: video"</li>
+          <li>✅ "Creating new video container for user: [other_user_uid]"</li>
+        </ul>
+      </ol>
+    </div>
+
+    <h2>🔍 What to Check in Console</h2>
+
+    <div class="step">
+      <strong>Success Messages (should see these):</strong>
+      <ul>
+        <li><code>Current user UID: [number]</code></li>
+        <li><code>RTM login successful</code></li>
+        <li><code>Successfully joined RTC channel</code></li>
+        <li><code>A new member has joined the room: [uid]</code></li>
+        <li><code>Total members in room: 2</code></li>
+        <li><code>Successfully published audio and video tracks</code></li>
+        <li><code>User published: [uid] Media type: video</code></li>
+        <li><code>Video track started playing for user: [uid]</code></li>
+      </ul>
+    </div>
+
+    <div class="step">
+      <strong>Error Messages (investigate if you see these):</strong>
+      <ul>
+        <li>
+          <code>Agora SDK not loaded properly</code> → Check internet connection
+        </li>
+        <li>
+          <code>NotAllowedError</code> → Camera/microphone permission denied
+        </li>
+        <li><code>NotFoundError</code> → No camera/microphone detected</li>
+        <li><code>Invalid App ID</code> → App ID expired or wrong</li>
+        <li>
+          <code>No video track found</code> → Stream not properly published
+        </li>
+      </ul>
+    </div>
+
+    <h2>🧪 Quick Tests</h2>
+
+    <a href="http://localhost:8000/lobby.html" class="test-button"
+      >Test Lobby</a
+    >
+    <a href="http://localhost:8000/test.html" class="test-button"
+      >Instructions</a
+    >
+    <a
+      href="javascript:navigator.mediaDevices.getUserMedia({video:true,audio:true}).then(()=>alert('Camera OK!')).catch(e=>alert('Camera Error: '+e.message))"
+      class="test-button"
+      >Test Camera Permission</a
+    >
+
+    <h2>🆘 Still Not Working?</h2>
+
+    <div class="solution">
+      <strong>Last Resort Options:</strong>
+      <ol>
+        <li>
+          <strong>Try Different Agora App ID:</strong> Create new project at
+          console.agora.io
+        </li>
+        <li>
+          <strong>Test on Different Device/Network:</strong> Mobile phone,
+          different WiFi
+        </li>
+        <li>
+          <strong>Use Alternative:</strong> Try a different WebRTC solution like
+          Jitsi Meet
+        </li>
+        <li>
+          <strong>Contact Support:</strong> Share console logs with Agora
+          support
+        </li>
+      </ol>
+    </div>
+
+    <script>
+      // Auto-refresh console checking
+      setTimeout(() => {
+        if (typeof AgoraRTC === "undefined") {
+          document.body.innerHTML +=
+            '<div style="background:red;color:white;padding:20px;margin:20px 0;"><strong>ERROR:</strong> Agora SDK not loaded! Check your internet connection.</div>';
+        }
+      }, 2000);
+    </script>
+  </body>
+</html>
