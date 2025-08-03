@@ -6,5 +6,5 @@ import com.openacademy.backend.dto.AdminRegisterRequest;
 
 @Service
 public interface AdminRegisterService {
-    String registerTeacher(AdminRegisterRequest request);
+    String registerAdmin(AdminRegisterRequest request);
 }
