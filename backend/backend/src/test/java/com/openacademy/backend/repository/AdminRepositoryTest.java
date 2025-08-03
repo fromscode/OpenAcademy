@@ -1,4 +1,4 @@
-package com.openacademy.backend;
+package com.openacademy.backend.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -13,8 +13,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import com.openacademy.backend.entity.Admin;
 import com.openacademy.backend.entity.User;
 import com.openacademy.backend.entity.common.Role;
-import com.openacademy.backend.repository.AdminRepository;
-import com.openacademy.backend.repository.UserRepository;
 
 @DataJpaTest
 public class AdminRepositoryTest {
@@ -42,7 +40,7 @@ public class AdminRepositoryTest {
     }
 
     @Test
-    public void studentIdMatchesUserId() {
+    public void adminIdMatchesUserId() {
         userRepository.save(user);
         adminRepository.save(admin);
 

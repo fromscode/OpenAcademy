@@ -1,8 +1,9 @@
-package com.openacademy.backend;
+package com.openacademy.backend.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -10,22 +11,20 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import com.openacademy.backend.entity.Teacher;
+import com.openacademy.backend.entity.Student;
 import com.openacademy.backend.entity.User;
 import com.openacademy.backend.entity.common.Role;
-import com.openacademy.backend.repository.TeacherRepository;
-import com.openacademy.backend.repository.UserRepository;
 
 @DataJpaTest
-public class TeacherRepositoryTest {
+public class StudentRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
-    private TeacherRepository teacherRepository;
+    private StudentRepository studentRepository;
 
     private User user;
-    private Teacher teacher;
+    private Student student;
 
     @BeforeEach
     public void initializeUser() {
@@ -37,20 +36,20 @@ public class TeacherRepositoryTest {
         user.setRole(Role.STUDENT);
         user.setPhoneNumber("1010101010");
 
-        teacher = new Teacher();
-        teacher.setUser(user);
-        teacher.setEducation("Phd");
+        student = new Student();
+        student.setUser(user);
+        student.setDateOfBirth(LocalDate.of(2022, 12, 18));
     }
 
     @Test
     public void studentIdMatchesUserId() {
         userRepository.save(user);
-        teacherRepository.save(teacher);
+        studentRepository.save(student);
 
         Optional<User> fetchedUser = userRepository.findById(user.getId());
-        Optional<Teacher> fetchedTeacher = teacherRepository.findById(user.getId());
+        Optional<Student> fetchedStudent = studentRepository.findById(user.getId());
         assertTrue(fetchedUser.isPresent());
-        assertTrue(fetchedTeacher.isPresent());
-        assertEquals(fetchedUser.get().getId(), fetchedTeacher.get().getId());
+        assertTrue(fetchedStudent.isPresent());
+        assertEquals(fetchedUser.get().getId(), fetchedStudent.get().getUserId());
     }
 }

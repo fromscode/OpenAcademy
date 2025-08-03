@@ -1,9 +1,8 @@
-package com.openacademy.backend;
+package com.openacademy.backend.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.LocalDate;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -11,22 +10,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import com.openacademy.backend.entity.Student;
 import com.openacademy.backend.entity.User;
 import com.openacademy.backend.entity.common.Role;
-import com.openacademy.backend.repository.StudentRepository;
-import com.openacademy.backend.repository.UserRepository;
 
 @DataJpaTest
-public class StudentRepositoryTest {
+public class UserRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private StudentRepository studentRepository;
-
     private User user;
-    private Student student;
 
     @BeforeEach
     public void initializeUser() {
@@ -37,21 +29,20 @@ public class StudentRepositoryTest {
         user.setLastName("Doe");
         user.setRole(Role.STUDENT);
         user.setPhoneNumber("1010101010");
-
-        student = new Student();
-        student.setUser(user);
-        student.setDateOfBirth(LocalDate.of(2022, 12, 18));
     }
 
     @Test
-    public void studentIdMatchesUserId() {
+    public void findByEmailReturnsCorrectUser() {
         userRepository.save(user);
-        studentRepository.save(student);
-
-        Optional<User> fetchedUser = userRepository.findById(user.getId());
-        Optional<Student> fetchedStudent = studentRepository.findById(user.getId());
+        Optional<User> fetchedUser = userRepository.findByEmail("test@example.com");
         assertTrue(fetchedUser.isPresent());
-        assertTrue(fetchedStudent.isPresent());
-        assertEquals(fetchedUser.get().getId(), fetchedStudent.get().getUserId());
+        assertEquals(fetchedUser.get().getEmail(), user.getEmail());
+    }
+
+    @Test
+    public void getFullNameReturnsCorrectFullName() {
+        assertEquals(user.getFullName(), "John Doe");
+        user.setMiddleName("Betty");
+        assertEquals(user.getFullName(), "John Betty Doe");
     }
 }
