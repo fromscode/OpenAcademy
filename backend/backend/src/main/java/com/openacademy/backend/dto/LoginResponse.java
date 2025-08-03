@@ -10,4 +10,6 @@ import lombok.Setter;
 public class LoginResponse {
     private String message;
     private Role role;
+    private String email;
+    private String firstName;
 }
