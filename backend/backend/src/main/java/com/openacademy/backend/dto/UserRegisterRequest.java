@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public abstract class BaseRegisterRequest {
+public abstract class UserRegisterRequest {
     private String email;
     private String password;
     private Role role;

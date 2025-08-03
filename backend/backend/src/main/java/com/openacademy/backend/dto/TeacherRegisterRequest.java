@@ -6,6 +6,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class TeacherRegisterRequest extends BaseRegisterRequest{
+public class TeacherRegisterRequest extends UserRegisterRequest{
     private String education;
 }

@@ -7,6 +7,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class StudentRegisterRequest extends BaseRegisterRequest{
+public class StudentRegisterRequest extends UserRegisterRequest{
     private LocalDate dateOfBirth;
 }

@@ -6,5 +6,5 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class AdminRegisterRequest extends BaseRegisterRequest{
+public class AdminRegisterRequest extends UserRegisterRequest{
 }
