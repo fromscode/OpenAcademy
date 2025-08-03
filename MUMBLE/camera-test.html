@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Camera Switch Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background-color: #1a1a1a;
+        color: white;
+      }
+      .test-container {
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      .info {
+        background-color: #262625;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
+      .test-button {
+        background-color: #845695;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 5px;
+      }
+      .test-button:hover {
+        background-color: #9966aa;
+      }
+      .test-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      #camera-list {
+        background-color: #262625;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="test-container">
+      <h1>📱 Camera Switch Feature Test</h1>
+
+      <div class="info">
+        <h3>Device Information</h3>
+        <p><strong>User Agent:</strong> <span id="user-agent"></span></p>
+        <p><strong>Is Mobile:</strong> <span id="is-mobile"></span></p>
+        <p><strong>Screen Width:</strong> <span id="screen-width"></span>px</p>
+        <p><strong>Touch Support:</strong> <span id="touch-support"></span></p>
+      </div>
+
+      <div class="info">
+        <h3>Camera Detection</h3>
+        <button class="test-button" onclick="testCameraDetection()">
+          Detect Cameras
+        </button>
+        <p>
+          <strong>Available Cameras:</strong>
+          <span id="camera-count">Not tested</span>
+        </p>
+        <div id="camera-list"></div>
+      </div>
+
+      <div class="info">
+        <h3>Feature Status</h3>
+        <p>
+          <strong>Camera Switching Available:</strong>
+          <span id="feature-status">Unknown</span>
+        </p>
+        <p>
+          <strong>Expected Button Visibility:</strong>
+          <span id="button-visibility">Unknown</span>
+        </p>
+      </div>
+
+      <div class="info">
+        <h3>Test Actions</h3>
+        <p>
+          Open the main room page on a mobile device to test the camera
+          switching feature.
+        </p>
+        <a href="index.html" class="test-button">Go to Main Room</a>
+      </div>
+    </div>
+
+    <script>
+      // Mobile detection function (same as in room_rtc.js)
+      function isMobileDevice() {
+        return (
+          /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+            navigator.userAgent
+          ) ||
+          window.innerWidth <= 768 ||
+          "ontouchstart" in window
+        );
+      }
+
+      // Update device info
+      document.getElementById("user-agent").textContent = navigator.userAgent;
+      document.getElementById("is-mobile").textContent = isMobileDevice()
+        ? "Yes"
+        : "No";
+      document.getElementById("screen-width").textContent = window.innerWidth;
+      document.getElementById("touch-support").textContent =
+        "ontouchstart" in window ? "Yes" : "No";
+
+      async function testCameraDetection() {
+        try {
+          const button = event.target;
+          button.disabled = true;
+          button.textContent = "Detecting...";
+
+          // Request permission and enumerate cameras
+          await navigator.mediaDevices.getUserMedia({ video: true });
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          const cameras = devices.filter(
+            (device) => device.kind === "videoinput"
+          );
+
+          document.getElementById("camera-count").textContent = cameras.length;
+
+          const cameraList = document.getElementById("camera-list");
+          cameraList.innerHTML = "<h4>Camera Details:</h4>";
+
+          cameras.forEach((camera, index) => {
+            const div = document.createElement("div");
+            div.style.margin = "5px 0";
+            div.style.padding = "5px";
+            div.style.backgroundColor = "#1a1a1a";
+            div.style.borderRadius = "3px";
+            div.innerHTML = `
+                        <strong>Camera ${index + 1}:</strong><br>
+                        Label: ${camera.label || "Unknown"}<br>
+                        Device ID: ${camera.deviceId.substring(0, 20)}...
+                    `;
+            cameraList.appendChild(div);
+          });
+
+          // Update feature status
+          const isMobile = isMobileDevice();
+          const hasMultipleCameras = cameras.length > 1;
+          const featureAvailable = isMobile && hasMultipleCameras;
+
+          document.getElementById("feature-status").textContent =
+            featureAvailable ? "Available" : "Not Available";
+          document.getElementById("feature-status").style.color =
+            featureAvailable ? "#4CAF50" : "#FF5722";
+
+          document.getElementById("button-visibility").textContent =
+            featureAvailable ? "Visible" : "Hidden";
+          document.getElementById("button-visibility").style.color =
+            featureAvailable ? "#4CAF50" : "#FF5722";
+
+          button.textContent = "Detect Cameras";
+          button.disabled = false;
+        } catch (error) {
+          console.error("Camera detection failed:", error);
+          document.getElementById("camera-count").textContent =
+            "Error: " + error.message;
+
+          const button = event.target;
+          button.textContent = "Detect Cameras";
+          button.disabled = false;
+        }
+      }
+    </script>
+  </body>
+</html>

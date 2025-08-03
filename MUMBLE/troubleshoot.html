@@ -80,9 +80,59 @@
         </ul>
       </div>
     </div>
+    <div class="error-section">
+      <h3>2. Screen Sharing Not Available on Mobile</h3>
+      <strong>Symptoms:</strong> Screen share button is disabled or shows error
+      on mobile devices
+      <div class="solution">
+        <strong>Explanation:</strong>
+        <p>
+          Screen sharing is
+          <strong>NOT supported on mobile browsers</strong> (iPhone, Android)
+          due to security and technical limitations.
+        </p>
+        <ul>
+          <li>
+            <strong>iOS Safari/Chrome:</strong> Apple doesn't allow screen
+            sharing in mobile browsers
+          </li>
+          <li>
+            <strong>Android Chrome/Firefox:</strong> Limited support, most
+            devices don't support it
+          </li>
+          <li>
+            <strong>Mobile Apps:</strong> You would need a native mobile app for
+            screen sharing
+          </li>
+        </ul>
+        <strong>Alternative Solutions for Mobile Users:</strong>
+        <ul>
+          <li>
+            🎥 <strong>Use camera instead:</strong> Point your camera at your
+            screen/document
+          </li>
+          <li>
+            💻 <strong>Switch to desktop:</strong> Use a laptop/desktop computer
+            for screen sharing
+          </li>
+          <li>
+            📧 <strong>Share files:</strong> Send documents via email or file
+            sharing
+          </li>
+          <li>
+            📱 <strong>Use screen recording:</strong> Record your screen and
+            share the video file
+          </li>
+          <li>
+            🔄 <strong>Mirror to computer:</strong> Use apps like TeamViewer or
+            Chrome Remote Desktop
+          </li>
+        </ul>
+      </div>
+    </div>
 
     <div class="error-section">
-      <h3>2. Agora App ID Issues</h3>
+      <h3>3. Agora App ID Issues</h3>
       <strong>Symptoms:</strong> Console shows "Invalid App ID" or connection
       errors
       <div class="solution">
@@ -99,9 +149,8 @@
         </ul>
       </div>
     </div>
-
     <div class="error-section">
-      <h3>3. Network/Firewall Blocking</h3>
+      <h3>4. Network/Firewall Blocking</h3>
       <strong>Symptoms:</strong> Can't connect to Agora servers, timeouts
       <div class="solution">
         <strong>Try:</strong>
@@ -112,9 +161,8 @@
         </ul>
       </div>
     </div>
-
     <div class="error-section">
-      <h3>4. Browser Compatibility</h3>
+      <h3>5. Browser Compatibility</h3>
       <strong>Symptoms:</strong> Features don't work, console errors about
       missing APIs
       <div class="solution">
@@ -207,9 +255,11 @@
     </div>
 
     <h2>🧪 Quick Tests</h2>
-
     <a href="http://localhost:8000/lobby.html" class="test-button"
       >Test Lobby</a
+    >
+    <a href="http://localhost:8000/mobile-test.html" class="test-button"
+      >Mobile Device Test</a
     >
     <a href="http://localhost:8000/test.html" class="test-button"
       >Instructions</a
@@ -218,6 +268,11 @@
       href="javascript:navigator.mediaDevices.getUserMedia({video:true,audio:true}).then(()=>alert('Camera OK!')).catch(e=>alert('Camera Error: '+e.message))"
       class="test-button"
       >Test Camera Permission</a
+    >
+    <a
+      href="javascript:(function(){const isMobile=/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);const hasScreenShare=!!(navigator.mediaDevices&&navigator.mediaDevices.getDisplayMedia);alert(isMobile?'📱 Mobile Device Detected\\n\\n❌ Screen sharing not supported\\n✅ Camera/microphone available\\n\\n💡 Use desktop for screen sharing':hasScreenShare?'💻 Desktop Device\\n✅ Screen sharing supported\\n✅ Camera/microphone available':'💻 Desktop Device\\n❌ Screen sharing not supported\\n✅ Camera/microphone available\\n\\n💡 Try Chrome, Firefox, or Edge');})()"
+      class="test-button"
+      >Check Device Capabilities</a
     >
 
     <h2>🆘 Still Not Working?</h2>

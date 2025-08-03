@@ -68,7 +68,7 @@
   background-color: #2aca3e;
 }
 
-.member_name{
+.member_name {
   font-size: 14px;
   line-height: 0;
 }
@@ -113,23 +113,20 @@
   color: #ede0e0;
 }
 
-.message__body__bot{
+.message__body__bot {
   padding: 0 20px;
   max-width: 900px;
   color: #bdbdbd;
 }
 
-
 .message__author {
   margin-right: 10px;
-  color: #2aca3e!important;
-
+  color: #2aca3e !important;
 }
 
 .message__author__bot {
   margin-right: 10px;
-  color: #a52aca!important;
-
+  color: #a52aca !important;
 }
 
 .message__text {
@@ -174,26 +171,26 @@
   height: 100%;
 }
 
-#stream__box{
+#stream__box {
   background-color: #3f434a;
   height: 60vh;
   display: none;
 }
 
-#stream__box .video__container{
+#stream__box .video__container {
   border: 2px solid #000;
   border-radius: 0;
-  height: 100%!important;
-  width:100%!important;
+  height: 100% !important;
+  width: 100% !important;
 
   background-size: 300px;
 }
 
-#stream__box video{
+#stream__box video {
   border-radius: 0;
 }
 
-#streams__container{
+#streams__container {
   display: flex;
   flex-wrap: wrap;
   gap: 2em;
@@ -203,11 +200,11 @@
   margin-bottom: 225px;
 }
 
-.video__container{
+.video__container {
   display: flex;
   justify-content: center;
   align-items: center;
-  border:2px solid #b366f9;
+  border: 2px solid #b366f9;
   border-radius: 50%;
   cursor: pointer;
   overflow: hidden;
@@ -220,17 +217,17 @@
   background-size: 75px;
 }
 
-.video-player{
+.video-player {
   height: 100%;
   width: 100%;
 }
 
-.video-player video{
+.video-player video {
   border-radius: 50%;
 }
 
 @media (max-width: 1400px) {
-  .video__container{
+  .video__container {
     height: 200px;
     width: 200px;
   }
@@ -270,7 +267,7 @@
     width: 100%;
   }
 
-  .video__container{
+  .video__container {
     height: 100px;
     width: 100px;
   }
@@ -332,23 +329,145 @@
 }
 
 .stream__actions a.active,
-.stream__actions button.active,
+.stream__actions button.active {
+  background-color: #845695;
+}
+
 .stream__actions a:hover,
 .stream__actions button:hover {
   background-color: #845695;
 }
 
-#join-btn{
+/* Camera switch button specific styles */
+#camera-switch-btn {
+  position: relative;
+}
+
+#camera-switch-btn svg {
+  transition: transform 0.3s ease-in-out;
+}
+
+#camera-switch-btn:hover svg {
+  transform: scale(1.1);
+}
+
+/* Show camera switch button animation */
+#camera-switch-btn.show {
+  animation: fadeInScale 0.3s ease-in-out;
+}
+
+@keyframes fadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Mobile responsive adjustments for camera controls */
+@media screen and (max-width: 768px) {
+  .stream__actions {
+    gap: 0.5rem;
+    padding: 0.75rem;
+    bottom: 0.5rem;
+  }
+
+  .stream__actions button {
+    padding: 0.4rem 0.8rem;
+    min-width: 44px; /* Minimum touch target size */
+    min-height: 44px;
+  }
+
+  .stream__actions button svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  /* Camera switch button gets extra space on mobile */
+  #camera-switch-btn {
+    background-color: #2c5aa0;
+  }
+
+  #camera-switch-btn:hover,
+  #camera-switch-btn.active {
+    background-color: #3b6bb5;
+  }
+
+  /* Make sure buttons are easily tappable */
+  .stream__actions button:not(:last-child) {
+    margin-right: 0.25rem;
+  }
+}
+
+/* Mobile-specific styles to fix touch interaction issues */
+@media (max-width: 768px) {
+  .stream__actions a:hover,
+  .stream__actions button:hover {
+    background-color: #262625;
+  }
+
+  .stream__actions a.active,
+  .stream__actions button.active {
+    background-color: #845695 !important;
+  }
+
+  .stream__actions a:not(.active),
+  .stream__actions button:not(.active) {
+    background-color: #262625 !important;
+  }
+
+  /* Disable hover effects on touch devices */
+  .stream__actions a,
+  .stream__actions button {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  /* Hide screen share button on mobile devices */
+  #screen-btn {
+    display: none;
+  }
+
+  /* Adjust button spacing when screen share is hidden */
+  .stream__actions {
+    gap: 1.5rem;
+  }
+}
+
+/* Screen share notification styles */
+.screen-share-notification {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* Disabled button styles */
+#screen-btn:disabled,
+#screen-btn[aria-disabled="true"] {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  pointer-events: auto !important;
+}
+
+#screen-btn:disabled:hover,
+#screen-btn[aria-disabled="true"]:hover {
+  background-color: #262625 !important;
+}
+
+#join-btn {
   background-color: #845695;
   font-size: 18px;
   padding: 25px 50px;
   border: none;
-  color:#fff;
+  color: #fff;
 
   position: fixed;
   bottom: 1rem;
   border-radius: 8px;
-  left:50%;
+  left: 50%;
   transform: translateX(-50%);
   cursor: pointer;
 }

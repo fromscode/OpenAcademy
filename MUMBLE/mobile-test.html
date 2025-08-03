@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Mobile Device Test - Mumble</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        padding: 20px;
+        max-width: 600px;
+        margin: 0 auto;
+        background: #1a1a1a;
+        color: #fff;
+      }
+      .test-result {
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 8px;
+        font-weight: 500;
+      }
+      .supported {
+        background: #2d5016;
+        border: 1px solid #4caf50;
+        color: #81c784;
+      }
+      .not-supported {
+        background: #5d1a1a;
+        border: 1px solid #f44336;
+        color: #ef5350;
+      }
+      .warning {
+        background: #3e2723;
+        border: 1px solid #ff9800;
+        color: #ffb74d;
+      }
+      .info {
+        background: #1a237e;
+        border: 1px solid #2196f3;
+        color: #64b5f6;
+      }
+      button {
+        background: #845695;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        margin: 10px 5px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      button:hover {
+        background: #6d4c7d;
+      }
+      .device-info {
+        background: #2c2c2c;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 15px 0;
+      }
+      .back-link {
+        display: inline-block;
+        background: #845695;
+        color: white;
+        text-decoration: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>📱 Mobile Device Capability Test</h1>
+
+    <div class="device-info">
+      <h3>Your Device Information:</h3>
+      <p><strong>User Agent:</strong> <span id="userAgent"></span></p>
+      <p><strong>Screen Size:</strong> <span id="screenSize"></span></p>
+      <p><strong>Touch Support:</strong> <span id="touchSupport"></span></p>
+    </div>
+
+    <h2>🔍 Feature Support Test</h2>
+
+    <div id="mobileDetection" class="test-result"></div>
+    <div id="screenShareSupport" class="test-result"></div>
+    <div id="cameraSupport" class="test-result"></div>
+    <div id="microphoneSupport" class="test-result"></div>
+
+    <h3>📋 Manual Tests</h3>
+    <button onclick="testCamera()">Test Camera Access</button>
+    <button onclick="testMicrophone()">Test Microphone Access</button>
+    <button onclick="testScreenShare()">Test Screen Sharing</button>
+
+    <div id="testResults"></div>
+
+    <h2>💡 Recommendations</h2>
+    <div id="recommendations"></div>
+
+    <a href="lobby.html" class="back-link">← Back to Lobby</a>
+
+    <script>
+      // Device detection
+      function isMobileDevice() {
+        return (
+          /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+            navigator.userAgent
+          ) ||
+          window.innerWidth <= 768 ||
+          "ontouchstart" in window
+        );
+      }
+
+      function isScreenSharingSupported() {
+        return !!(
+          navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia
+        );
+      }
+
+      function isCameraSupported() {
+        return !!(
+          navigator.mediaDevices && navigator.mediaDevices.getUserMedia
+        );
+      }
+
+      // Display device info
+      function displayDeviceInfo() {
+        document.getElementById("userAgent").textContent = navigator.userAgent;
+        document.getElementById(
+          "screenSize"
+        ).textContent = `${window.screen.width}x${window.screen.height}`;
+        document.getElementById("touchSupport").textContent =
+          "ontouchstart" in window ? "Yes" : "No";
+      }
+
+      // Run automatic tests
+      function runAutomaticTests() {
+        const isMobile = isMobileDevice();
+        const hasScreenShare = isScreenSharingSupported();
+        const hasCamera = isCameraSupported();
+
+        // Mobile detection
+        const mobileDiv = document.getElementById("mobileDetection");
+        if (isMobile) {
+          mobileDiv.className = "test-result warning";
+          mobileDiv.innerHTML =
+            "📱 <strong>Mobile Device Detected</strong><br>Screen sharing will not be available.";
+        } else {
+          mobileDiv.className = "test-result info";
+          mobileDiv.innerHTML =
+            "💻 <strong>Desktop Device Detected</strong><br>All features should be available.";
+        }
+
+        // Screen share support
+        const screenDiv = document.getElementById("screenShareSupport");
+        if (hasScreenShare && !isMobile) {
+          screenDiv.className = "test-result supported";
+          screenDiv.innerHTML =
+            "✅ <strong>Screen Sharing Supported</strong><br>You can share your screen with other participants.";
+        } else if (!hasScreenShare) {
+          screenDiv.className = "test-result not-supported";
+          screenDiv.innerHTML =
+            "❌ <strong>Screen Sharing Not Supported</strong><br>Your browser does not support screen sharing.";
+        } else {
+          screenDiv.className = "test-result not-supported";
+          screenDiv.innerHTML =
+            "❌ <strong>Screen Sharing Not Available</strong><br>Screen sharing is not supported on mobile devices.";
+        }
+
+        // Camera support
+        const cameraDiv = document.getElementById("cameraSupport");
+        if (hasCamera) {
+          cameraDiv.className = "test-result supported";
+          cameraDiv.innerHTML =
+            "✅ <strong>Camera Supported</strong><br>You can share your camera with other participants.";
+        } else {
+          cameraDiv.className = "test-result not-supported";
+          cameraDiv.innerHTML =
+            "❌ <strong>Camera Not Supported</strong><br>Your browser does not support camera access.";
+        }
+
+        // Microphone support (same as camera API)
+        const micDiv = document.getElementById("microphoneSupport");
+        if (hasCamera) {
+          micDiv.className = "test-result supported";
+          micDiv.innerHTML =
+            "✅ <strong>Microphone Supported</strong><br>You can share your audio with other participants.";
+        } else {
+          micDiv.className = "test-result not-supported";
+          micDiv.innerHTML =
+            "❌ <strong>Microphone Not Supported</strong><br>Your browser does not support microphone access.";
+        }
+
+        // Generate recommendations
+        generateRecommendations(isMobile, hasScreenShare, hasCamera);
+      }
+
+      function generateRecommendations(isMobile, hasScreenShare, hasCamera) {
+        const recDiv = document.getElementById("recommendations");
+        let recommendations = "";
+
+        if (isMobile) {
+          recommendations += `
+            <div class="test-result warning">
+              <strong>📱 Mobile Device Recommendations:</strong>
+              <ul>
+                <li>✅ Video calls work perfectly</li>
+                <li>❌ Screen sharing is not available</li>
+                <li>💡 For screen sharing, use a desktop/laptop computer</li>
+                <li>📸 You can point your camera at documents/screens as an alternative</li>
+                <li>🔄 Consider using Chrome Remote Desktop to control a computer remotely</li>
+              </ul>
+            </div>
+          `;
+        } else if (!hasScreenShare) {
+          recommendations += `
+            <div class="test-result not-supported">
+              <strong>🌐 Browser Compatibility:</strong>
+              <ul>
+                <li>❌ Your browser doesn't support screen sharing</li>
+                <li>💡 Try using Chrome, Firefox, or Edge (latest versions)</li>
+                <li>✅ Camera and microphone should work fine</li>
+              </ul>
+            </div>
+          `;
+        } else {
+          recommendations += `
+            <div class="test-result supported">
+              <strong>🎉 Great! Your device supports all features:</strong>
+              <ul>
+                <li>✅ Screen sharing available</li>
+                <li>✅ Camera sharing available</li>
+                <li>✅ Microphone sharing available</li>
+                <li>🚀 You're ready for a full video conferencing experience!</li>
+              </ul>
+            </div>
+          `;
+        }
+
+        recDiv.innerHTML = recommendations;
+      }
+
+      // Manual test functions
+      async function testCamera() {
+        const resultsDiv = document.getElementById("testResults");
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+          });
+          resultsDiv.innerHTML =
+            '<div class="test-result supported">✅ Camera test successful! Permission granted.</div>';
+          stream.getTracks().forEach((track) => track.stop());
+        } catch (error) {
+          resultsDiv.innerHTML = `<div class="test-result not-supported">❌ Camera test failed: ${error.message}</div>`;
+        }
+      }
+
+      async function testMicrophone() {
+        const resultsDiv = document.getElementById("testResults");
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+          });
+          resultsDiv.innerHTML =
+            '<div class="test-result supported">✅ Microphone test successful! Permission granted.</div>';
+          stream.getTracks().forEach((track) => track.stop());
+        } catch (error) {
+          resultsDiv.innerHTML = `<div class="test-result not-supported">❌ Microphone test failed: ${error.message}</div>`;
+        }
+      }
+
+      async function testScreenShare() {
+        const resultsDiv = document.getElementById("testResults");
+
+        if (isMobileDevice()) {
+          resultsDiv.innerHTML =
+            '<div class="test-result not-supported">❌ Screen sharing is not supported on mobile devices.</div>';
+          return;
+        }
+
+        if (!isScreenSharingSupported()) {
+          resultsDiv.innerHTML =
+            '<div class="test-result not-supported">❌ Screen sharing is not supported in this browser.</div>';
+          return;
+        }
+
+        try {
+          const stream = await navigator.mediaDevices.getDisplayMedia({
+            video: true,
+          });
+          resultsDiv.innerHTML =
+            '<div class="test-result supported">✅ Screen sharing test successful! Permission granted.</div>';
+          stream.getTracks().forEach((track) => track.stop());
+        } catch (error) {
+          resultsDiv.innerHTML = `<div class="test-result not-supported">❌ Screen sharing test failed: ${error.message}</div>`;
+        }
+      }
+
+      // Initialize page
+      window.onload = function () {
+        displayDeviceInfo();
+        runAutomaticTests();
+      };
+    </script>
+  </body>
+</html>
