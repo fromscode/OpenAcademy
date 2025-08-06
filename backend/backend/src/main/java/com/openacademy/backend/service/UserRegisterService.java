@@ -3,11 +3,13 @@ package com.openacademy.backend.service;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.openacademy.backend.dto.UserRegisterRequest;
 import com.openacademy.backend.entity.User;
 import com.openacademy.backend.repository.UserRepository;
 
+@Service
 public class UserRegisterService {
     @Autowired
     private UserRepository repo;

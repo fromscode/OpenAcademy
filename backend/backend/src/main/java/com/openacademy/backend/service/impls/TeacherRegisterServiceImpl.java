@@ -25,6 +25,7 @@ public class TeacherRegisterServiceImpl implements TeacherRegisterService {
         
         Teacher teacher = new Teacher();
         teacher.setUser(user);
+        teacher.setEducation(request.getEducation());
         teacherRepo.save(teacher);
         return "Teacher registered successfully!";
     }
