@@ -23,8 +23,7 @@ public class LoginServiceImpl implements LoginService{
         LoginResponse response = new LoginResponse();
 
         if (optionalUser.isEmpty()) {
-            response.setMessage("Invalid Email or Password!");
-            return response;
+            throw new IllegalArgumentException("Invalid email or password");
         }
 
         User user = optionalUser.get();
