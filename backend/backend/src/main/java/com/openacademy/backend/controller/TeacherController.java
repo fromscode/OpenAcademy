@@ -26,9 +26,8 @@ public class TeacherController {
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody TeacherRegisterRequest request) {
-        if (request.getEmail() == null || request.getFirstName() == null || request.getLastName() == null
-                || request.getPassword() == null || request.getPhoneNumber() == null || request.getRole() == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Incomplete Request");
+        if (!request.isValid()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid Request");
         }
 
         try {

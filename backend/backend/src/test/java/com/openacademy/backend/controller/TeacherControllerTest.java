@@ -78,7 +78,7 @@ public class TeacherControllerTest {
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest())
-        .andExpect(content().string("Incomplete Request"));
+        .andExpect(content().string("Invalid Request"));
     }
 
     @Test

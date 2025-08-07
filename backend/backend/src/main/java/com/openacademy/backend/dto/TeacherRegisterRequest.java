@@ -8,4 +8,10 @@ import lombok.Setter;
 @Setter
 public class TeacherRegisterRequest extends UserRegisterRequest{
     private String education;
+
+    @Override
+    public boolean isValid() {
+        return super.isValid() && education != null 
+        && !education.isBlank();
+    }
 }
