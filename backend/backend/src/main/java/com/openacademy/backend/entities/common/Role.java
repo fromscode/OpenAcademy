@@ -1,4 +1,4 @@
-package com.openacademy.backend.entity.common;
+package com.openacademy.backend.entities.common;
 
 public enum Role {
     STUDENT,

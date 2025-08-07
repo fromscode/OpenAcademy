@@ -3,8 +3,8 @@ package com.openacademy.backend.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.openacademy.backend.dto.TeacherRegisterRequest;
-import com.openacademy.backend.entity.Teacher;
-import com.openacademy.backend.entity.User;
+import com.openacademy.backend.entities.Teacher;
+import com.openacademy.backend.entities.User;
 import com.openacademy.backend.repository.TeacherRepository;
 
 @Service

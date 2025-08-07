@@ -16,8 +16,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.openacademy.backend.dto.StudentRegisterRequest;
-import com.openacademy.backend.entity.Student;
-import com.openacademy.backend.entity.User;
+import com.openacademy.backend.entities.Student;
+import com.openacademy.backend.entities.User;
 import com.openacademy.backend.repository.StudentRepository;
 
 public class StudentRegisterServiceTest {

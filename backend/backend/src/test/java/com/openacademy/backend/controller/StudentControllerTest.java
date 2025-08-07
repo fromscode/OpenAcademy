@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openacademy.backend.dto.LoginRequest;
 import com.openacademy.backend.dto.LoginResponse;
 import com.openacademy.backend.dto.StudentRegisterRequest;
-import com.openacademy.backend.entity.common.Role;
+import com.openacademy.backend.entities.common.Role;
 import com.openacademy.backend.service.LoginService;
 import com.openacademy.backend.service.StudentRegisterService;
 

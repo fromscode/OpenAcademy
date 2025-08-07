@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import com.openacademy.backend.entity.Teacher;
-import com.openacademy.backend.entity.User;
-import com.openacademy.backend.entity.common.Role;
+import com.openacademy.backend.entities.Teacher;
+import com.openacademy.backend.entities.User;
+import com.openacademy.backend.entities.common.Role;
 
 @DataJpaTest
 public class TeacherRepositoryTest {

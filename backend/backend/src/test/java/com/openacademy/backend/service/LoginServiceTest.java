@@ -15,8 +15,8 @@ import org.mockito.MockitoAnnotations;
 
 import com.openacademy.backend.dto.LoginRequest;
 import com.openacademy.backend.dto.LoginResponse;
-import com.openacademy.backend.entity.User;
-import com.openacademy.backend.entity.common.Role;
+import com.openacademy.backend.entities.User;
+import com.openacademy.backend.entities.common.Role;
 import com.openacademy.backend.repository.UserRepository;
 
 public class LoginServiceTest {

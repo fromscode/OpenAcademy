@@ -1,4 +1,4 @@
-package com.openacademy.backend.entity;
+package com.openacademy.backend.entities;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -12,12 +12,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "teachers")
+@Table(name = "admins")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Teacher {
+public class Admin {
     @Id
     private Long id;
 
@@ -25,6 +25,4 @@ public class Teacher {
     @MapsId
     @JoinColumn(name = "user_id")
     private User user;
-
-    private String education;
 }

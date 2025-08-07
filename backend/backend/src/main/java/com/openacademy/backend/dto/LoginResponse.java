@@ -1,6 +1,6 @@
 package com.openacademy.backend.dto;
 
-import com.openacademy.backend.entity.common.Role;
+import com.openacademy.backend.entities.common.Role;
 
 import lombok.Getter;
 import lombok.Setter;

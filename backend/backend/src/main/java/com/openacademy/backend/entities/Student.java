@@ -1,5 +1,8 @@
-package com.openacademy.backend.entity;
+package com.openacademy.backend.entities;
 
+import java.time.LocalDate;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -12,17 +15,21 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "admins")
+@Table(name = "students")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Admin {
+public class Student {
     @Id
-    private Long id;
+    private Long userId;
 
     @OneToOne
     @MapsId
     @JoinColumn(name = "user_id")
     private User user;
+
+    @Column(name = "dob")
+    private LocalDate dateOfBirth;
+
 }

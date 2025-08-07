@@ -14,9 +14,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.openacademy.backend.dto.AdminRegisterRequest;
-import com.openacademy.backend.entity.Admin;
-import com.openacademy.backend.entity.User;
-import com.openacademy.backend.entity.common.Role;
+import com.openacademy.backend.entities.Admin;
+import com.openacademy.backend.entities.User;
+import com.openacademy.backend.entities.common.Role;
 import com.openacademy.backend.repository.AdminRepository;
 public class AdminRegisterServiceTest {
 
