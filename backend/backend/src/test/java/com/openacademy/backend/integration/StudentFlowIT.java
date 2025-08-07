@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -62,7 +63,8 @@ public class StudentFlowIT {
         mockMvc.perform(post("/api/auth/student/register")
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
-        .andExpect(status().isCreated());
+        .andExpect(status().isCreated())
+        .andExpect(content().string("Student registered successfully!"));
 
         Optional<User> optionalUser = userRepo.findByEmail(request.getEmail());
         assertTrue(optionalUser.isPresent());
