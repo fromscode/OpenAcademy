@@ -18,12 +18,10 @@ import com.openacademy.backend.entity.Admin;
 import com.openacademy.backend.entity.User;
 import com.openacademy.backend.entity.common.Role;
 import com.openacademy.backend.repository.AdminRepository;
-import com.openacademy.backend.service.impls.AdminRegisterServiceImpl;
-
 public class AdminRegisterServiceTest {
 
     @InjectMocks
-    private AdminRegisterServiceImpl adminService;
+    private AdminRegisterService adminService;
 
     @Mock
     private UserRegisterService userService;
