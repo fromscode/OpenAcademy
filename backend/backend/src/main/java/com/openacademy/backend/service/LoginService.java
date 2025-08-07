@@ -1,11 +1,36 @@
 package com.openacademy.backend.service;
 
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.openacademy.backend.dto.LoginRequest;
 import com.openacademy.backend.dto.LoginResponse;
+import com.openacademy.backend.entity.User;
+import com.openacademy.backend.repository.UserRepository;
 
 @Service
-public interface LoginService {
-    LoginResponse login(LoginRequest request);
+public class LoginService {
+    @Autowired
+    private UserRepository repo;
+
+    public LoginResponse login(LoginRequest request) {
+        Optional<User> optionalUser = repo.findByEmailAndPassword
+                                (request.getEmail(), request.getPassword());
+
+        LoginResponse response = new LoginResponse();
+
+        if (optionalUser.isEmpty()) {
+            throw new IllegalArgumentException("Invalid email or password");
+        }
+
+        User user = optionalUser.get();
+                                    
+        response.setRole(user.getRole());
+        response.setFirstName(user.getFirstName());
+        response.setEmail(user.getEmail());
+        response.setMessage("Login Successfull");
+        return response;
+    }
 }

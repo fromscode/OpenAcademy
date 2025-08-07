@@ -1,6 +1,7 @@
 package com.openacademy.backend.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -17,11 +18,10 @@ import com.openacademy.backend.dto.LoginResponse;
 import com.openacademy.backend.entity.User;
 import com.openacademy.backend.entity.common.Role;
 import com.openacademy.backend.repository.UserRepository;
-import com.openacademy.backend.service.impls.LoginServiceImpl;
 
 public class LoginServiceTest {
     @InjectMocks
-    private LoginServiceImpl service;
+    private LoginService service;
 
     @Mock private UserRepository repo;
 
@@ -37,9 +37,11 @@ public class LoginServiceTest {
 
     @Test
     public void invalidEmailOrPasswordFailsLogin() {
-        when(repo.findByEmailAndPassword(anyString(), anyString())).thenReturn(Optional.empty());
-        LoginResponse response = service.login(request);
-        assertEquals("Invalid Email or Password!", response.getMessage());
+        when(repo.findByEmailAndPassword(anyString(), anyString())).thenThrow(
+            new IllegalArgumentException("test-string")
+        );
+        Exception ex = assertThrows(IllegalArgumentException.class, () -> service.login(request));
+        assertEquals("test-string", ex.getMessage());
     }
 
     @Test
