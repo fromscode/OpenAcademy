@@ -48,7 +48,7 @@ public class AdminControllerTest {
         request.setFirstName("John");
         request.setLastName("Doe");
         request.setPassword("babababa");
-        request.setRole(Role.TEACHER);
+        request.setRole(Role.ADMIN);
         request.setPassword("babababa");
         request.setPhoneNumber("101010101010");
 
@@ -77,7 +77,7 @@ public class AdminControllerTest {
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest())
-        .andExpect(content().string("Incomplete Request"));
+        .andExpect(content().string("Invalid Request"));
     }
 
     @Test
