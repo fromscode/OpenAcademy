@@ -41,8 +41,8 @@ public class AdminController {
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         LoginResponse response = new LoginResponse();
 
-        if (request.getEmail() == null || request.getPassword() == null) {
-            response.setMessage("Incomplete Request");
+        if (!request.isValid()) {
+            response.setMessage("Missing email or password");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);    
         }
 

@@ -121,7 +121,7 @@ public class AdminControllerTest {
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(loginRequest)))
         .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.message").value("Incomplete Request"));
+        .andExpect(jsonPath("$.message").value("Missing email or password"));
 
     }
 

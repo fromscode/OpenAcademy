@@ -45,7 +45,7 @@ public class StudentController {
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         LoginResponse response = new LoginResponse();
 
-        if (request.getEmail() == null || request.getPassword() == null) {
+        if (!request.isValid()) {
             response.setMessage("Missing email or password");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
