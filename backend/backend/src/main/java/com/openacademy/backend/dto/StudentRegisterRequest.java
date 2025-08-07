@@ -2,6 +2,8 @@ package com.openacademy.backend.dto;
 
 import java.time.LocalDate;
 
+import com.openacademy.backend.entity.common.Role;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,4 +11,10 @@ import lombok.Setter;
 @Setter
 public class StudentRegisterRequest extends UserRegisterRequest{
     private LocalDate dateOfBirth;
+
+    @Override
+    public boolean isValid() {
+        return super.isValid() && super.getRole().equals(Role.STUDENT)
+        && dateOfBirth != null;
+    }
 }

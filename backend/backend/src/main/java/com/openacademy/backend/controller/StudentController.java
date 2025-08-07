@@ -27,12 +27,9 @@ public class StudentController {
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody StudentRegisterRequest request) {
 
-        if (request.getEmail() == null || request.getFirstName() == null
-                || request.getLastName() == null || request.getPassword() == null
-                || request.getPhoneNumber() == null) {
+       if (!request.isValid())
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Incomplete Request");
-        }
+                    .body("Invalid Request");
 
         try {
             String result = service.registerStudent(request);
