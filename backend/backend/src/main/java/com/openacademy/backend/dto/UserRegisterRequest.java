@@ -17,11 +17,11 @@ public abstract class UserRegisterRequest {
 
     protected boolean isValid() {
         if (email == null || email.isEmpty()
-                || password == null || password.isEmpty()
+                || password == null || password.isBlank()
                 || role == null
-                || firstName == null || firstName.isEmpty()
-                || lastName == null || lastName.isEmpty()
-                || phoneNumber == null || phoneNumber.isEmpty())
+                || firstName == null || firstName.isBlank()
+                || lastName == null || lastName.isBlank()
+                || phoneNumber == null || phoneNumber.isBlank())
             return false;
         return true;
     }
