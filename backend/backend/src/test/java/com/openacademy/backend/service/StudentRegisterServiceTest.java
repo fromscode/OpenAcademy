@@ -19,11 +19,10 @@ import com.openacademy.backend.dto.StudentRegisterRequest;
 import com.openacademy.backend.entity.Student;
 import com.openacademy.backend.entity.User;
 import com.openacademy.backend.repository.StudentRepository;
-import com.openacademy.backend.service.impls.StudentRegisterServiceImpl;
 
 public class StudentRegisterServiceTest {
     @InjectMocks
-    StudentRegisterServiceImpl service;
+    StudentRegisterService service;
 
     @Mock UserRegisterService userService;
 
