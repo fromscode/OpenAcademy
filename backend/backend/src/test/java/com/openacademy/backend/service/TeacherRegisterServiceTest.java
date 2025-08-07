@@ -17,11 +17,10 @@ import com.openacademy.backend.dto.TeacherRegisterRequest;
 import com.openacademy.backend.entity.Teacher;
 import com.openacademy.backend.entity.User;
 import com.openacademy.backend.repository.TeacherRepository;
-import com.openacademy.backend.service.impls.TeacherRegisterServiceImpl;
 
 public class TeacherRegisterServiceTest {
     @InjectMocks
-    TeacherRegisterServiceImpl service;
+    TeacherRegisterService service;
 
     @Mock
     TeacherRepository teacherRepo;

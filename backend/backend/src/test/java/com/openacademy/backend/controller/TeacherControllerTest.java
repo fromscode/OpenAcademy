@@ -22,7 +22,7 @@ import com.openacademy.backend.dto.LoginResponse;
 import com.openacademy.backend.dto.TeacherRegisterRequest;
 import com.openacademy.backend.entity.common.Role;
 import com.openacademy.backend.service.LoginService;
-import com.openacademy.backend.service.impls.TeacherRegisterServiceImpl;
+import com.openacademy.backend.service.TeacherRegisterService;
 
 @WebMvcTest(TeacherController.class)
 public class TeacherControllerTest {
@@ -33,7 +33,7 @@ public class TeacherControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
-    private TeacherRegisterServiceImpl service;
+    private TeacherRegisterService service;
 
     @MockitoBean
     private LoginService loginService;
