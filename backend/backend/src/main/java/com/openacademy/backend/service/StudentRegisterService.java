@@ -20,6 +20,7 @@ public class StudentRegisterService {
         
         Student student = new Student();
         student.setUser(user);
+        student.setDateOfBirth(request.getDateOfBirth());
         studentRepo.save(student);
         return "Student registered successfully!";
     }
