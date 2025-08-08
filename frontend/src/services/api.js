@@ -1,6 +1,6 @@
 // Essential API service functions for dashboard functionality only
 // TODO: Update BASE_URL to match your backend URL
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
 // Helper function to get auth token
 const getAuthToken = () => {
