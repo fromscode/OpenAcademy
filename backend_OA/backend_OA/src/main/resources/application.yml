@@ -5,7 +5,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/open_academy
     username: postgres
-    password: password
+    password: Deep@123
     driver-class-name: org.postgresql.Driver
 
   jpa:
