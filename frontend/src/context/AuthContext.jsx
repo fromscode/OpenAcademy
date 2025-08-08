@@ -29,7 +29,22 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password, role) => {
     try {
-      const data = await authAPI.login(email, password, role);
+      let data;
+
+      // Call the appropriate login method based on role
+      switch (role) {
+        case "student":
+          data = await authAPI.student.login(email, password);
+          break;
+        case "teacher":
+          data = await authAPI.teacher.login(email, password);
+          break;
+        case "admin":
+          data = await authAPI.admin.login(email, password);
+          break;
+        default:
+          throw new Error("Invalid role specified");
+      }
 
       if (data.success) {
         const { user: userData, token } = data;
@@ -55,8 +70,22 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      // Call backend logout endpoint
-      await authAPI.logout();
+      // Call backend logout endpoint based on user role
+      if (user && user.role) {
+        switch (user.role) {
+          case "student":
+            await authAPI.student.logout();
+            break;
+          case "teacher":
+            await authAPI.teacher.logout();
+            break;
+          case "admin":
+            await authAPI.admin.logout();
+            break;
+          default:
+            console.warn("Unknown user role, proceeding with local logout");
+        }
+      }
     } catch (error) {
       console.error("Logout error:", error);
       // Continue with local logout even if backend call fails
@@ -69,7 +98,22 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const data = await authAPI.register(userData);
+      let data;
+
+      // Call the appropriate register method based on role
+      switch (userData.role) {
+        case "student":
+          data = await authAPI.student.register(userData);
+          break;
+        case "teacher":
+          data = await authAPI.teacher.register(userData);
+          break;
+        case "admin":
+          data = await authAPI.admin.register(userData);
+          break;
+        default:
+          throw new Error("Invalid role specified");
+      }
 
       if (data.success) {
         return {
