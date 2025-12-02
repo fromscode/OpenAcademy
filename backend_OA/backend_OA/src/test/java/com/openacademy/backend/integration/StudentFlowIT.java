@@ -85,4 +85,118 @@ public class StudentFlowIT {
         assertEquals(request.getDateOfBirth(), student.getDateOfBirth());
     }
 
+    @Test
+    public void invalidEmailFailsRegistration() throws Exception {
+        request.setEmail("");
+        mockMvc.perform(post("/api/auth/student/register")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().string("Invalid Request"));
+
+        request.setEmail(null);
+        mockMvc.perform(post("/api/auth/student/register")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().string("Invalid Request"));
+
+    }
+
+    @Test
+    public void invalidPasswordFailsRegistration() throws Exception {
+        request.setPassword("");
+        mockMvc.perform(post("/api/auth/student/register")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().string("Invalid Request"));
+
+        request.setPassword(null);
+        mockMvc.perform(post("/api/auth/student/register")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().string("Invalid Request"));
+
+    }
+
+    @Test
+    public void invalidRoleFailsRegistration() throws Exception {
+        request.setRole(Role.ADMIN);
+        mockMvc.perform(post("/api/auth/student/register")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().string("Invalid Request"));
+
+        request.setRole(Role.TEACHER);
+        mockMvc.perform(post("/api/auth/student/register")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().string("Invalid Request"));
+
+        request.setRole(null);
+        mockMvc.perform(post("/api/auth/student/register")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().string("Invalid Request"));
+
+    }
+
+    @Test
+    public void invalidFirstNameFailsRegistration() throws Exception {
+        request.setFirstName("");
+        mockMvc.perform(post("/api/auth/student/register")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().string("Invalid Request"));
+
+        request.setFirstName(null);
+        mockMvc.perform(post("/api/auth/student/register")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().string("Invalid Request"));
+
+    }
+
+    @Test
+    public void invalidLastNameFailsRegistration() throws Exception {
+        request.setLastName("");
+        mockMvc.perform(post("/api/auth/student/register")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().string("Invalid Request"));
+
+        request.setLastName(null);
+        mockMvc.perform(post("/api/auth/student/register")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().string("Invalid Request"));
+
+    }
+
+    @Test
+    public void invalidPhoneNumberFailsRegistration() throws Exception {
+        request.setPhoneNumber("");
+        mockMvc.perform(post("/api/auth/student/register")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().string("Invalid Request"));
+
+        request.setPhoneNumber(null);
+        mockMvc.perform(post("/api/auth/student/register")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().string("Invalid Request"));
+
+    }
 }
