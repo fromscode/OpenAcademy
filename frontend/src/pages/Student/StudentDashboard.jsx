@@ -10,25 +10,18 @@ const StudentDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Debug logging
-  console.log("StudentDashboard - User:", user);
-  console.log("StudentDashboard - User role:", user?.role);
-
   useEffect(() => {
-    console.log("StudentDashboard - useEffect triggered");
     fetchDashboardData();
   }, []);
 
   const fetchDashboardData = async () => {
     try {
-      console.log("Fetching dashboard data...");
       setIsLoading(true);
       const data = await dashboardAPI.getStudentDashboard();
-      console.log("Dashboard data received:", data);
       setDashboardData(data);
     } catch (err) {
       console.error("Failed to fetch dashboard data:", err);
-      setError("Failed to load dashboard data: " + err.message);
+      setError("Failed to load dashboard data");
     } finally {
       setIsLoading(false);
     }
@@ -44,38 +37,21 @@ const StudentDashboard = () => {
 
   if (error) {
     return (
-      <div className="p-8">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <p>{error}</p>
-          <button
-            onClick={fetchDashboardData}
-            className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
-          >
-            Try again
-          </button>
-        </div>
-        <div className="mt-4 p-4 bg-gray-100 rounded">
-          <h3>Debug Info:</h3>
-          <p>User: {JSON.stringify(user, null, 2)}</p>
-          <p>Is Loading: {isLoading.toString()}</p>
-        </div>
+      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+        <p>{error}</p>
+        <button
+          onClick={fetchDashboardData}
+          className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
+        >
+          Try again
+        </button>
       </div>
     );
   }
 
-  // Add a simple test to ensure component is rendering
-  console.log("StudentDashboard - Component is rendering");
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Test element to verify component is working */}
-        <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4">
-          <p>DEBUG: StudentDashboard component is rendering!</p>
-          <p>User role: {user?.role}</p>
-          <p>Loading: {isLoading.toString()}</p>
-          <p>Error: {error || "None"}</p>
-        </div>
         {/* Welcome Header */}
         <div className="bg-gradient-to-r from-blue-600 to-purple-700 rounded-2xl shadow-lg mb-8">
           <div className="px-8 py-12">

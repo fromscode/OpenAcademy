@@ -1,16 +1,8 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import ThemeToggle from '../Common/ThemeToggle';
-import { 
-  Bell, 
-  Search, 
-  User, 
-  Settings, 
-  LogOut, 
-  Menu, 
-  X 
-} from 'lucide-react';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import ThemeToggle from "../Common/ThemeToggle";
+import { Bell, Search, User, Settings, LogOut, Menu, X } from "lucide-react";
 
 const Navbar = ({ onToggleSidebar }) => {
   const { user, logout } = useAuth();
@@ -20,19 +12,19 @@ const Navbar = ({ onToggleSidebar }) => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate("/login");
   };
 
   const getUserDashboard = () => {
     switch (user?.role) {
-      case 'admin':
-        return '/dashboard/admin/dashboard';
-      case 'teacher':
-        return '/dashboard/teacher/dashboard';
-      case 'student':
-        return '/dashboard/student/dashboard';
+      case "admin":
+        return "/dashboard/admin/dashboard";
+      case "teacher":
+        return "/dashboard/teacher/dashboard";
+      case "student":
+        return "/dashboard/student/dashboard";
       default:
-        return '/dashboard';
+        return "/dashboard";
     }
   };
 
@@ -48,10 +40,15 @@ const Navbar = ({ onToggleSidebar }) => {
             >
               <Menu className="h-6 w-6" />
             </button>
-            
-            <Link to={getUserDashboard()} className="flex items-center ml-4 lg:ml-0">
+
+            <Link
+              to={getUserDashboard()}
+              className="flex items-center ml-4 lg:ml-0"
+            >
               <div className="flex-shrink-0">
-                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">OpenAcademy</h1>
+                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  OpenAcademy
+                </h1>
               </div>
             </Link>
           </div>
@@ -74,7 +71,7 @@ const Navbar = ({ onToggleSidebar }) => {
           <div className="flex items-center space-x-4">
             {/* Theme Toggle */}
             <ThemeToggle />
-            
+
             {/* Notifications */}
             <button className="p-2 rounded-full text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
               <Bell className="h-6 w-6" />
@@ -86,14 +83,14 @@ const Navbar = ({ onToggleSidebar }) => {
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="flex items-center space-x-3 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <img
-                  className="h-8 w-8 rounded-full object-cover"
-                  src={user?.avatar}
-                  alt={user?.name}
-                />
+                <div className="h-8 w-8 rounded-full bg-gray-600 flex items-center justify-center">
+                  <User className="h-5 w-5 text-gray-300" />
+                </div>
                 <div className="hidden md:block text-left">
                   <p className="text-sm font-medium text-white">{user?.name}</p>
-                  <p className="text-xs text-gray-400 capitalize">{user?.role}</p>
+                  <p className="text-xs text-gray-400 capitalize">
+                    {user?.role}
+                  </p>
                 </div>
               </button>
 

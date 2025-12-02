@@ -29,14 +29,11 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      console.log("AuthContext - Attempting login for:", email);
       // Call the global login endpoint
       const data = await authAPI.login(email, password);
-      console.log("AuthContext - Login response:", data);
 
       if (data.success) {
         const { user: userData, token } = data;
-        console.log("AuthContext - User data:", userData);
 
         setUser(userData);
         localStorage.setItem("openacademy_user", JSON.stringify(userData));
