@@ -31,7 +31,7 @@ public class LoginService {
         LoginResponse.UserInfo userInfo = new LoginResponse.UserInfo();
         userInfo.setEmail(user.getEmail());
         userInfo.setFirstName(user.getFirstName());
-        userInfo.setRole(user.getRole());
+        userInfo.setRoleFromEnum(user.getRole());
         
         // Set response fields
         response.setSuccess(true);

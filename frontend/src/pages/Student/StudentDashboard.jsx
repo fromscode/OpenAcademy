@@ -1,367 +1,173 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import {
-  BookOpen,
-  FileText,
-  Award,
-  Calendar,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  TrendingUp,
-} from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { GraduationCap, User, Mail } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
-// TODO: Remove mock data imports when backend is ready
-import {
-  mockCourses,
-  mockAssignments,
-  mockSubmissions,
-} from "../../data/mockData";
+import { dashboardAPI } from "../../services/api";
+import LoadingSpinner from "../../components/Common/LoadingSpinner";
 
 const StudentDashboard = () => {
   const { user } = useAuth();
+  const [dashboardData, setDashboardData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // TODO: Replace with actual API calls to fetch student data
-  // For now using mock data - replace these with API calls:
-  // - coursesAPI.getByStudent(user.id)
-  // - assignmentsAPI.getByStudent(user.id)
-  // - submissionsAPI.getByStudent(user.id)
+  // Debug logging
+  console.log("StudentDashboard - User:", user);
+  console.log("StudentDashboard - User role:", user?.role);
 
-  // Get student's courses (TEMPORARY - using mock data)
-  const studentCourses = mockCourses.filter(
-    (course) => course.students.includes(user?.id || 1) // Use actual user ID when available
-  );
+  useEffect(() => {
+    console.log("StudentDashboard - useEffect triggered");
+    fetchDashboardData();
+  }, []);
 
-  // Get student's assignments (TEMPORARY - using mock data)
-  const studentAssignments = mockAssignments.filter((assignment) =>
-    studentCourses.some((course) => course.id === assignment.courseId)
-  );
+  const fetchDashboardData = async () => {
+    try {
+      console.log("Fetching dashboard data...");
+      setIsLoading(true);
+      const data = await dashboardAPI.getStudentDashboard();
+      console.log("Dashboard data received:", data);
+      setDashboardData(data);
+    } catch (err) {
+      console.error("Failed to fetch dashboard data:", err);
+      setError("Failed to load dashboard data: " + err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  // Get student's submissions (TEMPORARY - using mock data)
-  const studentSubmissions = mockSubmissions.filter(
-    (submission) => submission.studentId === (user?.id || 1) // Use actual user ID when available
-  );
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
 
-  const upcomingAssignments = studentAssignments
-    .filter((assignment) => new Date(assignment.dueDate) > new Date())
-    .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
-    .slice(0, 5);
+  if (error) {
+    return (
+      <div className="p-8">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          <p>{error}</p>
+          <button
+            onClick={fetchDashboardData}
+            className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
+          >
+            Try again
+          </button>
+        </div>
+        <div className="mt-4 p-4 bg-gray-100 rounded">
+          <h3>Debug Info:</h3>
+          <p>User: {JSON.stringify(user, null, 2)}</p>
+          <p>Is Loading: {isLoading.toString()}</p>
+        </div>
+      </div>
+    );
+  }
 
-  const recentGrades = studentSubmissions
-    .filter((submission) => submission.grade !== null)
-    .sort((a, b) => new Date(b.submissionDate) - new Date(a.submissionDate))
-    .slice(0, 5);
-
-  const stats = [
-    {
-      name: "Enrolled Courses",
-      value: studentCourses.length,
-      icon: BookOpen,
-      color: "bg-blue-500",
-    },
-    {
-      name: "Pending Assignments",
-      value: upcomingAssignments.length,
-      icon: FileText,
-      color: "bg-orange-500",
-    },
-    {
-      name: "Completed Assignments",
-      value: studentSubmissions.length,
-      icon: CheckCircle,
-      color: "bg-green-500",
-    },
-    {
-      name: "Average Grade",
-      value:
-        recentGrades.length > 0
-          ? Math.round(
-              recentGrades.reduce((sum, grade) => sum + grade.grade, 0) /
-                recentGrades.length
-            )
-          : "N/A",
-      icon: Award,
-      color: "bg-purple-500",
-    },
-  ];
+  // Add a simple test to ensure component is rendering
+  console.log("StudentDashboard - Component is rendering");
 
   return (
-    <div className="space-y-6">
-      {/* Welcome Header */}
-      <div className="bg-gradient-to-r from-primary-600 to-primary-700 rounded-lg shadow">
-        <div className="px-6 py-8">
-          <div className="flex items-center">
-            <img
-              className="h-16 w-16 rounded-full object-cover border-4 border-white"
-              src={user?.avatar}
-              alt={user?.name}
-            />
-            <div className="ml-6">
-              <h1 className="text-3xl font-bold text-white">
-                Welcome back, {user?.name?.split(" ")[0]}!
-              </h1>
-              <p className="text-primary-100 mt-2">
-                Ready to continue your learning journey? You have{" "}
-                {upcomingAssignments.length} upcoming assignments.
-              </p>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Test element to verify component is working */}
+        <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4">
+          <p>DEBUG: StudentDashboard component is rendering!</p>
+          <p>User role: {user?.role}</p>
+          <p>Loading: {isLoading.toString()}</p>
+          <p>Error: {error || "None"}</p>
+        </div>
+        {/* Welcome Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-purple-700 rounded-2xl shadow-lg mb-8">
+          <div className="px-8 py-12">
+            <div className="flex items-center">
+              <div className="h-20 w-20 bg-white rounded-full flex items-center justify-center">
+                <GraduationCap className="h-10 w-10 text-blue-600" />
+              </div>
+              <div className="ml-8">
+                <h1 className="text-4xl font-bold text-white mb-2">
+                  {dashboardData?.welcomeMessage || "Welcome to OpenAcademy!"}
+                </h1>
+                <p className="text-blue-100 text-lg">
+                  Hello,{" "}
+                  {dashboardData?.studentName || user?.firstName || "Student"}!
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <div key={stat.name} className="card">
+        {/* Student Info Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {/* Student Details */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <div className="flex items-center mb-4">
+              <User className="h-8 w-8 text-blue-600 mr-3" />
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                Student Information
+              </h2>
+            </div>
+            <div className="space-y-3">
               <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className={`p-3 rounded-lg ${stat.color}`}>
-                    <Icon className="h-6 w-6 text-white" />
-                  </div>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
-                      {stat.name}
-                    </dt>
-                    <dd className="text-2xl font-semibold text-gray-900 dark:text-white">
-                      {stat.value}
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Quick Actions */}
-      <div className="card">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-          Quick Actions
-        </h3>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Link
-            to="/student/courses"
-            className="p-4 border border-gray-200 rounded-lg hover:border-primary-300 hover:shadow-md transition-all duration-200"
-          >
-            <BookOpen className="h-8 w-8 text-primary-600 mb-2" />
-            <h4 className="font-medium text-gray-900 dark:text-white">
-              My Courses
-            </h4>
-            <p className="text-sm text-gray-600 dark:text-gray-300">
-              View enrolled courses and materials
-            </p>
-          </Link>
-
-          <Link
-            to="/student/assignments"
-            className="p-4 border border-gray-200 rounded-lg hover:border-primary-300 hover:shadow-md transition-all duration-200"
-          >
-            <FileText className="h-8 w-8 text-primary-600 mb-2" />
-            <h4 className="font-medium text-gray-900 dark:text-white">
-              Assignments
-            </h4>
-            <p className="text-sm text-gray-600 dark:text-gray-300">
-              Submit and track assignments
-            </p>
-          </Link>
-
-          <Link
-            to="/student/grades"
-            className="p-4 border border-gray-200 rounded-lg hover:border-primary-300 hover:shadow-md transition-all duration-200"
-          >
-            <Award className="h-8 w-8 text-primary-600 mb-2" />
-            <h4 className="font-medium text-gray-900 dark:text-white">
-              Grades
-            </h4>
-            <p className="text-sm text-gray-600 dark:text-gray-300">
-              View grades and feedback
-            </p>
-          </Link>
-
-          <Link
-            to="/student/schedule"
-            className="p-4 border border-gray-200 rounded-lg hover:border-primary-300 hover:shadow-md transition-all duration-200"
-          >
-            <Calendar className="h-8 w-8 text-primary-600 mb-2" />
-            <h4 className="font-medium text-gray-900 dark:text-white">
-              Schedule
-            </h4>
-            <p className="text-sm text-gray-600 dark:text-gray-300">
-              View class schedule and events
-            </p>
-          </Link>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Upcoming Assignments */}
-        <div className="card">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-              Upcoming Assignments
-            </h3>
-            <Link
-              to="/student/assignments"
-              className="text-sm text-primary-600 hover:text-primary-700"
-            >
-              View all
-            </Link>
-          </div>
-          <div className="space-y-4">
-            {upcomingAssignments.length > 0 ? (
-              upcomingAssignments.map((assignment) => {
-                const daysUntilDue = Math.ceil(
-                  (new Date(assignment.dueDate) - new Date()) /
-                    (1000 * 60 * 60 * 24)
-                );
-                const isUrgent = daysUntilDue <= 3;
-
-                return (
-                  <div
-                    key={assignment.id}
-                    className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
-                  >
-                    <div className="flex-shrink-0">
-                      {isUrgent ? (
-                        <AlertCircle className="h-5 w-5 text-red-500" />
-                      ) : (
-                        <Clock className="h-5 w-5 text-yellow-500" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                        {assignment.title}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {assignment.courseName} • Due{" "}
-                        {new Date(assignment.dueDate).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="flex-shrink-0">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          isUrgent
-                            ? "bg-red-100 text-red-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
-                        {daysUntilDue} days
-                      </span>
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <p className="text-gray-500 text-center py-4">
-                No upcoming assignments
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Recent Grades */}
-        <div className="card">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-              Recent Grades
-            </h3>
-            <Link
-              to="/student/grades"
-              className="text-sm text-primary-600 hover:text-primary-700"
-            >
-              View all
-            </Link>
-          </div>
-          <div className="space-y-4">
-            {recentGrades.length > 0 ? (
-              recentGrades.map((submission) => {
-                const assignment = studentAssignments.find(
-                  (a) => a.id === submission.assignmentId
-                );
-                const gradePercentage =
-                  (submission.grade / (assignment?.totalPoints || 100)) * 100;
-
-                return (
-                  <div
-                    key={submission.id}
-                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                        {assignment?.title}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Submitted{" "}
-                        {new Date(
-                          submission.submissionDate
-                        ).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          gradePercentage >= 90
-                            ? "bg-green-100 text-green-800"
-                            : gradePercentage >= 80
-                            ? "bg-blue-100 text-blue-800"
-                            : gradePercentage >= 70
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        {submission.grade}/{assignment?.totalPoints || 100}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <p className="text-gray-500 text-center py-4">
-                No grades available
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* My Courses */}
-      <div className="card">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-          My Courses
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {studentCourses.map((course) => (
-            <div
-              key={course.id}
-              className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-medium text-gray-900 dark:text-white">
-                  {course.title}
-                </h4>
-                <span className="text-xs text-gray-500">{course.code}</span>
-              </div>
-              <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
-                {course.teacherName}
-              </p>
-              <p className="text-xs text-gray-500 mb-3">{course.schedule}</p>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500">
-                  {course.credits} credits
+                <span className="text-gray-500 dark:text-gray-400 w-16">
+                  Name:
                 </span>
-                <Link
-                  to={`/student/courses/${course.id}`}
-                  className="text-sm text-primary-600 hover:text-primary-700 font-medium"
-                >
-                  View Course
-                </Link>
+                <span className="text-gray-900 dark:text-white font-medium">
+                  {dashboardData?.studentName ||
+                    user?.firstName ||
+                    "Not Available"}
+                </span>
+              </div>
+              <div className="flex items-center">
+                <Mail className="h-4 w-4 text-gray-400 mr-2" />
+                <span className="text-gray-500 dark:text-gray-400 w-14">
+                  Email:
+                </span>
+                <span className="text-gray-900 dark:text-white">
+                  {dashboardData?.studentEmail ||
+                    user?.email ||
+                    "Not Available"}
+                </span>
               </div>
             </div>
-          ))}
+          </div>
+
+          {/* Quick Stats */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <div className="flex items-center mb-4">
+              <GraduationCap className="h-8 w-8 text-purple-600 mr-3" />
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                Quick Overview
+              </h2>
+            </div>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600 dark:text-gray-300">Status</span>
+                <span className="px-3 py-1 bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100 rounded-full text-sm font-medium">
+                  Active Student
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600 dark:text-gray-300">Role</span>
+                <span className="text-gray-900 dark:text-white font-medium capitalize">
+                  {user?.role || "Student"}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Coming Soon Section */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8 text-center">
+          <div className="max-w-md mx-auto">
+            <GraduationCap className="h-16 w-16 text-blue-600 mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              More Features Coming Soon!
+            </h3>
+            <p className="text-gray-600 dark:text-gray-300">
+              We're working hard to bring you courses, assignments, grades, and
+              much more. Stay tuned for exciting updates!
+            </p>
+          </div>
         </div>
       </div>
     </div>

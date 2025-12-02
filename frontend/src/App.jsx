@@ -1,17 +1,22 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { ThemeProvider } from './context/ThemeContext';
-import LandingPage from './pages/Landing/LandingPage';
-import Login from './pages/Auth/Login';
-import AdminDashboard from './pages/Admin/AdminDashboard';
-import Students from './pages/Admin/Students';
-import TeacherDashboard from './pages/Teacher/TeacherDashboard';
-import StudentDashboard from './pages/Student/StudentDashboard';
-import Messages from './pages/Messages/Messages';
-import Settings from './pages/Settings/Settings';
-import DashboardLayout from './components/Layout/DashboardLayout';
-import LoadingSpinner from './components/Common/LoadingSpinner';
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
+import LandingPage from "./pages/Landing/LandingPage";
+import Login from "./pages/Auth/Login";
+import AdminDashboard from "./pages/Admin/AdminDashboard";
+import Students from "./pages/Admin/Students";
+import TeacherDashboard from "./pages/Teacher/TeacherDashboard";
+import StudentDashboard from "./pages/Student/StudentDashboard";
+import Messages from "./pages/Messages/Messages";
+import Settings from "./pages/Settings/Settings";
+import DashboardLayout from "./components/Layout/DashboardLayout";
+import LoadingSpinner from "./components/Common/LoadingSpinner";
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
@@ -31,7 +36,7 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
 
   if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
     // Redirect to appropriate dashboard based on user role
-    const dashboardPath = `/${user.role}/dashboard`;
+    const dashboardPath = `/dashboard/${user.role}/dashboard`;
     return <Navigate to={dashboardPath} replace />;
   }
 
@@ -52,7 +57,7 @@ const PublicRoute = ({ children }) => {
 
   if (user) {
     // Redirect to appropriate dashboard based on user role
-    const dashboardPath = `/${user.role}/dashboard`;
+    const dashboardPath = `/dashboard/${user.role}/dashboard`;
     return <Navigate to={dashboardPath} replace />;
   }
 
@@ -99,7 +104,7 @@ function App() {
                 <Route
                   path="admin/dashboard"
                   element={
-                    <ProtectedRoute allowedRoles={['admin']}>
+                    <ProtectedRoute allowedRoles={["admin"]}>
                       <AdminDashboard />
                     </ProtectedRoute>
                   }
@@ -107,7 +112,7 @@ function App() {
                 <Route
                   path="admin/students"
                   element={
-                    <ProtectedRoute allowedRoles={['admin']}>
+                    <ProtectedRoute allowedRoles={["admin"]}>
                       <Students />
                     </ProtectedRoute>
                   }
@@ -117,7 +122,7 @@ function App() {
                 <Route
                   path="teacher/dashboard"
                   element={
-                    <ProtectedRoute allowedRoles={['teacher']}>
+                    <ProtectedRoute allowedRoles={["teacher"]}>
                       <TeacherDashboard />
                     </ProtectedRoute>
                   }
@@ -127,7 +132,7 @@ function App() {
                 <Route
                   path="student/dashboard"
                   element={
-                    <ProtectedRoute allowedRoles={['student']}>
+                    <ProtectedRoute allowedRoles={["student"]}>
                       <StudentDashboard />
                     </ProtectedRoute>
                   }
@@ -150,8 +155,39 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
-
               </Route>
+
+              {/* Direct role-based routes for backward compatibility */}
+              <Route
+                path="/student/dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={["student"]}>
+                    <DashboardLayout>
+                      <StudentDashboard />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/teacher/dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={["teacher"]}>
+                    <DashboardLayout>
+                      <TeacherDashboard />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <DashboardLayout>
+                      <AdminDashboard />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
 
               {/* Catch all route */}
               <Route path="*" element={<Navigate to="/" replace />} />

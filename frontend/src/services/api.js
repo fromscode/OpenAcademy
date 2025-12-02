@@ -155,8 +155,12 @@ export const authAPI = {
 export const dashboardAPI = {
   // Student Dashboard
   getStudentDashboard: async () => {
+    const user = JSON.parse(localStorage.getItem("openacademy_user") || "{}");
     const response = await fetch(`${BASE_URL}/dashboard/student`, {
-      headers: getAuthHeaders(),
+      headers: {
+        ...getAuthHeaders(),
+        "X-Student-Email": user.email || "",
+      },
     });
     return handleResponse(response);
   },

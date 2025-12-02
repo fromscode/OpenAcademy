@@ -21,6 +21,10 @@ public class LoginResponse {
     public static class UserInfo {
         private String email;
         private String firstName;
-        private Role role;
+        private String role; // Changed to String for lowercase role
+
+        public void setRoleFromEnum(Role roleEnum) {
+            this.role = roleEnum != null ? roleEnum.name().toLowerCase() : null;
+        }
     }
 }
