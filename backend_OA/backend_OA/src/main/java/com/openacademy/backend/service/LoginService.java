@@ -26,11 +26,22 @@ public class LoginService {
         }
 
         User user = optionalUser.get();
-                                    
+        
+        // Create user info object
+        LoginResponse.UserInfo userInfo = new LoginResponse.UserInfo();
+        userInfo.setEmail(user.getEmail());
+        userInfo.setFirstName(user.getFirstName());
+        userInfo.setRole(user.getRole());
+        
+        // Set response fields
+        response.setSuccess(true);
         response.setRole(user.getRole());
         response.setFirstName(user.getFirstName());
         response.setEmail(user.getEmail());
-        response.setMessage("Login Successfull");
+        response.setUser(userInfo);
+        response.setMessage("Login Successful");
+        response.setToken("temporary-token"); // TODO: Implement proper JWT token generation
+        
         return response;
     }
 }

@@ -31,6 +31,15 @@ const handleResponse = async (response) => {
 // AUTHENTICATION API - Essential for login/signup
 // ===================================================================
 export const authAPI = {
+  // Global Login - determines role automatically
+  login: async (email, password) => {
+    const response = await fetch(`${BASE_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+    return handleResponse(response);
+  },
   // Student Authentication
   student: {
     login: async (email, password) => {

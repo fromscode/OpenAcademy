@@ -8,7 +8,6 @@ const Login = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    role: "student",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
@@ -40,11 +39,7 @@ const Login = () => {
     if (!validateForm()) return;
 
     setIsLoading(true);
-    const result = await login(
-      formData.email,
-      formData.password,
-      formData.role
-    );
+    const result = await login(formData.email, formData.password);
     setIsLoading(false);
 
     if (result.success) {
@@ -105,26 +100,6 @@ const Login = () => {
           )}
 
           <div className="space-y-4">
-            <div>
-              <label
-                htmlFor="role"
-                className="block text-sm font-medium text-gray-300 mb-1"
-              >
-                Login as
-              </label>
-              <select
-                id="role"
-                name="role"
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                value={formData.role}
-                onChange={handleChange}
-              >
-                <option value="student">Student</option>
-                <option value="teacher">Teacher</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
-
             <div>
               <label
                 htmlFor="email"

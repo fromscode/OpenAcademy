@@ -27,24 +27,10 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(false);
   }, []);
 
-  const login = async (email, password, role) => {
+  const login = async (email, password) => {
     try {
-      let data;
-
-      // Call the appropriate login method based on role
-      switch (role) {
-        case "student":
-          data = await authAPI.student.login(email, password);
-          break;
-        case "teacher":
-          data = await authAPI.teacher.login(email, password);
-          break;
-        case "admin":
-          data = await authAPI.admin.login(email, password);
-          break;
-        default:
-          throw new Error("Invalid role specified");
-      }
+      // Call the global login endpoint
+      const data = await authAPI.login(email, password);
 
       if (data.success) {
         const { user: userData, token } = data;
