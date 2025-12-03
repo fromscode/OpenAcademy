@@ -1,5 +1,6 @@
 package com.openacademy.backend.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import com.openacademy.backend.repository.GroupMemberRepository;
 import com.openacademy.backend.repository.UserRepository;
 
 @Service
+@SuppressWarnings("null")
 public class GroupService {
 
     private final ChatGroupRepository groupRepo;
@@ -37,23 +39,41 @@ public class GroupService {
         return group;
     }
 
-    @SuppressWarnings("null")
-    public void addMember(Long groupId, User user, String role) {
+    public ChatGroup getGroup(Long groupId) {
+        return groupRepo.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException("Group not found"));
+    }
+
+    public List<ChatGroup> getAllGroups() {
+        return groupRepo.findAll();
+    }
+
+    public ChatGroup addMember(Long groupId, User user, String role) {
         if (!memberRepo.existsByGroupIdAndUserId(groupId, user.getId())) {
             ChatGroup group = groupRepo.findById(groupId)
                     .orElseThrow(() -> new IllegalArgumentException("Group not found"));
 
             GroupMember gm = new GroupMember(group, user, role);
             memberRepo.save(gm);
+            return gm.getGroup();
         }
+        return null;
     }
 
-    @SuppressWarnings("null")
-    public void addMember(Long groupId, Long userId, String role) {
+    public ChatGroup addMember(Long groupId, Long userId, String role) {
         Optional<User> userOpt = userRepo.findById(userId);
 
         User user = userOpt.orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        this.addMember(groupId, user, role);
+        return this.addMember(groupId, user, role);
+    }
+
+    public ChatGroup deleteMember(Long groupId, Long userId) {
+        GroupMember gm = memberRepo.findByGroupIdAndUserId(groupId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("Group member not found"));
+
+        memberRepo.delete(gm);
+
+        return gm.getGroup();
     }
 }
