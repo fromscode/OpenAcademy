@@ -32,6 +32,7 @@ public class GroupService {
         return group;
     }
 
+    @SuppressWarnings("null")
     public void addMember(Long groupId, User user, String role) {
         if (!memberRepo.existsByGroupIdAndUserId(groupId, user.getId())) {
             ChatGroup group = groupRepo.findById(groupId)
