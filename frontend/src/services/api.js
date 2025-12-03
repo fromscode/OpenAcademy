@@ -534,6 +534,11 @@ export const authUtils = {
   },
 };
 
+// ===================================================================
+// CHAT API - Real-time messaging functionality
+// ===================================================================
+export { default as chatAPI } from "./chatAPI";
+
 // Export for backward compatibility
 export default {
   authAPI,
