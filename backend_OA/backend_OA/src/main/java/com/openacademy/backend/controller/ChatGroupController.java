@@ -20,9 +20,10 @@ public class ChatGroupController {
     @Autowired
     private GroupService groupService;
 
-    @PostMapping("/create/{group-name}")
-    public ChatGroup createGroup(@PathVariable("group-name") String groupName) {
-        return groupService.createGroup(groupName, null);
+    @PostMapping("/create/{group-name}/{owner-id}")
+    public ChatGroup createGroup(@PathVariable("group-name") String groupName,
+            @PathVariable("owner-id") Long ownerId) {
+        return groupService.createGroup(groupName, ownerId);
     }
 
     @PostMapping("/add-member/{group-id}/{user-id}/{role}")
@@ -34,7 +35,7 @@ public class ChatGroupController {
     }
 
     @DeleteMapping("/remove-member/{group-id}/{user-id}")
-    public ChatGroup removeMember(@PathVariable("group-id") Long groupId,
+    public String removeMember(@PathVariable("group-id") Long groupId,
             @PathVariable("user-id") Long userId) {
 
         return groupService.deleteMember(groupId, userId);

@@ -39,6 +39,13 @@ public class GroupService {
         return group;
     }
 
+    public ChatGroup createGroup(String name, Long ownerId) {
+        Optional<User> ownerOpt = userRepo.findById(ownerId);
+        User owner = ownerOpt.orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        return this.createGroup(name, owner);
+    }
+
     public ChatGroup getGroup(Long groupId) {
         return groupRepo.findById(groupId)
                 .orElseThrow(() -> new IllegalArgumentException("Group not found"));
@@ -68,12 +75,12 @@ public class GroupService {
         return this.addMember(groupId, user, role);
     }
 
-    public ChatGroup deleteMember(Long groupId, Long userId) {
+    public String deleteMember(Long groupId, Long userId) {
         GroupMember gm = memberRepo.findByGroupIdAndUserId(groupId, userId)
                 .orElseThrow(() -> new IllegalArgumentException("Group member not found"));
 
-        memberRepo.delete(gm);
+        memberRepo.deleteById(gm.getId());
 
-        return gm.getGroup();
+        return "Member deleted sucessfully";
     }
 }
