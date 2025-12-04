@@ -118,11 +118,15 @@ class WebSocketService {
     }
   }
 
-  sendChatMessage(groupId, message, senderId) {
-    return this.publish("/app/chat.sendMessage", {
-      groupId,
-      senderId,
-      content: message,
+  sendChatMessage({ groupId, senderId, content }) {
+    this.client.publish({
+      destination: "/app/chat.sendMessage",
+      body: JSON.stringify({
+        // MUST be string
+        groupId: Number(groupId), // make sure primitive
+        senderId: Number(senderId),
+        content: String(content),
+      }),
     });
   }
 

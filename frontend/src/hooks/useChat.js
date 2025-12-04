@@ -113,7 +113,17 @@ export const useChat = () => {
     // Send to backend
     try {
       await chatAPI.messages.sendMessage(messageData);
-      webSocketService.sendChatMessage(groupId, messageText, user.id);
+      const chatMessageWS = {
+        groupId,
+        senderId: user.id,
+        content: messageText,
+      };
+      console.log(
+        "Payload being sent via STOMP:",
+        JSON.stringify(chatMessageWS)
+      );
+      webSocketService.sendChatMessage(chatMessageWS);
+      // webSocketService.sendChatMessage(groupId, messageText, user.id);
     } catch (err) {
       console.warn("Message not sent to backend:", err);
     }

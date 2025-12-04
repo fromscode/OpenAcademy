@@ -4,10 +4,11 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.openacademy.backend.dto.ChatMessageWS;
 import com.openacademy.backend.entities.ChatMessage;
 import com.openacademy.backend.service.ChatMessageService;
 
@@ -22,9 +23,11 @@ public class ChatMessageController {
 
     // send message
     @PostMapping("/send")
-    public ChatMessage sendMessage(@RequestParam Long groupId,
-            @RequestParam Long userId,
-            @RequestParam String content) {
+    public ChatMessage sendMessage(@RequestBody ChatMessageWS chatMessageWS) {
+        System.out.println("Received chatMessageWS:" + chatMessageWS.getContent()); // debug
+        Long groupId = chatMessageWS.getGroupId();
+        Long userId = chatMessageWS.getSenderId();
+        String content = chatMessageWS.getContent();
         return chatMessageService.sendMessage(groupId, userId, content);
     }
 
