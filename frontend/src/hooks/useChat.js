@@ -81,44 +81,44 @@ export const useChat = () => {
   const loadGroupMessages = async (groupId) => {
     try {
       const response = await chatAPI.messages.getGroupMessages(groupId);
-      console.log(`Messages for group ${groupId}:`, response); // debug
-      const messagesArray = Array.isArray(response) ? response : [];
-      setMessages((prev) => ({ ...prev, [groupId]: messagesArray }));
+      const messagesArray = Array.isArray(response)
+        ? response.map(normalizeMessage)
+        : [];
+
+      setMessages((prev) => ({
+        ...prev,
+        [groupId]: messagesArray,
+      }));
     } catch (err) {
       console.error(`Failed to load messages for group ${groupId}`, err);
     }
   };
 
   const handleIncomingMessage = useCallback((msg) => {
-    const { groupId, senderId, senderName, content, timestamp } = msg;
-    const newMsg = {
-      id: Date.now() + Math.random(),
-      groupId,
-      senderId,
-      senderName,
-      message: content,
-      timestamp: timestamp || new Date().toISOString(),
-    };
+    const normalized = normalizeMessage(msg);
+
     setMessages((prev) => ({
       ...prev,
-      [groupId]: [...(prev[groupId] || []), newMsg],
+      [normalized.groupId]: [...(prev[normalized.groupId] || []), normalized],
     }));
   }, []);
 
   const sendMessage = async (groupId, messageText) => {
     if (!messageText.trim()) return;
 
-    const messageData = {
-      groupId,
-      message: messageText,
-      senderId: user.id,
-      senderName: user.name || user.email,
-      timestamp: new Date().toISOString(),
+    const localMsg = {
+      id: Date.now(),
+      content: messageText,
+      sender: { id: user.id, fullName: user.name || user.email },
+      createdAt: new Date().toISOString(),
+      group: { id: groupId },
     };
+
+    const normalized = normalizeMessage(localMsg);
 
     setMessages((prev) => ({
       ...prev,
-      [groupId]: [...(prev[groupId] || []), messageData],
+      [groupId]: [...(prev[groupId] || []), normalized],
     }));
 
     // Send to backend
@@ -158,6 +158,17 @@ export const useChat = () => {
     } catch (err) {
       console.error("Failed to join group:", err);
     }
+  };
+
+  const normalizeMessage = (msg) => {
+    return {
+      id: msg.id,
+      message: msg.content,
+      senderId: msg.sender?.id,
+      senderName: msg.sender?.fullName || "Unknown User",
+      timestamp: msg.createdAt,
+      groupId: msg.group?.id,
+    };
   };
 
   return {
