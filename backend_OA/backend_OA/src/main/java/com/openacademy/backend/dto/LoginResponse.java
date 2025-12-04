@@ -19,6 +19,7 @@ public class LoginResponse {
     @Getter
     @Setter
     public static class UserInfo {
+        private Long id;
         private String email;
         private String firstName;
         private String role; // Changed to String for lowercase role

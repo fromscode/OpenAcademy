@@ -16,8 +16,7 @@ public class LoginService {
     private UserRepository repo;
 
     public LoginResponse login(LoginRequest request) {
-        Optional<User> optionalUser = repo.findByEmailAndPassword
-                                (request.getEmail(), request.getPassword());
+        Optional<User> optionalUser = repo.findByEmailAndPassword(request.getEmail(), request.getPassword());
 
         LoginResponse response = new LoginResponse();
 
@@ -26,13 +25,14 @@ public class LoginService {
         }
 
         User user = optionalUser.get();
-        
+
         // Create user info object
         LoginResponse.UserInfo userInfo = new LoginResponse.UserInfo();
+        userInfo.setId(user.getId());
         userInfo.setEmail(user.getEmail());
         userInfo.setFirstName(user.getFirstName());
         userInfo.setRoleFromEnum(user.getRole());
-        
+
         // Set response fields
         response.setSuccess(true);
         response.setRole(user.getRole());
@@ -41,7 +41,7 @@ public class LoginService {
         response.setUser(userInfo);
         response.setMessage("Login Successful");
         response.setToken("temporary-token"); // TODO: Implement proper JWT token generation
-        
+
         return response;
     }
 }
