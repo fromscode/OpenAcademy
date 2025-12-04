@@ -109,7 +109,12 @@ const Messages = () => {
   const handleGroupSelect = (group) => {
     if (selectedGroup?.id !== group.id) {
       setSelectedGroup(group);
-      joinGroup(group.id);
+
+      if (!group.isDemo) {
+        joinGroup(group.id).catch((error) => {
+          console.error("Failed to join group:", error);
+        });
+      }
     }
   };
 

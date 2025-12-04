@@ -7,14 +7,14 @@ export const useChat = () => {
   const { user } = useAuth();
   const [groups, setGroups] = useState([
     {
-      id: "demo-1",
+      id: -1, // Use negative IDs for demo groups
       name: "General Chat",
       description: "General discussion",
       memberCount: 1,
       isDemo: true,
     },
     {
-      id: "demo-2",
+      id: -2, // Use negative IDs for demo groups
       name: "Study Group",
       description: "Study together",
       memberCount: 1,
@@ -144,6 +144,8 @@ export const useChat = () => {
 
   // Load messages for a specific group
   const loadGroupMessages = async (groupId) => {
+    if (groupId < 0) return; // Skip demo groups
+
     try {
       const response = await chatAPI.messages.getGroupMessages(groupId);
       setMessages((prev) => ({

@@ -1,248 +1,259 @@
-// WebSocket service for real-time chat functionality
+// websocketService.js
+import SockJS from "sockjs-client";
+import { Client } from "@stomp/stompjs";
+
+/**
+ * Singleton WebSocket/STOMP service
+ *
+ * Usage:
+ *  import webSocketService from "../services/websocketService";
+ *  webSocketService.connect(userId);
+ *  const unsub = webSocketService.subscribe(`/topic/group/${groupId}`, handler);
+ *  webSocketService.publish("/app/chat.sendMessage", payload);
+ */
+
 class WebSocketService {
   constructor() {
-    this.socket = null;
-    this.isConnected = false;
-    this.reconnectAttempts = 0;
-    this.maxReconnectAttempts = 5;
-    this.reconnectDelay = 1000; // Start with 1 second
-    this.messageHandlers = new Map();
-    this.connectionHandlers = [];
-    this.disconnectionHandlers = [];
-    this.errorHandlers = [];
+    this.client = null; // @stomp/stompjs Client
+    this.connected = false;
+    this.subscriptions = new Map(); // destination -> {count, subscribers: Set}
+    this.connectHandlers = new Set();
+    this.disconnectHandlers = new Set();
+    this.errorHandlers = new Set();
+    this.messageHandlers = new Map(); // optional named handlers for types
+    this._userId = null;
+
+    // settings
+    this.reconnectDelay = 5000;
+    this.debug = false;
   }
 
-  // Connect to WebSocket server
-  connect(userId) {
-    if (this.socket && this.isConnected) {
-      console.log("WebSocket already connected");
-      return;
-    }
-
-    const WS_URL = import.meta.env.VITE_WS_URL || "ws://localhost:8080/ws";
+  _getWsEndpoint(userId) {
+    const base = import.meta.env.VITE_WS_URL || "http://localhost:8080/ws";
     const token = localStorage.getItem("openacademy_token");
-
-    try {
-      // Include authentication token in connection URL
-      const wsUrl = token
-        ? `${WS_URL}?token=${token}&userId=${userId}`
-        : `${WS_URL}?userId=${userId}`;
-
-      this.socket = new WebSocket(wsUrl);
-
-      this.socket.onopen = (event) => {
-        console.log("WebSocket connected successfully");
-        this.isConnected = true;
-        this.reconnectAttempts = 0;
-        this.reconnectDelay = 1000;
-
-        // Notify connection handlers
-        this.connectionHandlers.forEach((handler) => handler(event));
-      };
-
-      this.socket.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          this.handleMessage(data);
-        } catch (error) {
-          console.error("Error parsing WebSocket message:", error);
-        }
-      };
-
-      this.socket.onclose = (event) => {
-        console.log("WebSocket connection closed", event.code, event.reason);
-        this.isConnected = false;
-
-        // Notify disconnection handlers
-        this.disconnectionHandlers.forEach((handler) => handler(event));
-
-        // Attempt to reconnect if not intentionally closed
-        if (
-          event.code !== 1000 &&
-          this.reconnectAttempts < this.maxReconnectAttempts
-        ) {
-          this.reconnect(userId);
-        }
-      };
-
-      this.socket.onerror = (error) => {
-        console.error("WebSocket error:", error);
-        this.errorHandlers.forEach((handler) => handler(error));
-      };
-    } catch (error) {
-      console.error("Failed to create WebSocket connection:", error);
-      this.errorHandlers.forEach((handler) => handler(error));
-    }
+    // SockJS uses HTTP endpoint; tokens can be passed as query params if your backend reads them
+    const params = new URLSearchParams();
+    if (token) params.append("token", token);
+    if (userId) params.append("userId", userId);
+    const url = `${base}?${params.toString()}`;
+    return url;
   }
 
-  // Reconnect with exponential backoff
-  reconnect(userId) {
-    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error("Max reconnection attempts reached");
+  connect(userId) {
+    if (this.client && this.connected) {
+      if (this.debug) console.log("STOMP: already connected");
       return;
     }
+    this._userId = userId;
+    const endpoint = this._getWsEndpoint(userId);
 
-    this.reconnectAttempts++;
-    console.log(
-      `Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts}) in ${this.reconnectDelay}ms`
-    );
+    // Create STOMP client with SockJS factory
+    this.client = new Client({
+      // We'll use webSocketFactory to create SockJS so we keep SockJS fallback behavior
+      webSocketFactory: () => new SockJS(endpoint),
+      connectHeaders: {},
+      debug: (str) => {
+        if (this.debug) console.log("STOMP DEBUG:", str);
+      },
+      reconnectDelay: this.reconnectDelay,
+      onConnect: (frame) => {
+        this.connected = true;
+        if (this.debug) console.log("STOMP connected:", frame);
+        // re-subscribe existing destinations
+        [...this.subscriptions.keys()].forEach((destination) => {
+          // re-subscribe all subscribers
+          const meta = this.subscriptions.get(destination);
+          if (meta && !meta.stompSub) {
+            meta.stompSub = this.client.subscribe(destination, (msg) => {
+              this._handleIncomingMessage(msg);
+            });
+          }
+        });
+        this.connectHandlers.forEach((h) => {
+          try {
+            h(frame);
+          } catch (e) {
+            console.error(e);
+          }
+        });
+      },
+      onStompError: (frame) => {
+        console.error("STOMP Error: ", frame);
+        this.errorHandlers.forEach((h) => h(frame));
+      },
+      onWebSocketClose: (evt) => {
+        this.connected = false;
+        this.disconnectHandlers.forEach((h) => h(evt));
+        if (this.debug) console.log("STOMP websocket closed", evt);
+      },
+      onWebSocketError: (evt) => {
+        this.errorHandlers.forEach((h) => h(evt));
+        if (this.debug) console.error("STOMP websocket error", evt);
+      },
+    });
 
-    setTimeout(() => {
-      this.connect(userId);
-    }, this.reconnectDelay);
-
-    // Exponential backoff with jitter
-    this.reconnectDelay =
-      Math.min(this.reconnectDelay * 2, 30000) + Math.random() * 1000;
+    this.client.activate();
   }
 
-  // Disconnect from WebSocket
   disconnect() {
-    if (this.socket) {
-      this.socket.close(1000, "Manual disconnect");
-      this.socket = null;
-      this.isConnected = false;
+    if (this.client) {
+      try {
+        this.client.deactivate();
+      } catch (e) {
+        console.warn("Error while deactivating STOMP client", e);
+      }
+    }
+    this.client = null;
+    this.connected = false;
+    // clear subscriptions
+    this.subscriptions.forEach((meta, dest) => {
+      if (meta.stompSub) {
+        try {
+          meta.stompSub.unsubscribe();
+        } catch (e) {}
+      }
+    });
+    this.subscriptions.clear();
+  }
+
+  // Subscribe to a STOMP destination. Returns unsubscribe function.
+  subscribe(destination, callback) {
+    if (!destination || typeof callback !== "function") {
+      throw new Error("destination and callback required");
+    }
+
+    // ensure meta
+    if (!this.subscriptions.has(destination)) {
+      this.subscriptions.set(destination, {
+        count: 0,
+        subscribers: new Set(),
+        stompSub: null,
+      });
+    }
+    const meta = this.subscriptions.get(destination);
+    meta.subscribers.add(callback);
+    meta.count++;
+
+    // If connected and not yet subscribed at stomp level, do it now
+    if (this.client && this.connected && !meta.stompSub) {
+      meta.stompSub = this.client.subscribe(destination, (msg) => {
+        this._handleIncomingMessage(msg);
+      });
+    }
+
+    // Unsubscribe function
+    return () => {
+      const m = this.subscriptions.get(destination);
+      if (!m) return;
+      m.subscribers.delete(callback);
+      m.count = Math.max(0, m.count - 1);
+      if (m.count === 0) {
+        // remove stomp subscription
+        try {
+          if (m.stompSub) m.stompSub.unsubscribe();
+        } catch (e) {}
+        this.subscriptions.delete(destination);
+      }
+    };
+  }
+
+  // Internal: handle raw STOMP message (msg.body)
+  _handleIncomingMessage(msg) {
+    let body = msg.body;
+    let payload;
+    try {
+      payload = JSON.parse(body);
+    } catch (e) {
+      // if not JSON, forward raw
+      payload = body;
+    }
+
+    const destination =
+      msg.headers && (msg.headers.destination || msg.headers["destination"]);
+    const meta = this.subscriptions.get(destination);
+    if (meta) {
+      meta.subscribers.forEach((cb) => {
+        try {
+          cb(payload);
+        } catch (e) {
+          console.error("handler error", e);
+        }
+      });
+    } else {
+      // if no subscription meta, try messageHandlers (by type)
+      if (payload && payload.type && this.messageHandlers.has(payload.type)) {
+        this.messageHandlers.get(payload.type).forEach((h) => {
+          try {
+            h(payload.payload);
+          } catch (e) {}
+        });
+      } else {
+        // Optional: log orphan messages
+        if (this.debug) console.log("Unrouted message", destination, payload);
+      }
     }
   }
 
-  // Send message through WebSocket
-  sendMessage(message) {
-    if (this.socket && this.isConnected) {
-      try {
-        this.socket.send(JSON.stringify(message));
-        return true;
-      } catch (error) {
-        console.error("Failed to send WebSocket message:", error);
-        return false;
-      }
-    } else {
-      console.warn("WebSocket not connected, cannot send message");
+  // Publish / send to a destination
+  publish(destination, payload = {}) {
+    if (!this.client || !this.connected) {
+      if (this.debug)
+        console.warn("STOMP not connected; cannot publish", destination);
+      return false;
+    }
+    try {
+      const body =
+        typeof payload === "string" ? payload : JSON.stringify(payload);
+      this.client.publish({ destination, body });
+      return true;
+    } catch (e) {
+      console.error("Failed to publish STOMP message", e);
       return false;
     }
   }
 
-  // Handle incoming messages
-  handleMessage(data) {
-    const { type, payload } = data;
-
-    if (this.messageHandlers.has(type)) {
-      this.messageHandlers.get(type).forEach((handler) => {
-        try {
-          handler(payload);
-        } catch (error) {
-          console.error(`Error in message handler for type ${type}:`, error);
-        }
-      });
-    } else {
-      console.warn(`No handler registered for message type: ${type}`);
-    }
-  }
-
-  // Register message handler for specific message type
-  onMessage(type, handler) {
-    if (!this.messageHandlers.has(type)) {
-      this.messageHandlers.set(type, []);
-    }
-    this.messageHandlers.get(type).push(handler);
-
-    // Return unsubscribe function
-    return () => {
-      const handlers = this.messageHandlers.get(type);
-      if (handlers) {
-        const index = handlers.indexOf(handler);
-        if (index > -1) {
-          handlers.splice(index, 1);
-        }
-        if (handlers.length === 0) {
-          this.messageHandlers.delete(type);
-        }
-      }
-    };
-  }
-
-  // Register connection event handlers
-  onConnect(handler) {
-    this.connectionHandlers.push(handler);
-    return () => {
-      const index = this.connectionHandlers.indexOf(handler);
-      if (index > -1) {
-        this.connectionHandlers.splice(index, 1);
-      }
-    };
-  }
-
-  onDisconnect(handler) {
-    this.disconnectionHandlers.push(handler);
-    return () => {
-      const index = this.disconnectionHandlers.indexOf(handler);
-      if (index > -1) {
-        this.disconnectionHandlers.splice(index, 1);
-      }
-    };
-  }
-
-  onError(handler) {
-    this.errorHandlers.push(handler);
-    return () => {
-      const index = this.errorHandlers.indexOf(handler);
-      if (index > -1) {
-        this.errorHandlers.splice(index, 1);
-      }
-    };
-  }
-
-  // Get connection status
-  getConnectionStatus() {
-    return {
-      isConnected: this.isConnected,
-      readyState: this.socket ? this.socket.readyState : WebSocket.CLOSED,
-      reconnectAttempts: this.reconnectAttempts,
-    };
-  }
-
-  // Join a chat group (send join message)
-  joinGroup(groupId) {
-    return this.sendMessage({
-      type: "JOIN_GROUP",
-      payload: { groupId },
-    });
-  }
-
-  // Leave a chat group (send leave message)
-  leaveGroup(groupId) {
-    return this.sendMessage({
-      type: "LEAVE_GROUP",
-      payload: { groupId },
-    });
-  }
-
-  // Send a chat message
+  // convenience wrappers
   sendChatMessage(groupId, message, senderId) {
-    return this.sendMessage({
-      type: "CHAT_MESSAGE",
-      payload: {
-        groupId,
-        message,
-        senderId,
-        timestamp: new Date().toISOString(),
-      },
+    return this.publish("/app/chat.sendMessage", {
+      groupId,
+      senderId,
+      content: message,
     });
   }
 
-  // Send typing indicator
   sendTypingIndicator(groupId, isTyping, userId) {
-    return this.sendMessage({
-      type: "TYPING_INDICATOR",
-      payload: {
-        groupId,
-        isTyping,
-        userId,
-      },
-    });
+    return this.publish("/app/chat.typing", { groupId, userId, isTyping });
+  }
+
+  joinGroup(groupId) {
+    return this.publish("/app/chat.join", { groupId });
+  }
+
+  leaveGroup(groupId) {
+    return this.publish("/app/chat.leave", { groupId });
+  }
+
+  // connection event register/unregister
+  onConnect(fn) {
+    this.connectHandlers.add(fn);
+    return () => this.connectHandlers.delete(fn);
+  }
+  onDisconnect(fn) {
+    this.disconnectHandlers.add(fn);
+    return () => this.disconnectHandlers.delete(fn);
+  }
+  onError(fn) {
+    this.errorHandlers.add(fn);
+    return () => this.errorHandlers.delete(fn);
+  }
+
+  // messageHandlers by custom type (optional)
+  onMessageType(type, handler) {
+    if (!this.messageHandlers.has(type))
+      this.messageHandlers.set(type, new Set());
+    this.messageHandlers.get(type).add(handler);
+    return () => this.messageHandlers.get(type).delete(handler);
   }
 }
 
-// Create singleton instance
-const webSocketService = new WebSocketService();
-
-export default webSocketService;
+export default new WebSocketService();

@@ -91,6 +91,10 @@ export const chatGroupsAPI = {
 export const chatMessagesAPI = {
   // Get all messages from a group
   getGroupMessages: async (groupId) => {
+    if (typeof groupId !== "number") {
+      throw new Error("groupId must be a number");
+    }
+
     const response = await fetch(`${BASE_URL}/chat/messages/group/${groupId}`, {
       method: "POST",
       headers: getAuthHeaders(),
