@@ -12,8 +12,6 @@ export const useChat = () => {
   const [error, setError] = useState(null);
   const [typingUsers, setTypingUsers] = useState({});
 
-  console.log("useChat running, user:", user);
-
   useEffect(() => {
     if (!user?.id) return;
 
@@ -55,13 +53,14 @@ export const useChat = () => {
     setIsLoading(true);
     try {
       const response = await chatAPI.groups.getAllGroups();
-      const groupList = response.data || [];
+      console.log("loadGroups response:", response); // debug
+      const groupList = Array.isArray(response) ? response : [];
       setGroups(groupList);
 
       // Load messages for each group
       groupList.forEach((group) => loadGroupMessages(group.id));
     } catch (err) {
-      console.error(err);
+      console.error("Failed to load groups:", err);
       setGroups([]);
     } finally {
       setIsLoading(false);
@@ -71,7 +70,9 @@ export const useChat = () => {
   const loadGroupMessages = async (groupId) => {
     try {
       const response = await chatAPI.messages.getGroupMessages(groupId);
-      setMessages((prev) => ({ ...prev, [groupId]: response.data || [] }));
+      console.log(`Messages for group ${groupId}:`, response); // debug
+      const messagesArray = Array.isArray(response) ? response : [];
+      setMessages((prev) => ({ ...prev, [groupId]: messagesArray }));
     } catch (err) {
       console.error(`Failed to load messages for group ${groupId}`, err);
     }
@@ -130,6 +131,14 @@ export const useChat = () => {
       .map(([_, data]) => data);
   };
 
+  const joinGroup = async (groupId) => {
+    try {
+      return webSocketService.joinGroup(groupId);
+    } catch (err) {
+      console.error("Failed to join group:", err);
+    }
+  };
+
   return {
     groups,
     messages,
@@ -141,6 +150,7 @@ export const useChat = () => {
     getGroupMessages,
     getTypingUsers,
     loadGroupMessages,
+    joinGroup,
   };
 };
 

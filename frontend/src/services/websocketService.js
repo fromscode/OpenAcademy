@@ -56,7 +56,6 @@ class WebSocketService {
       },
     });
 
-    console.log("activating STOMP client for userId:", this._userId);
     this.client.activate();
   }
 
