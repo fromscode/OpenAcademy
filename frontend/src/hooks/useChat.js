@@ -49,6 +49,17 @@ export const useChat = () => {
     init();
   }, [user]);
 
+  const createGroup = async (groupName) => {
+    try {
+      const response = await chatAPI.groups.createGroup(groupName, user.id); // assuming API needs owner id
+      setGroups((prev) => [...prev, response]); // add newly created group to local state
+      return response;
+    } catch (err) {
+      console.error("Failed to create group:", err);
+      throw err;
+    }
+  };
+
   const loadGroups = async () => {
     setIsLoading(true);
     try {
@@ -161,6 +172,7 @@ export const useChat = () => {
     getTypingUsers,
     loadGroupMessages,
     joinGroup,
+    createGroup,
   };
 };
 
