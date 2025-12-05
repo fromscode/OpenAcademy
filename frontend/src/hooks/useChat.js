@@ -123,7 +123,7 @@ export const useChat = () => {
 
     // Send to backend
     try {
-      await chatAPI.messages.sendMessage(messageData);
+      await chatAPI.messages.sendMessage(normalized);
       const chatMessageWS = {
         groupId,
         senderId: user.id,
