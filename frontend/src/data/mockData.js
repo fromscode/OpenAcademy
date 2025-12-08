@@ -225,3 +225,176 @@ export const mockMessages = [
     read: true,
   },
 ];
+
+// Mock grades for students
+export const mockGrades = [
+  {
+    id: 1,
+    studentId: 1,
+    courseId: 1,
+    courseName: "Introduction to Web Development",
+    courseCode: "CS101",
+    assignmentScores: [
+      { name: "Build a Portfolio Website", score: 85, maxScore: 100 },
+      { name: "HTML/CSS Quiz", score: 92, maxScore: 100 },
+      { name: "JavaScript Project", score: 88, maxScore: 100 },
+    ],
+    midtermScore: 87,
+    finalScore: null,
+    currentGrade: "B+",
+    letterGrade: "B+",
+    percentage: 87.5,
+  },
+  {
+    id: 2,
+    studentId: 1,
+    courseId: 2,
+    courseName: "Advanced JavaScript",
+    courseCode: "CS201",
+    assignmentScores: [
+      { name: "JavaScript Functions Exercise", score: 78, maxScore: 100 },
+      { name: "Async Programming", score: 85, maxScore: 100 },
+    ],
+    midtermScore: 82,
+    finalScore: null,
+    currentGrade: "B",
+    letterGrade: "B",
+    percentage: 81.7,
+  },
+];
+
+// Mock schedule for students
+export const mockSchedule = [
+  {
+    id: 1,
+    studentId: 1,
+    courseId: 1,
+    courseName: "Introduction to Web Development",
+    courseCode: "CS101",
+    teacherName: "Sarah Wilson",
+    room: "Room 301",
+    building: "Computer Science Building",
+    days: ["Monday", "Wednesday", "Friday"],
+    startTime: "10:00 AM",
+    endTime: "11:30 AM",
+    color: "#3B82F6", // blue
+  },
+  {
+    id: 2,
+    studentId: 1,
+    courseId: 2,
+    courseName: "Advanced JavaScript",
+    courseCode: "CS201",
+    teacherName: "Sarah Wilson",
+    room: "Room 205",
+    building: "Computer Science Building",
+    days: ["Tuesday", "Thursday"],
+    startTime: "2:00 PM",
+    endTime: "3:30 PM",
+    color: "#8B5CF6", // purple
+  },
+  {
+    id: 3,
+    studentId: 1,
+    courseId: 3,
+    courseName: "Calculus I",
+    courseCode: "MATH101",
+    teacherName: "Robert Brown",
+    room: "Room 101",
+    building: "Mathematics Building",
+    days: ["Monday", "Wednesday", "Friday"],
+    startTime: "9:00 AM",
+    endTime: "10:00 AM",
+    color: "#10B981", // green
+  },
+];
+
+// Mock student assignments with submission status
+export const mockStudentAssignments = [
+  {
+    id: 1,
+    assignmentId: 1,
+    studentId: 1,
+    title: "Build a Portfolio Website",
+    description:
+      "Create a personal portfolio website using HTML, CSS, and JavaScript.",
+    courseId: 1,
+    courseName: "Introduction to Web Development",
+    courseCode: "CS101",
+    dueDate: "2024-02-15",
+    submittedDate: "2024-02-14",
+    status: "graded",
+    grade: 85,
+    maxGrade: 100,
+    feedback:
+      "Great work! The design is clean and the code is well-structured.",
+  },
+  {
+    id: 2,
+    assignmentId: 2,
+    studentId: 1,
+    title: "JavaScript Functions Exercise",
+    description:
+      "Complete the JavaScript functions worksheet with proper documentation.",
+    courseId: 2,
+    courseName: "Advanced JavaScript",
+    courseCode: "CS201",
+    dueDate: "2024-02-20",
+    submittedDate: "2024-02-19",
+    status: "submitted",
+    grade: null,
+    maxGrade: 50,
+    feedback: null,
+  },
+  {
+    id: 3,
+    assignmentId: 3,
+    studentId: 1,
+    title: "Derivative Problems Set",
+    description:
+      "Solve the provided calculus problems focusing on derivatives.",
+    courseId: 3,
+    courseName: "Calculus I",
+    courseCode: "MATH101",
+    dueDate: "2024-02-18",
+    submittedDate: null,
+    status: "pending",
+    grade: null,
+    maxGrade: 75,
+    feedback: null,
+  },
+  {
+    id: 4,
+    assignmentId: 4,
+    studentId: 1,
+    title: "Responsive Design Project",
+    description:
+      "Create a responsive website that works on mobile, tablet, and desktop.",
+    courseId: 1,
+    courseName: "Introduction to Web Development",
+    courseCode: "CS101",
+    dueDate: "2024-03-01",
+    submittedDate: null,
+    status: "not_started",
+    grade: null,
+    maxGrade: 100,
+    feedback: null,
+  },
+  {
+    id: 5,
+    assignmentId: 5,
+    studentId: 1,
+    title: "Promise and Async/Await",
+    description:
+      "Implement asynchronous JavaScript using Promises and Async/Await patterns.",
+    courseId: 2,
+    courseName: "Advanced JavaScript",
+    courseCode: "CS201",
+    dueDate: "2024-02-25",
+    submittedDate: null,
+    status: "in_progress",
+    grade: null,
+    maxGrade: 75,
+    feedback: null,
+  },
+];

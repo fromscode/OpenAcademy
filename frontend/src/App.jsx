@@ -13,6 +13,10 @@ import AdminDashboard from "./pages/Admin/AdminDashboard";
 import Students from "./pages/Admin/Students";
 import TeacherDashboard from "./pages/Teacher/TeacherDashboard";
 import StudentDashboard from "./pages/Student/StudentDashboard";
+import Courses from "./pages/Student/Courses";
+import Assignments from "./pages/Student/Assignments";
+import Grades from "./pages/Student/Grades";
+import Schedule from "./pages/Student/Schedule";
 import Messages from "./pages/Messages/Messages";
 import Settings from "./pages/Settings/Settings";
 import DashboardLayout from "./components/Layout/DashboardLayout";
@@ -134,6 +138,38 @@ function App() {
                   element={
                     <ProtectedRoute allowedRoles={["student"]}>
                       <StudentDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="student/courses"
+                  element={
+                    <ProtectedRoute allowedRoles={["student"]}>
+                      <Courses />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="student/assignments"
+                  element={
+                    <ProtectedRoute allowedRoles={["student"]}>
+                      <Assignments />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="student/grades"
+                  element={
+                    <ProtectedRoute allowedRoles={["student"]}>
+                      <Grades />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="student/schedule"
+                  element={
+                    <ProtectedRoute allowedRoles={["student"]}>
+                      <Schedule />
                     </ProtectedRoute>
                   }
                 />
