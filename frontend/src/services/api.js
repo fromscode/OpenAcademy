@@ -4,7 +4,7 @@ const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
 // Helper function to get auth token
 const getAuthToken = () => {
-  return localStorage.getItem("openacademy_token");
+  return sessionStorage.getItem("openacademy_token");
 };
 
 // Helper function to create headers with auth token

@@ -17,8 +17,8 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     // Check if user is logged in on mount
-    const savedUser = localStorage.getItem("openacademy_user");
-    const token = localStorage.getItem("openacademy_token");
+    const savedUser = sessionStorage.getItem("openacademy_user");
+    const token = sessionStorage.getItem("openacademy_token");
 
     if (savedUser && token) {
       setUser(JSON.parse(savedUser));
@@ -36,8 +36,8 @@ export const AuthProvider = ({ children }) => {
         const { user: userData, token } = data;
 
         setUser(userData);
-        localStorage.setItem("openacademy_user", JSON.stringify(userData));
-        localStorage.setItem("openacademy_token", token);
+        sessionStorage.setItem("openacademy_user", JSON.stringify(userData));
+        sessionStorage.setItem("openacademy_token", token);
 
         return { success: true, user: userData };
       } else {
@@ -77,8 +77,8 @@ export const AuthProvider = ({ children }) => {
       // Continue with local logout even if backend call fails
     } finally {
       setUser(null);
-      localStorage.removeItem("openacademy_user");
-      localStorage.removeItem("openacademy_token");
+      sessionStorage.removeItem("openacademy_user");
+      sessionStorage.removeItem("openacademy_token");
     }
   };
 
