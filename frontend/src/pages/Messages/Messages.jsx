@@ -9,9 +9,12 @@ import {
   WifiOff,
   AlertCircle,
   RefreshCw,
+  UserPlus,
+  X,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import useChat from "../../hooks/useChat";
+import chatAPI from "../../services/chatAPI";
 
 const Messages = () => {
   const { user, isLoading: authLoading } = useAuth();
@@ -23,6 +26,7 @@ const Messages = () => {
     sendMessage,
     createGroup,
     joinGroup,
+    joinGroupAsMember,
     getGroupMessages,
     getTypingUsers,
     sendTypingIndicator,
@@ -35,9 +39,13 @@ const Messages = () => {
   const [newMessage, setNewMessage] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [showCreateGroup, setShowCreateGroup] = useState(false);
+  const [showBrowseGroups, setShowBrowseGroups] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [allGroups, setAllGroups] = useState([]);
+  const [loadingAllGroups, setLoadingAllGroups] = useState(false);
+  const [joiningGroupId, setJoiningGroupId] = useState(null);
 
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
@@ -103,6 +111,37 @@ const Messages = () => {
       setShowCreateGroup(false);
     } catch (error) {
       console.error("Failed to create group:", error);
+    }
+  };
+
+  const handleBrowseGroups = async () => {
+    setShowBrowseGroups(true);
+    setLoadingAllGroups(true);
+    try {
+      const response = await chatAPI.groups.getAllGroups();
+      // Filter out groups user is already a member of
+      const availableGroups = response.filter(
+        (group) => !groups.some((g) => g.id === group.id)
+      );
+      setAllGroups(availableGroups);
+    } catch (error) {
+      console.error("Failed to load all groups:", error);
+    } finally {
+      setLoadingAllGroups(false);
+    }
+  };
+
+  const handleJoinGroup = async (groupId) => {
+    setJoiningGroupId(groupId);
+    try {
+      await joinGroupAsMember(groupId);
+      // Remove from available groups
+      setAllGroups((prev) => prev.filter((g) => g.id !== groupId));
+    } catch (error) {
+      console.error("Failed to join group:", error);
+      alert(error.message || "Failed to join group");
+    } finally {
+      setJoiningGroupId(null);
     }
   };
 
@@ -210,6 +249,15 @@ const Messages = () => {
                   title="Refresh"
                 >
                   <RefreshCw className="h-4 w-4" />
+                </button>
+
+                {/* Browse Groups Button */}
+                <button
+                  onClick={handleBrowseGroups}
+                  className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  title="Browse Groups"
+                >
+                  <UserPlus className="h-4 w-4" />
                 </button>
 
                 {/* Create Group Button */}
@@ -559,6 +607,92 @@ const Messages = () => {
           )}
         </div>
       </div>
+
+      {/* Browse Groups Modal */}
+      {showBrowseGroups && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Browse Available Groups
+              </h3>
+              <button
+                onClick={() => setShowBrowseGroups(false)}
+                className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto max-h-[60vh]">
+              {loadingAllGroups ? (
+                <div className="flex items-center justify-center py-8">
+                  <RefreshCw className="h-6 w-6 animate-spin text-primary-600" />
+                  <span className="ml-2 text-gray-600 dark:text-gray-400">
+                    Loading groups...
+                  </span>
+                </div>
+              ) : allGroups.length > 0 ? (
+                <div className="space-y-3">
+                  {allGroups.map((group) => (
+                    <div
+                      key={group.id}
+                      className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-primary-300 dark:hover:border-primary-700 transition-colors"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3 flex-1">
+                          <div className="h-10 w-10 rounded-full bg-primary-100 dark:bg-primary-800 flex items-center justify-center flex-shrink-0">
+                            <Users className="h-5 w-5 text-primary-600 dark:text-primary-300" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                              {group.name || "Unnamed Group"}
+                            </p>
+                            {group.description && (
+                              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                {group.description}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleJoinGroup(group.id)}
+                          disabled={joiningGroupId === group.id}
+                          className="ml-4 px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 flex-shrink-0"
+                        >
+                          {joiningGroupId === group.id ? (
+                            <>
+                              <RefreshCw className="h-4 w-4 animate-spin" />
+                              <span>Joining...</span>
+                            </>
+                          ) : (
+                            <>
+                              <UserPlus className="h-4 w-4" />
+                              <span>Join</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Users className="h-12 w-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
+                  <p className="text-gray-600 dark:text-gray-400">
+                    No new groups available to join
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
+                    You're already a member of all existing groups
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

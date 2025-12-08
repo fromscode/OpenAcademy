@@ -8,6 +8,7 @@ import com.openacademy.backend.entities.ChatGroup;
 import com.openacademy.backend.entities.ChatMessage;
 import com.openacademy.backend.entities.User;
 import com.openacademy.backend.repository.ChatGroupRepository;
+import com.openacademy.backend.repository.GroupMemberRepository;
 import com.openacademy.backend.repository.MessageRepository;
 import com.openacademy.backend.repository.UserRepository;
 
@@ -18,15 +19,23 @@ public class ChatMessageService {
     private final MessageRepository messageRepo;
     private final ChatGroupRepository groupRepo;
     private final UserRepository userRepo;
+    private final GroupMemberRepository memberRepo;
 
-    public ChatMessageService(MessageRepository messageRepo, ChatGroupRepository groupRepo, UserRepository userRepo) {
+    public ChatMessageService(MessageRepository messageRepo, ChatGroupRepository groupRepo, 
+                              UserRepository userRepo, GroupMemberRepository memberRepo) {
         this.messageRepo = messageRepo;
         this.groupRepo = groupRepo;
         this.userRepo = userRepo;
+        this.memberRepo = memberRepo;
     }
 
-    // sending message
+    // sending message - with membership check
     public ChatMessage sendMessage(Long groupId, Long userId, String content) {
+        
+        // Check if user is a member of the group
+        if (!memberRepo.existsByGroupIdAndUserId(groupId, userId)) {
+            throw new IllegalArgumentException("User is not a member of this group");
+        }
 
         ChatGroup group = groupRepo.findById(groupId)
                 .orElseThrow(() -> new IllegalArgumentException("Group not found"));
@@ -43,8 +52,14 @@ public class ChatMessageService {
         return messageRepo.save(message);
     }
 
-    // Get all messages for a group
-    public List<ChatMessage> getMessagesByGroup(Long groupId) {
+    // Get all messages for a group - with membership check
+    public List<ChatMessage> getMessagesByGroup(Long groupId, Long userId) {
+        
+        // Check if user is a member of the group
+        if (!memberRepo.existsByGroupIdAndUserId(groupId, userId)) {
+            throw new IllegalArgumentException("User is not a member of this group");
+        }
+        
         return messageRepo.findByGroupIdOrderByCreatedAtAsc(groupId);
     }
 

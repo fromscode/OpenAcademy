@@ -2,6 +2,8 @@ package com.openacademy.backend.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,18 +25,28 @@ public class ChatMessageController {
 
     // send message
     @PostMapping("/send")
-    public ChatMessage sendMessage(@RequestBody ChatMessageWS chatMessageWS) {
+    public ResponseEntity<?> sendMessage(@RequestBody ChatMessageWS chatMessageWS) {
         System.out.println("Received chatMessageWS:" + chatMessageWS.getContent()); // debug
-        Long groupId = chatMessageWS.getGroupId();
-        Long userId = chatMessageWS.getSenderId();
-        String content = chatMessageWS.getContent();
-        return chatMessageService.sendMessage(groupId, userId, content);
+        try {
+            Long groupId = chatMessageWS.getGroupId();
+            Long userId = chatMessageWS.getSenderId();
+            String content = chatMessageWS.getContent();
+            ChatMessage message = chatMessageService.sendMessage(groupId, userId, content);
+            return ResponseEntity.ok(message);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        }
     }
 
-    // get all messages of a group
-    @PostMapping("/group/{groupId}")
-    public List<ChatMessage> getMessagesByGroup(@PathVariable Long groupId) {
-        return chatMessageService.getMessagesByGroup(groupId);
+    // get all messages of a group - requires userId to check membership
+    @PostMapping("/group/{groupId}/{userId}")
+    public ResponseEntity<?> getMessagesByGroup(@PathVariable Long groupId, @PathVariable Long userId) {
+        try {
+            List<ChatMessage> messages = chatMessageService.getMessagesByGroup(groupId, userId);
+            return ResponseEntity.ok(messages);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        }
     }
 
 }

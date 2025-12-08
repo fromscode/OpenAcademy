@@ -55,6 +55,16 @@ public class GroupService {
         return groupRepo.findAll();
     }
 
+    // Get groups where user is a member
+    public List<ChatGroup> getUserGroups(Long userId) {
+        return groupRepo.findGroupsByUserId(userId);
+    }
+
+    // Check if user is a member of the group
+    public boolean isUserMember(Long groupId, Long userId) {
+        return memberRepo.existsByGroupIdAndUserId(groupId, userId);
+    }
+
     public ChatGroup addMember(Long groupId, User user, String role) {
         if (!memberRepo.existsByGroupIdAndUserId(groupId, user.getId())) {
             ChatGroup group = groupRepo.findById(groupId)
@@ -82,5 +92,9 @@ public class GroupService {
         memberRepo.deleteById(gm.getId());
 
         return "Member deleted sucessfully";
+    }
+
+    public List<GroupMember> getGroupMembers(Long groupId) {
+        return memberRepo.findByGroupId(groupId);
     }
 }

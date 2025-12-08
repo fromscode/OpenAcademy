@@ -3,6 +3,8 @@ package com.openacademy.backend.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.openacademy.backend.entities.ChatGroup;
+import com.openacademy.backend.entities.GroupMember;
 import com.openacademy.backend.service.GroupService;
 
 @RestController
@@ -34,6 +37,22 @@ public class ChatGroupController {
         return groupService.addMember(groupId, userId, role);
     }
 
+    // New endpoint to join a group (user explicitly joins)
+    @PostMapping("/join/{group-id}/{user-id}")
+    public ResponseEntity<?> joinGroup(@PathVariable("group-id") Long groupId,
+            @PathVariable("user-id") Long userId) {
+        try {
+            ChatGroup group = groupService.addMember(groupId, userId, "MEMBER");
+            if (group != null) {
+                return ResponseEntity.ok(group);
+            } else {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("User already a member");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
     @DeleteMapping("/remove-member/{group-id}/{user-id}")
     public String removeMember(@PathVariable("group-id") Long groupId,
             @PathVariable("user-id") Long userId) {
@@ -46,8 +65,21 @@ public class ChatGroupController {
         return groupService.getGroup(groupId);
     }
 
+    // Get all groups (for admin purposes)
     @GetMapping("/all-groups")
     public List<ChatGroup> getAllGroups() {
         return groupService.getAllGroups();
+    }
+
+    // Get groups where user is a member (this should be the default for students)
+    @GetMapping("/user/{userId}")
+    public List<ChatGroup> getUserGroups(@PathVariable Long userId) {
+        return groupService.getUserGroups(userId);
+    }
+
+    // Get all members of a group
+    @GetMapping("/{groupId}/members")
+    public List<GroupMember> getGroupMembers(@PathVariable Long groupId) {
+        return groupService.getGroupMembers(groupId);
     }
 }

@@ -51,8 +51,10 @@ export const useChat = () => {
 
   const createGroup = async (groupName) => {
     try {
-      const response = await chatAPI.groups.createGroup(groupName, user.id); // assuming API needs owner id
-      setGroups((prev) => [...prev, response]); // add newly created group to local state
+      const response = await chatAPI.groups.createGroup(groupName, user.id);
+      setGroups((prev) => [...prev, response]);
+      // Automatically join the group since you created it (you're already added as ADMIN in backend)
+      await loadGroupMessages(response.id);
       return response;
     } catch (err) {
       console.error("Failed to create group:", err);
@@ -63,8 +65,9 @@ export const useChat = () => {
   const loadGroups = async () => {
     setIsLoading(true);
     try {
-      const response = await chatAPI.groups.getAllGroups();
-      console.log("loadGroups response:", response); // debug
+      // Use getUserGroups instead of getAllGroups to get only groups user is a member of
+      const response = await chatAPI.groups.getUserGroups(user.id);
+      console.log("loadGroups response:", response);
       const groupList = Array.isArray(response) ? response : [];
       setGroups(groupList);
 
@@ -80,7 +83,11 @@ export const useChat = () => {
 
   const loadGroupMessages = async (groupId) => {
     try {
-      const response = await chatAPI.messages.getGroupMessages(groupId);
+      // Pass userId to check membership
+      const response = await chatAPI.messages.getGroupMessages(
+        groupId,
+        user.id
+      );
       const messagesArray = Array.isArray(response)
         ? response.map(normalizeMessage)
         : [];
@@ -154,10 +161,28 @@ export const useChat = () => {
 
   const joinGroup = async (groupId) => {
     try {
+      // Join via WebSocket for real-time updates
       return webSocketService.joinGroup(groupId);
     } catch (err) {
       console.error("Failed to join group:", err);
     }
+  };
+
+  const joinGroupAsMember = async (groupId) => {
+    try {
+      // Add user as member in the backend
+      const response = await chatAPI.groups.joinGroup(groupId, user.id);
+      // Refresh groups list to include the newly joined group
+      await loadGroups();
+      return response;
+    } catch (err) {
+      console.error("Failed to join group as member:", err);
+      throw err;
+    }
+  };
+
+  const refresh = async () => {
+    await loadGroups();
   };
 
   const normalizeMessage = (msg) => {
@@ -183,7 +208,9 @@ export const useChat = () => {
     getTypingUsers,
     loadGroupMessages,
     joinGroup,
+    joinGroupAsMember,
     createGroup,
+    refresh,
   };
 };
 

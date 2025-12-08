@@ -30,9 +30,18 @@ const handleResponse = async (response) => {
 // CHAT GROUPS API
 // ===================================================================
 export const chatGroupsAPI = {
-  // Get all groups
+  // Get all groups (for admin)
   getAllGroups: async () => {
     const response = await fetch(`${BASE_URL}/chat/groups/all-groups`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  // Get groups where user is a member
+  getUserGroups: async (userId) => {
+    const response = await fetch(`${BASE_URL}/chat/groups/user/${userId}`, {
       method: "GET",
       headers: getAuthHeaders(),
     });
@@ -52,6 +61,18 @@ export const chatGroupsAPI = {
   createGroup: async (groupName, ownerId) => {
     const response = await fetch(
       `${BASE_URL}/chat/groups/create/${groupName}/${ownerId}`,
+      {
+        method: "POST",
+        headers: getAuthHeaders(),
+      }
+    );
+    return handleResponse(response);
+  },
+
+  // Join a group
+  joinGroup: async (groupId, userId) => {
+    const response = await fetch(
+      `${BASE_URL}/chat/groups/join/${groupId}/${userId}`,
       {
         method: "POST",
         headers: getAuthHeaders(),
@@ -83,22 +104,37 @@ export const chatGroupsAPI = {
     );
     return handleResponse(response);
   },
+
+  // Get group members
+  getGroupMembers: async (groupId) => {
+    const response = await fetch(`${BASE_URL}/chat/groups/${groupId}/members`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
 };
 
 // ===================================================================
 // CHAT MESSAGES API
 // ===================================================================
 export const chatMessagesAPI = {
-  // Get all messages from a group
-  getGroupMessages: async (groupId) => {
+  // Get all messages from a group (with userId for membership check)
+  getGroupMessages: async (groupId, userId) => {
     if (typeof groupId !== "number") {
       throw new Error("groupId must be a number");
     }
+    if (typeof userId !== "number") {
+      throw new Error("userId must be a number");
+    }
 
-    const response = await fetch(`${BASE_URL}/chat/messages/group/${groupId}`, {
-      method: "POST",
-      headers: getAuthHeaders(),
-    });
+    const response = await fetch(
+      `${BASE_URL}/chat/messages/group/${groupId}/${userId}`,
+      {
+        method: "POST",
+        headers: getAuthHeaders(),
+      }
+    );
     return handleResponse(response);
   },
 
