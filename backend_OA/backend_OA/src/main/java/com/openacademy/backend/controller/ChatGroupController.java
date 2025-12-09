@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.openacademy.backend.entities.ChatGroup;
 import com.openacademy.backend.entities.GroupMember;
 import com.openacademy.backend.service.GroupService;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/chat/groups")
@@ -82,4 +83,10 @@ public class ChatGroupController {
     public List<GroupMember> getGroupMembers(@PathVariable Long groupId) {
         return groupService.getGroupMembers(groupId);
     }
+
+    @GetMapping("/count/{groupId}")
+    public long countGroupMembers(@PathVariable Long groupId) {
+        return groupService.countGroupMembers(groupId);
+    }
+
 }

@@ -97,4 +97,8 @@ public class GroupService {
     public List<GroupMember> getGroupMembers(Long groupId) {
         return memberRepo.findByGroupId(groupId);
     }
+
+    public long countGroupMembers(Long groupId) {
+        return memberRepo.countByGroupId(groupId);
+    }
 }
