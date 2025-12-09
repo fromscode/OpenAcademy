@@ -1,79 +1,91 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { 
-  GraduationCap, 
-  BookOpen, 
-  Users, 
-  Award, 
+import React from "react";
+import { Link } from "react-router-dom";
+import {
+  GraduationCap,
+  BookOpen,
+  Users,
+  Award,
   ArrowRight,
   Star,
   Play,
   CheckCircle,
   Globe,
   Zap,
-  Shield
-} from 'lucide-react';
+  Shield,
+  Video,
+} from "lucide-react";
 
 const LandingPage = () => {
   const features = [
     {
       icon: BookOpen,
-      title: 'Interactive Learning',
-      description: 'Engage with dynamic course content and real-time collaboration tools.'
+      title: "Interactive Learning",
+      description:
+        "Engage with dynamic course content and real-time collaboration tools.",
     },
     {
       icon: Users,
-      title: 'Expert Instructors',
-      description: 'Learn from industry professionals with years of experience.'
+      title: "Expert Instructors",
+      description:
+        "Learn from industry professionals with years of experience.",
     },
     {
       icon: Award,
-      title: 'Certified Programs',
-      description: 'Earn recognized certificates upon successful course completion.'
+      title: "Certified Programs",
+      description:
+        "Earn recognized certificates upon successful course completion.",
     },
     {
       icon: Globe,
-      title: 'Global Community',
-      description: 'Connect with learners and educators from around the world.'
+      title: "Global Community",
+      description: "Connect with learners and educators from around the world.",
     },
     {
       icon: Zap,
-      title: 'Fast Learning',
-      description: 'Accelerated learning paths designed for busy professionals.'
+      title: "Fast Learning",
+      description:
+        "Accelerated learning paths designed for busy professionals.",
     },
     {
       icon: Shield,
-      title: 'Secure Platform',
-      description: 'Your data and progress are protected with enterprise-grade security.'
-    }
+      title: "Secure Platform",
+      description:
+        "Your data and progress are protected with enterprise-grade security.",
+    },
   ];
 
   const testimonials = [
     {
-      name: 'Sarah Johnson',
-      role: 'Software Developer',
-      image: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150',
-      content: 'OpenAcademy transformed my career. The courses are practical and the instructors are amazing!'
+      name: "Sarah Johnson",
+      role: "Software Developer",
+      image:
+        "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150",
+      content:
+        "OpenAcademy transformed my career. The courses are practical and the instructors are amazing!",
     },
     {
-      name: 'Michael Chen',
-      role: 'Data Scientist',
-      image: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=150',
-      content: 'The best online learning platform I\'ve used. Highly recommend for anyone looking to upskill.'
+      name: "Michael Chen",
+      role: "Data Scientist",
+      image:
+        "https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=150",
+      content:
+        "The best online learning platform I've used. Highly recommend for anyone looking to upskill.",
     },
     {
-      name: 'Emily Rodriguez',
-      role: 'UX Designer',
-      image: 'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=150',
-      content: 'Interactive lessons and real-world projects made learning enjoyable and effective.'
-    }
+      name: "Emily Rodriguez",
+      role: "UX Designer",
+      image:
+        "https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=150",
+      content:
+        "Interactive lessons and real-world projects made learning enjoyable and effective.",
+    },
   ];
 
   const stats = [
-    { number: '50K+', label: 'Students' },
-    { number: '200+', label: 'Courses' },
-    { number: '95%', label: 'Success Rate' },
-    { number: '24/7', label: 'Support' }
+    { number: "50K+", label: "Students" },
+    { number: "200+", label: "Courses" },
+    { number: "95%", label: "Success Rate" },
+    { number: "24/7", label: "Support" },
   ];
 
   return (
@@ -89,10 +101,25 @@ const LandingPage = () => {
               </span>
             </div>
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-gray-300 hover:text-white transition-colors">Features</a>
+              <a
+                href="#features"
+                className="text-gray-300 hover:text-white transition-colors"
+              >
+                Features
+              </a>
               {/* <a href="#courses" className="text-gray-300 hover:text-white transition-colors">Courses</a> */}
-              <a href="#testimonials" className="text-gray-300 hover:text-white transition-colors">Reviews</a>
-              <a href="#contact" className="text-gray-300 hover:text-white transition-colors">Contact</a>
+              <a
+                href="#testimonials"
+                className="text-gray-300 hover:text-white transition-colors"
+              >
+                Reviews
+              </a>
+              <a
+                href="#contact"
+                className="text-gray-300 hover:text-white transition-colors"
+              >
+                Contact
+              </a>
             </div>
             <Link
               to="/login"
@@ -111,22 +138,25 @@ const LandingPage = () => {
             <div className="mb-8">
               <div className="inline-flex items-center px-4 py-2 bg-gray-800/50 rounded-full border border-gray-700 mb-8">
                 <Star className="h-4 w-4 text-yellow-400 mr-2" />
-                <span className="text-sm text-gray-300">Trusted by 50,000+ students worldwide</span>
+                <span className="text-sm text-gray-300">
+                  Trusted by 50,000+ students worldwide
+                </span>
               </div>
             </div>
-            
+
             <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent">
               Learn Without
               <span className="block bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                 Limits
               </span>
             </h1>
-            
+
             <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Unlock your potential with our cutting-edge online learning platform. 
-              Master new skills, advance your career, and join a global community of learners.
+              Unlock your potential with our cutting-edge online learning
+              platform. Master new skills, advance your career, and join a
+              global community of learners.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
               <Link
                 to="/login"
@@ -135,7 +165,18 @@ const LandingPage = () => {
                 Start Learning Today
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Link>
-              
+
+              <button
+                onClick={() =>
+                  (window.location.href =
+                    "https://deeppati2005.github.io/mumble/")
+                }
+                className="group flex items-center px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-full font-semibold text-lg transition-all duration-300 shadow-2xl hover:shadow-green-500/30"
+              >
+                <Video className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
+                Start Meeting
+              </button>
+
               <button className="group flex items-center px-8 py-4 border border-gray-600 hover:border-gray-500 rounded-full font-semibold text-lg transition-all duration-300 hover:bg-gray-800/50">
                 <Play className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
                 Watch Demo
@@ -158,17 +199,21 @@ const LandingPage = () => {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-800/30">
+      <section
+        id="features"
+        className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-800/30"
+      >
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
               Why Choose OpenAcademy?
             </h2>
             <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-              Experience the future of education with our innovative features designed for modern learners.
+              Experience the future of education with our innovative features
+              designed for modern learners.
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => {
               const Icon = feature.icon;
@@ -203,10 +248,11 @@ const LandingPage = () => {
               What Our Students Say
             </h2>
             <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-              Join thousands of successful learners who have transformed their careers with OpenAcademy.
+              Join thousands of successful learners who have transformed their
+              careers with OpenAcademy.
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
               <div
@@ -220,7 +266,9 @@ const LandingPage = () => {
                     className="w-12 h-12 rounded-full object-cover mr-4"
                   />
                   <div>
-                    <h4 className="font-semibold text-white">{testimonial.name}</h4>
+                    <h4 className="font-semibold text-white">
+                      {testimonial.name}
+                    </h4>
                     <p className="text-gray-400 text-sm">{testimonial.role}</p>
                   </div>
                 </div>
@@ -229,7 +277,10 @@ const LandingPage = () => {
                 </p>
                 <div className="flex mt-4">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
+                    <Star
+                      key={i}
+                      className="h-4 w-4 text-yellow-400 fill-current"
+                    />
                   ))}
                 </div>
               </div>
@@ -245,9 +296,10 @@ const LandingPage = () => {
             Ready to Start Your Journey?
           </h2>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Join OpenAcademy today and unlock access to world-class education that fits your schedule.
+            Join OpenAcademy today and unlock access to world-class education
+            that fits your schedule.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
               to="/login"
@@ -257,7 +309,7 @@ const LandingPage = () => {
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
-          
+
           <div className="mt-8 flex items-center justify-center space-x-6 text-sm text-gray-400">
             <div className="flex items-center">
               <CheckCircle className="h-4 w-4 text-green-400 mr-2" />
@@ -276,17 +328,21 @@ const LandingPage = () => {
       </section>
 
       {/* Footer */}
-      <footer id="contact" className="py-12 px-4 sm:px-6 lg:px-8 border-t border-gray-800">
+      <footer
+        id="contact"
+        className="py-12 px-4 sm:px-6 lg:px-8 border-t border-gray-800"
+      >
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-4">
               Contact Us
             </h2>
             <p className="text-gray-400 max-w-2xl mx-auto">
-              Ready to transform your learning experience? Get in touch with us today.
+              Ready to transform your learning experience? Get in touch with us
+              today.
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div className="text-center">
               <h3 className="text-lg font-semibold text-white mb-2">Email</h3>
@@ -298,10 +354,12 @@ const LandingPage = () => {
             </div>
             <div className="text-center">
               <h3 className="text-lg font-semibold text-white mb-2">Address</h3>
-              <p className="text-gray-400">123 Education St, Learning City, LC 12345</p>
+              <p className="text-gray-400">
+                123 Education St, Learning City, LC 12345
+              </p>
             </div>
           </div>
-          
+
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center mb-4 md:mb-0">
               <GraduationCap className="h-8 w-8 text-blue-400" />
@@ -309,14 +367,20 @@ const LandingPage = () => {
                 OpenAcademy
               </span>
             </div>
-            
+
             <div className="flex space-x-6 text-gray-400">
-              <a href="#" className="hover:text-white transition-colors">Privacy</a>
-              <a href="#" className="hover:text-white transition-colors">Terms</a>
-              <a href="#" className="hover:text-white transition-colors">Support</a>
+              <a href="#" className="hover:text-white transition-colors">
+                Privacy
+              </a>
+              <a href="#" className="hover:text-white transition-colors">
+                Terms
+              </a>
+              <a href="#" className="hover:text-white transition-colors">
+                Support
+              </a>
             </div>
           </div>
-          
+
           <div className="mt-8 pt-8 border-t border-gray-800 text-center text-gray-400">
             <p>&copy; 2024 OpenAcademy. All rights reserved.</p>
           </div>
