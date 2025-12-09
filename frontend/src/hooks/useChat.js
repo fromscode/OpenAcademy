@@ -52,10 +52,13 @@ export const useChat = () => {
   const createGroup = async (groupName) => {
     try {
       const response = await chatAPI.groups.createGroup(groupName, user.id);
-      setGroups((prev) => [...prev, response]);
+      // Load member count for the new group
+      const memberCount = await chatAPI.groups.getGroupMemberCount(response.id);
+      const groupWithCount = { ...response, memberCount };
+      setGroups((prev) => [...prev, groupWithCount]);
       // Automatically join the group since you created it (you're already added as ADMIN in backend)
       await loadGroupMessages(response.id);
-      return response;
+      return groupWithCount;
     } catch (err) {
       console.error("Failed to create group:", err);
       throw err;
@@ -69,10 +72,29 @@ export const useChat = () => {
       const response = await chatAPI.groups.getUserGroups(user.id);
       console.log("loadGroups response:", response);
       const groupList = Array.isArray(response) ? response : [];
-      setGroups(groupList);
+
+      // Load member count for each group
+      const groupsWithCount = await Promise.all(
+        groupList.map(async (group) => {
+          try {
+            const memberCount = await chatAPI.groups.getGroupMemberCount(
+              group.id
+            );
+            return { ...group, memberCount };
+          } catch (err) {
+            console.error(
+              `Failed to load member count for group ${group.id}:`,
+              err
+            );
+            return { ...group, memberCount: 0 };
+          }
+        })
+      );
+
+      setGroups(groupsWithCount);
 
       // Load messages for each group
-      groupList.forEach((group) => loadGroupMessages(group.id));
+      groupsWithCount.forEach((group) => loadGroupMessages(group.id));
     } catch (err) {
       console.error("Failed to load groups:", err);
       setGroups([]);

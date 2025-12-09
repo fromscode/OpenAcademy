@@ -113,6 +113,15 @@ export const chatGroupsAPI = {
     });
     return handleResponse(response);
   },
+
+  // Get group member count
+  getGroupMemberCount: async (groupId) => {
+    const response = await fetch(`${BASE_URL}/chat/groups/count/${groupId}`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
 };
 
 // ===================================================================

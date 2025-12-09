@@ -123,7 +123,26 @@ const Messages = () => {
       const availableGroups = response.filter(
         (group) => !groups.some((g) => g.id === group.id)
       );
-      setAllGroups(availableGroups);
+
+      // Load member count for each available group
+      const groupsWithCount = await Promise.all(
+        availableGroups.map(async (group) => {
+          try {
+            const memberCount = await chatAPI.groups.getGroupMemberCount(
+              group.id
+            );
+            return { ...group, memberCount };
+          } catch (err) {
+            console.error(
+              `Failed to load member count for group ${group.id}:`,
+              err
+            );
+            return { ...group, memberCount: 0 };
+          }
+        })
+      );
+
+      setAllGroups(groupsWithCount);
     } catch (error) {
       console.error("Failed to load all groups:", error);
     } finally {
@@ -650,8 +669,11 @@ const Messages = () => {
                             <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                               {group.name || "Unnamed Group"}
                             </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {group.memberCount || 0} members
+                            </p>
                             {group.description && (
-                              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                              <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-1">
                                 {group.description}
                               </p>
                             )}
