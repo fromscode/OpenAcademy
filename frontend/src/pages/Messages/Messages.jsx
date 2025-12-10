@@ -103,25 +103,24 @@ const Messages = () => {
 
     setIsSending(true);
     const messageText = newMessage;
-    setNewMessage(""); // Clear input immediately for better UX
+
+    // Stop typing indicator
+    if (isTyping) {
+      sendTypingIndicator(selectedGroup.id, false);
+      setIsTyping(false);
+    }
 
     try {
-      const success = await sendMessage(selectedGroup.id, messageText);
-      if (!success) {
-        // Restore message if failed
-        setNewMessage(messageText);
-      }
+      await sendMessage(selectedGroup.id, messageText);
+      // Clear input only after successful send
+      setNewMessage("");
+      // Scroll to bottom to show new message
+      setTimeout(() => scrollToBottom(), 100);
     } catch (error) {
       console.error("Failed to send message:", error);
-      // Restore message if failed
-      setNewMessage(messageText);
+      // Keep message in input if failed
     } finally {
       setIsSending(false);
-      // Stop typing indicator
-      if (isTyping) {
-        sendTypingIndicator(selectedGroup.id, false);
-        setIsTyping(false);
-      }
     }
   };
 
@@ -283,9 +282,9 @@ const Messages = () => {
       )}
 
       {/* Main Chat Container */}
-      <div className="flex-1 flex">
+      <div className="flex-1 flex min-h-0">
         {/* Groups List */}
-        <div className="w-1/3 border-r border-gray-200 dark:border-gray-700 flex flex-col">
+        <div className="w-1/3 border-r border-gray-200 dark:border-gray-700 flex flex-col min-h-0">
           {/* Header */}
           <div className="p-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between mb-3">
@@ -497,7 +496,7 @@ const Messages = () => {
         </div>
 
         {/* Chat Area */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-h-0">
           {selectedGroup ? (
             <>
               {/* Chat Header */}
@@ -549,7 +548,7 @@ const Messages = () => {
               </div>
 
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
                 {(() => {
                   const messages = getGroupMessages(selectedGroup.id);
                   const typingUsers = getTypingUsers(selectedGroup.id);
