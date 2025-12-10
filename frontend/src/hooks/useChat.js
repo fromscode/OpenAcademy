@@ -29,19 +29,12 @@ export const useChat = () => {
       );
       const unsubError = webSocketService.onError((e) => console.warn(e));
 
-      // Message subscription (all groups)
-      const unsubMessages = webSocketService.subscribe(
-        "/topic/group",
-        handleIncomingMessage
-      );
-
       webSocketService.connect(user.id || user.email);
 
       return () => {
         unsubConnect();
         unsubDisconnect();
         unsubError();
-        unsubMessages();
         webSocketService.disconnect();
       };
     };
@@ -123,14 +116,22 @@ export const useChat = () => {
     }
   };
 
-  const handleIncomingMessage = useCallback((msg) => {
-    const normalized = normalizeMessage(msg);
+  const handleIncomingMessage = useCallback(
+    (msg) => {
+      const normalized = normalizeMessage(msg);
 
-    setMessages((prev) => ({
-      ...prev,
-      [normalized.groupId]: [...(prev[normalized.groupId] || []), normalized],
-    }));
-  }, []);
+      // 🛑 Ignore if we already added locally
+      if (normalized.senderId === user.id) {
+        return;
+      }
+
+      setMessages((prev) => ({
+        ...prev,
+        [normalized.groupId]: [...(prev[normalized.groupId] || []), normalized],
+      }));
+    },
+    [user.id]
+  );
 
   const sendMessage = async (groupId, messageText) => {
     if (!messageText.trim()) return;
@@ -184,10 +185,26 @@ export const useChat = () => {
   const joinGroup = async (groupId) => {
     try {
       // Join via WebSocket for real-time updates
-      return webSocketService.joinGroup(groupId);
+      const status = webSocketService.joinGroup(groupId);
+      subscribeToGroupTopic(groupId);
+      return status;
     } catch (err) {
       console.error("Failed to join group:", err);
     }
+  };
+
+  const subscribeToGroupTopic = (groupId) => {
+    const destination = `/topic/group/${groupId}`;
+
+    if (webSocketService.subscriptions.has(destination)) {
+      // Already subscribed
+      return;
+    }
+
+    webSocketService.subscribe(destination, (msg) => {
+      console.log("WS message received:", msg);
+      handleIncomingMessage(msg);
+    });
   };
 
   const joinGroupAsMember = async (groupId) => {
