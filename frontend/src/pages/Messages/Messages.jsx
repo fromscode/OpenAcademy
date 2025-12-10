@@ -372,10 +372,10 @@ const Messages = () => {
           {showCreateGroup && (
             <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-750">
               <form onSubmit={handleCreateGroup}>
-                <div className="flex space-x-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <input
                     type="text"
-                    className="flex-1 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className="flex-1 min-w-0 w-full sm:w-auto border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                     placeholder="Group name..."
                     value={newGroupName}
                     onChange={(e) => setNewGroupName(e.target.value)}
@@ -384,7 +384,7 @@ const Messages = () => {
                   <button
                     type="submit"
                     disabled={!newGroupName.trim()}
-                    className="px-3 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50"
+                    className="px-3 py-2 whitespace-nowrap bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50"
                   >
                     Create
                   </button>
@@ -394,7 +394,7 @@ const Messages = () => {
                       setShowCreateGroup(false);
                       setNewGroupName("");
                     }}
-                    className="px-3 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+                    className="px-3 py-2 whitespace-nowrap border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
                   >
                     Cancel
                   </button>
