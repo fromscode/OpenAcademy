@@ -11,6 +11,7 @@ import {
   RefreshCw,
   UserPlus,
   X,
+  LogOut,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import useChat from "../../hooks/useChat";
@@ -27,6 +28,7 @@ const Messages = () => {
     createGroup,
     joinGroup,
     joinGroupAsMember,
+    leaveGroup,
     getGroupMessages,
     getTypingUsers,
     sendTypingIndicator,
@@ -46,6 +48,8 @@ const Messages = () => {
   const [allGroups, setAllGroups] = useState([]);
   const [loadingAllGroups, setLoadingAllGroups] = useState(false);
   const [joiningGroupId, setJoiningGroupId] = useState(null);
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const [leavingGroup, setLeavingGroup] = useState(false);
 
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
@@ -173,6 +177,30 @@ const Messages = () => {
           console.error("Failed to join group:", error);
         });
       }
+    }
+  };
+
+  const handleLeaveGroup = async () => {
+    if (!selectedGroup) return;
+
+    setLeavingGroup(true);
+    try {
+      await leaveGroup(selectedGroup.id);
+      setShowLeaveConfirm(false);
+      setSelectedGroup(null);
+      // If there are other groups, select the first one
+      if (groups.length > 1) {
+        const remainingGroups = groups.filter((g) => g.id !== selectedGroup.id);
+        if (remainingGroups.length > 0) {
+          setSelectedGroup(remainingGroups[0]);
+          joinGroup(remainingGroups[0].id);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to leave group:", error);
+      alert(error.message || "Failed to leave group");
+    } finally {
+      setLeavingGroup(false);
     }
   };
 
@@ -480,9 +508,15 @@ const Messages = () => {
                       <span>Connected</span>
                     </div>
                   )}
-                  <button className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                    <MoreVertical className="h-5 w-5" />
-                  </button>
+                  {user?.role?.toLowerCase() === "student" && (
+                    <button
+                      onClick={() => setShowLeaveConfirm(true)}
+                      className="p-2 text-red-400 hover:text-red-600 dark:hover:text-red-300"
+                      title="Leave Group"
+                    >
+                      <LogOut className="h-5 w-5" />
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -626,6 +660,59 @@ const Messages = () => {
           )}
         </div>
       </div>
+
+      {/* Leave Group Confirmation Modal */}
+      {showLeaveConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Leave Group?
+              </h3>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6">
+              <p className="text-gray-600 dark:text-gray-400">
+                Are you sure you want to leave{" "}
+                <span className="font-semibold text-gray-900 dark:text-white">
+                  {selectedGroup?.name}
+                </span>
+                ? You will no longer receive messages from this group.
+              </p>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
+              <button
+                onClick={() => setShowLeaveConfirm(false)}
+                disabled={leavingGroup}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleLeaveGroup}
+                disabled={leavingGroup}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 flex items-center space-x-2"
+              >
+                {leavingGroup ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 animate-spin" />
+                    <span>Leaving...</span>
+                  </>
+                ) : (
+                  <>
+                    <LogOut className="h-4 w-4" />
+                    <span>Leave Group</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Browse Groups Modal */}
       {showBrowseGroups && (

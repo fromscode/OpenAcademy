@@ -203,6 +203,25 @@ export const useChat = () => {
     }
   };
 
+  const leaveGroup = async (groupId) => {
+    try {
+      // Remove user from the group in the backend
+      await chatAPI.groups.removeMember(groupId, user.id);
+      // Remove group from local state
+      setGroups((prev) => prev.filter((g) => g.id !== groupId));
+      // Remove messages for this group
+      setMessages((prev) => {
+        const updated = { ...prev };
+        delete updated[groupId];
+        return updated;
+      });
+      return true;
+    } catch (err) {
+      console.error("Failed to leave group:", err);
+      throw err;
+    }
+  };
+
   const refresh = async () => {
     await loadGroups();
   };
@@ -231,6 +250,7 @@ export const useChat = () => {
     loadGroupMessages,
     joinGroup,
     joinGroupAsMember,
+    leaveGroup,
     createGroup,
     refresh,
   };
