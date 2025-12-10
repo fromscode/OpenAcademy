@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.openacademy.backend.dto.MessageResponse;
 import com.openacademy.backend.entities.ChatGroup;
 import com.openacademy.backend.entities.GroupMember;
 import com.openacademy.backend.service.GroupService;
@@ -55,10 +56,14 @@ public class ChatGroupController {
     }
 
     @DeleteMapping("/remove-member/{group-id}/{user-id}")
-    public String removeMember(@PathVariable("group-id") Long groupId,
+    public ResponseEntity<?> removeMember(@PathVariable("group-id") Long groupId,
             @PathVariable("user-id") Long userId) {
-
-        return groupService.deleteMember(groupId, userId);
+        try {
+            String result = groupService.deleteMember(groupId, userId);
+            return ResponseEntity.ok().body(new MessageResponse(result));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MessageResponse(e.getMessage()));
+        }
     }
 
     @GetMapping("/{groupId}")

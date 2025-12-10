@@ -23,7 +23,25 @@ const handleResponse = async (response) => {
       .catch(() => ({ message: "Network error" }));
     throw new Error(error.message || "API request failed");
   }
-  return response.json();
+
+  // Check if response has content
+  const contentType = response.headers.get("content-type");
+  if (contentType && contentType.includes("application/json")) {
+    return response.json();
+  }
+
+  // Handle text response
+  const text = await response.text();
+  if (!text) {
+    return { success: true };
+  }
+
+  // Try to parse as JSON, if it fails return as text in an object
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { message: text, success: true };
+  }
 };
 
 // ===================================================================
@@ -96,7 +114,7 @@ export const chatGroupsAPI = {
   // Remove member from group
   removeMember: async (groupId, userId) => {
     const response = await fetch(
-      `${BASE_URL}/chat/groups/remove-member/${groupId}/${userId}/`,
+      `${BASE_URL}/chat/groups/remove-member/${groupId}/${userId}`,
       {
         method: "DELETE",
         headers: getAuthHeaders(),
