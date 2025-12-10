@@ -125,7 +125,7 @@ export const chatGroupsAPI = {
 
   // Get group members
   getGroupMembers: async (groupId) => {
-    const response = await fetch(`${BASE_URL}/chat/groups/${groupId}/members`, {
+    const response = await fetch(`${BASE_URL}/chat/groups/members/${groupId}`, {
       method: "GET",
       headers: getAuthHeaders(),
     });

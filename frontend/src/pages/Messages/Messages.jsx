@@ -50,6 +50,9 @@ const Messages = () => {
   const [joiningGroupId, setJoiningGroupId] = useState(null);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [leavingGroup, setLeavingGroup] = useState(false);
+  const [showMembersModal, setShowMembersModal] = useState(false);
+  const [groupMembers, setGroupMembers] = useState([]);
+  const [loadingMembers, setLoadingMembers] = useState(false);
 
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
@@ -69,6 +72,23 @@ const Messages = () => {
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Fetch group members
+  const fetchGroupMembers = async (groupId) => {
+    if (!groupId) return;
+
+    setLoadingMembers(true);
+    try {
+      const members = await chatAPI.groups.getGroupMembers(groupId);
+      setGroupMembers(members);
+      setShowMembersModal(true);
+    } catch (error) {
+      console.error("Failed to fetch group members:", error);
+      setGroupMembers([]);
+    } finally {
+      setLoadingMembers(false);
+    }
   };
 
   const filteredGroups = groups.filter(
@@ -508,6 +528,14 @@ const Messages = () => {
                       <span>Connected</span>
                     </div>
                   )}
+                  <button
+                    onClick={() => fetchGroupMembers(selectedGroup.id)}
+                    className="p-2 text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
+                    title="View Members"
+                    disabled={loadingMembers}
+                  >
+                    <Users className="h-5 w-5" />
+                  </button>
                   {user?.role?.toLowerCase() === "student" && (
                     <button
                       onClick={() => setShowLeaveConfirm(true)}
@@ -798,6 +826,118 @@ const Messages = () => {
                   </p>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Group Members Modal */}
+      {showMembersModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Users className="h-5 w-5 text-primary-600 dark:text-primary-400" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Group Members
+                </h3>
+                {selectedGroup && (
+                  <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
+                    ({groupMembers.length}{" "}
+                    {groupMembers.length === 1 ? "member" : "members"})
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={() => setShowMembersModal(false)}
+                className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto max-h-[60vh]">
+              {loadingMembers ? (
+                <div className="flex items-center justify-center py-8">
+                  <RefreshCw className="h-6 w-6 animate-spin text-primary-600" />
+                  <span className="ml-2 text-gray-600 dark:text-gray-400">
+                    Loading members...
+                  </span>
+                </div>
+              ) : groupMembers.length > 0 ? (
+                <div className="space-y-3">
+                  {groupMembers.map((member, index) => (
+                    <div
+                      key={member.userId || index}
+                      className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start space-x-3 flex-1">
+                          <div className="h-10 w-10 rounded-full bg-primary-100 dark:bg-primary-800 flex items-center justify-center flex-shrink-0">
+                            <span className="text-primary-600 dark:text-primary-300 font-semibold text-sm">
+                              {member.fullName
+                                ? member.fullName
+                                    .split(" ")
+                                    .map((n) => n[0])
+                                    .join("")
+                                    .toUpperCase()
+                                    .slice(0, 2)
+                                : "U"}
+                            </span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center space-x-2">
+                              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                {member.fullName || "Unknown User"}
+                              </p>
+                              {member.role && member.role !== "MEMBER" && (
+                                <span className="px-2 py-0.5 text-xs bg-primary-100 dark:bg-primary-800 text-primary-600 dark:text-primary-300 rounded">
+                                  {member.role}
+                                </span>
+                              )}
+                            </div>
+                            {member.email && (
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                {member.email}
+                              </p>
+                            )}
+                            {member.phoneNumber && (
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                {member.phoneNumber}
+                              </p>
+                            )}
+                            {member.joinedAt && (
+                              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                                Joined{" "}
+                                {new Date(member.joinedAt).toLocaleDateString()}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Users className="h-12 w-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
+                  <p className="text-gray-600 dark:text-gray-400">
+                    No members found
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+              <button
+                onClick={() => setShowMembersModal(false)}
+                className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
