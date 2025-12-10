@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.openacademy.backend.dto.GroupMemberDTO;
 import com.openacademy.backend.entities.ChatGroup;
 import com.openacademy.backend.entities.GroupMember;
 import com.openacademy.backend.service.GroupService;
@@ -79,8 +80,8 @@ public class ChatGroupController {
     }
 
     // Get all members of a group
-    @GetMapping("/{groupId}/members")
-    public List<GroupMember> getGroupMembers(@PathVariable Long groupId) {
+    @GetMapping("/members/{groupId}")
+    public List<GroupMemberDTO> getGroupMembers(@PathVariable Long groupId) {
         return groupService.getGroupMembers(groupId);
     }
 

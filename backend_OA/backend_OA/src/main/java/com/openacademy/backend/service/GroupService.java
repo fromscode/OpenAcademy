@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.openacademy.backend.dto.GroupMemberDTO;
 import com.openacademy.backend.entities.ChatGroup;
 import com.openacademy.backend.entities.GroupMember;
 import com.openacademy.backend.entities.User;
@@ -94,8 +95,17 @@ public class GroupService {
         return "Member deleted sucessfully";
     }
 
-    public List<GroupMember> getGroupMembers(Long groupId) {
-        return memberRepo.findByGroupId(groupId);
+    public List<GroupMemberDTO> getGroupMembers(Long groupId) {
+        return memberRepo.findByGroupId(groupId)
+                .stream()
+                .map(m -> new GroupMemberDTO(
+                        m.getUser().getId(),
+                        m.getUser().getFullName(),
+                        m.getUser().getEmail(),
+                        m.getUser().getPhoneNumber(),
+                        m.getRole(),
+                        m.getJoinedAt()))
+                .toList();
     }
 
     public long countGroupMembers(Long groupId) {
