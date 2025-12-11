@@ -174,6 +174,25 @@ export const chatMessagesAPI = {
     });
     return handleResponse(response);
   },
+
+  // Delete a message (only sender can delete)
+  deleteMessage: async (userId, messageId) => {
+    if (typeof userId !== "number") {
+      throw new Error("userId must be a number");
+    }
+    if (typeof messageId !== "number") {
+      throw new Error("messageId must be a number");
+    }
+
+    const response = await fetch(
+      `${BASE_URL}/chat/messages/delete/${userId}/${messageId}`,
+      {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      }
+    );
+    return handleResponse(response);
+  },
 };
 
 // ===================================================================
