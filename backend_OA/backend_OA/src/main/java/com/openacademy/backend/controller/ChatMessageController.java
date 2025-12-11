@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,6 +45,16 @@ public class ChatMessageController {
         try {
             List<ChatMessage> messages = chatMessageService.getMessagesByGroup(groupId, userId);
             return ResponseEntity.ok(messages);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/delete/{userId}/{messageId}")
+    public ResponseEntity<?> deleteMessage(@PathVariable Long userId, @PathVariable Long messageId) {
+        try {
+            chatMessageService.deleteMessage(messageId, userId);
+            return ResponseEntity.ok("Message deleted successfully.");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         }

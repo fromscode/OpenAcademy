@@ -21,8 +21,8 @@ public class ChatMessageService {
     private final UserRepository userRepo;
     private final GroupMemberRepository memberRepo;
 
-    public ChatMessageService(MessageRepository messageRepo, ChatGroupRepository groupRepo, 
-                              UserRepository userRepo, GroupMemberRepository memberRepo) {
+    public ChatMessageService(MessageRepository messageRepo, ChatGroupRepository groupRepo,
+            UserRepository userRepo, GroupMemberRepository memberRepo) {
         this.messageRepo = messageRepo;
         this.groupRepo = groupRepo;
         this.userRepo = userRepo;
@@ -31,7 +31,7 @@ public class ChatMessageService {
 
     // sending message - with membership check
     public ChatMessage sendMessage(Long groupId, Long userId, String content) {
-        
+
         // Check if user is a member of the group
         if (!memberRepo.existsByGroupIdAndUserId(groupId, userId)) {
             throw new IllegalArgumentException("User is not a member of this group");
@@ -54,13 +54,25 @@ public class ChatMessageService {
 
     // Get all messages for a group - with membership check
     public List<ChatMessage> getMessagesByGroup(Long groupId, Long userId) {
-        
+
         // Check if user is a member of the group
         if (!memberRepo.existsByGroupIdAndUserId(groupId, userId)) {
             throw new IllegalArgumentException("User is not a member of this group");
         }
-        
+
         return messageRepo.findByGroupIdOrderByCreatedAtAsc(groupId);
+    }
+
+    // Delete message - only sender can delete
+    public void deleteMessage(Long messageId, Long userId) {
+        ChatMessage message = messageRepo.findById(messageId)
+                .orElseThrow(() -> new IllegalArgumentException("Message not found"));
+
+        if (!message.getSender().getId().equals(userId)) {
+            throw new IllegalArgumentException("User is not the sender of this message");
+        }
+
+        messageRepo.delete(message);
     }
 
 }
