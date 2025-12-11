@@ -243,27 +243,6 @@ export const useChat = () => {
     await loadGroups();
   };
 
-  const deleteMessage = async (messageId, groupId) => {
-    try {
-      // Call the API to delete the message
-      await chatAPI.messages.deleteMessage(user.id, messageId);
-
-      // Remove the message from local state
-      setMessages((prev) => {
-        const groupMessages = prev[groupId] || [];
-        return {
-          ...prev,
-          [groupId]: groupMessages.filter((msg) => msg.id !== messageId),
-        };
-      });
-
-      return true;
-    } catch (err) {
-      console.error("Failed to delete message:", err);
-      throw err;
-    }
-  };
-
   const normalizeMessage = (msg) => {
     return {
       id: msg.id,
@@ -290,7 +269,6 @@ export const useChat = () => {
     joinGroupAsMember,
     leaveGroup,
     createGroup,
-    deleteMessage,
     refresh,
   };
 };
