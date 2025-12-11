@@ -120,15 +120,39 @@ export const useChat = () => {
     (msg) => {
       const normalized = normalizeMessage(msg);
 
-      // 🛑 Ignore if we already added locally
-      if (normalized.senderId === user.id) {
-        return;
-      }
+      setMessages((prev) => {
+        const groupMessages = prev[normalized.groupId] || [];
 
-      setMessages((prev) => ({
-        ...prev,
-        [normalized.groupId]: [...(prev[normalized.groupId] || []), normalized],
-      }));
+        // If this is our own message, replace the temporary local message with the backend one
+        if (normalized.senderId === user.id) {
+          // Find and replace temporary message (has large timestamp ID) with same content
+          const tempMsgIndex = groupMessages.findIndex(
+            (m) =>
+              m.senderId === user.id &&
+              m.message === normalized.message &&
+              m.id > 1000000000000 // Temporary ID (timestamp)
+          );
+
+          if (tempMsgIndex !== -1) {
+            // Replace temporary message with backend message
+            const updatedMessages = [...groupMessages];
+            updatedMessages[tempMsgIndex] = normalized;
+            return {
+              ...prev,
+              [normalized.groupId]: updatedMessages,
+            };
+          }
+
+          // If no temp message found, don't add duplicate
+          return prev;
+        }
+
+        // For other users' messages, just add to the list
+        return {
+          ...prev,
+          [normalized.groupId]: [...groupMessages, normalized],
+        };
+      });
     },
     [user.id]
   );
@@ -243,6 +267,27 @@ export const useChat = () => {
     await loadGroups();
   };
 
+  const deleteMessage = useCallback(async (groupId, messageId, userId) => {
+    console.log("deleteMessage called with:", { groupId, messageId, userId });
+    try {
+      // Call backend to delete the message
+      await chatAPI.messages.deleteMessage(userId, messageId);
+      console.log("Message deleted successfully from backend");
+
+      // Remove message from local state
+      setMessages((prev) => ({
+        ...prev,
+        [groupId]: (prev[groupId] || []).filter((msg) => msg.id !== messageId),
+      }));
+      console.log("Message removed from local state");
+
+      return true;
+    } catch (err) {
+      console.error("Failed to delete message:", err);
+      throw err;
+    }
+  }, []);
+
   const normalizeMessage = (msg) => {
     return {
       id: msg.id,
@@ -269,6 +314,7 @@ export const useChat = () => {
     joinGroupAsMember,
     leaveGroup,
     createGroup,
+    deleteMessage,
     refresh,
   };
 };

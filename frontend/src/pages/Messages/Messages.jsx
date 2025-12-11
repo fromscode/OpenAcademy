@@ -12,6 +12,7 @@ import {
   UserPlus,
   X,
   LogOut,
+  Trash2,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import useChat from "../../hooks/useChat";
@@ -32,6 +33,7 @@ const Messages = () => {
     getGroupMessages,
     getTypingUsers,
     sendTypingIndicator,
+    deleteMessage,
     refresh,
   } = useChat();
 
@@ -53,6 +55,8 @@ const Messages = () => {
   const [showMembersModal, setShowMembersModal] = useState(false);
   const [groupMembers, setGroupMembers] = useState([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
+  const [deletingMessageId, setDeletingMessageId] = useState(null);
+  const [messageToDelete, setMessageToDelete] = useState(null);
 
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
@@ -220,6 +224,49 @@ const Messages = () => {
       alert(error.message || "Failed to leave group");
     } finally {
       setLeavingGroup(false);
+    }
+  };
+
+  const handleDeleteMessage = async () => {
+    console.log("handleDeleteMessage called", {
+      messageToDelete,
+      userId: user?.id,
+      selectedGroup,
+    });
+
+    if (!messageToDelete || !user?.id) {
+      console.error("Missing required data:", {
+        messageToDelete,
+        userId: user?.id,
+      });
+      return;
+    }
+
+    // Check if this is a temporary local message (very large ID from Date.now())
+    // Backend IDs are typically smaller sequential numbers
+    if (messageToDelete.id > 1000000000000) {
+      alert(
+        "This message is still being sent. Please wait a moment and try again."
+      );
+      setMessageToDelete(null);
+      return;
+    }
+
+    setDeletingMessageId(messageToDelete.id);
+    try {
+      console.log("Calling deleteMessage with:", {
+        groupId: selectedGroup.id,
+        messageId: messageToDelete.id,
+        userId: user.id,
+      });
+      await deleteMessage(selectedGroup.id, messageToDelete.id, user.id);
+      console.log("Delete successful, closing modal");
+      setMessageToDelete(null);
+    } catch (error) {
+      console.error("Failed to delete message:", error);
+      alert(error.message || "Failed to delete message");
+    } finally {
+      setDeletingMessageId(null);
     }
   };
 
@@ -557,10 +604,12 @@ const Messages = () => {
                     <>
                       {messages.map((message) => {
                         const isOwnMessage = message.senderId === user.id;
+                        const isStudent =
+                          user?.role?.toLowerCase() === "student";
                         return (
                           <div
                             key={message.id}
-                            className={`flex ${
+                            className={`flex group/message ${
                               isOwnMessage ? "justify-end" : "justify-start"
                             }`}
                           >
@@ -571,27 +620,43 @@ const Messages = () => {
                                 </p>
                               )}
                               <div
-                                className={`px-4 py-2 rounded-lg ${
-                                  isOwnMessage
-                                    ? "bg-primary-600 text-white"
-                                    : "bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white"
+                                className={`flex items-start gap-2 ${
+                                  isOwnMessage ? "flex-row-reverse" : "flex-row"
                                 }`}
                               >
-                                <p className="text-sm">{message.message}</p>
-                                <p
-                                  className={`text-xs mt-1 ${
+                                <div
+                                  className={`px-4 py-2 rounded-lg ${
                                     isOwnMessage
-                                      ? "text-primary-200"
-                                      : "text-gray-500"
+                                      ? "bg-primary-600 text-white"
+                                      : "bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white"
                                   }`}
                                 >
-                                  {new Date(
-                                    message.timestamp
-                                  ).toLocaleTimeString([], {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })}
-                                </p>
+                                  <p className="text-sm">{message.message}</p>
+                                  <p
+                                    className={`text-xs mt-1 ${
+                                      isOwnMessage
+                                        ? "text-primary-200"
+                                        : "text-gray-500"
+                                    }`}
+                                  >
+                                    {new Date(
+                                      message.timestamp
+                                    ).toLocaleTimeString([], {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    })}
+                                  </p>
+                                </div>
+                                {/* Show delete button only for student's own messages */}
+                                {isOwnMessage && isStudent && (
+                                  <button
+                                    onClick={() => setMessageToDelete(message)}
+                                    className="p-1 text-red-400 hover:text-red-600 dark:hover:text-red-300 opacity-0 group-hover/message:opacity-100 transition-opacity flex-shrink-0 mt-1"
+                                    title="Delete message"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </button>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -936,6 +1001,64 @@ const Messages = () => {
                 className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Message Confirmation Modal */}
+      {messageToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Delete Message?
+              </h3>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6">
+              <p className="text-gray-600 dark:text-gray-400 mb-3">
+                Are you sure you want to delete this message? This action cannot
+                be undone.
+              </p>
+              <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg">
+                <p className="text-sm text-gray-900 dark:text-white">
+                  {messageToDelete.message}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  {new Date(messageToDelete.timestamp).toLocaleString()}
+                </p>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
+              <button
+                onClick={() => setMessageToDelete(null)}
+                disabled={deletingMessageId === messageToDelete.id}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteMessage}
+                disabled={deletingMessageId === messageToDelete.id}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 flex items-center space-x-2"
+              >
+                {deletingMessageId === messageToDelete.id ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 animate-spin" />
+                    <span>Deleting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4" />
+                    <span>Delete</span>
+                  </>
+                )}
               </button>
             </div>
           </div>

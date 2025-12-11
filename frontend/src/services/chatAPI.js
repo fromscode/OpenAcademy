@@ -21,6 +21,13 @@ const handleResponse = async (response) => {
     const error = await response
       .json()
       .catch(() => ({ message: "Network error" }));
+
+    if (response.status === 403) {
+      throw new Error(
+        error.message || "You don't have permission to perform this action"
+      );
+    }
+
     throw new Error(error.message || "API request failed");
   }
 
@@ -172,6 +179,30 @@ export const chatMessagesAPI = {
       headers: getAuthHeaders(),
       body: JSON.stringify(messageData),
     });
+    return handleResponse(response);
+  },
+
+  // Delete a message
+  deleteMessage: async (userId, messageId) => {
+    console.log("Deleting message:", {
+      userId,
+      messageId,
+      url: `${BASE_URL}/chat/messages/delete/${userId}/${messageId}`,
+    });
+
+    if (!userId || !messageId) {
+      throw new Error(
+        `Invalid parameters: userId=${userId}, messageId=${messageId}`
+      );
+    }
+
+    const response = await fetch(
+      `${BASE_URL}/chat/messages/delete/${userId}/${messageId}`,
+      {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      }
+    );
     return handleResponse(response);
   },
 };
