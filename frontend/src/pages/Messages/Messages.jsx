@@ -248,7 +248,8 @@ const Messages = () => {
       console.error("Failed to delete message:", error);
       const errorMessage = error.message || "Failed to delete message";
       alert(
-        errorMessage.includes("Network") || errorMessage.includes("Failed to fetch")
+        errorMessage.includes("Network") ||
+          errorMessage.includes("Failed to fetch")
           ? "Cannot delete message. Please check your backend connection."
           : errorMessage
       );
@@ -761,7 +762,8 @@ const Messages = () => {
                       Backend Not Connected
                     </p>
                     <p className="text-xs text-red-600 dark:text-red-400 mt-1">
-                      Cannot delete message. Please ensure the backend server is running.
+                      Cannot delete message. Please ensure the backend server is
+                      running.
                     </p>
                   </div>
                 </div>
