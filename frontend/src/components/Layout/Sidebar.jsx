@@ -15,6 +15,7 @@ import {
   Award,
   User,
   X,
+  Video,
 } from "lucide-react";
 
 const Sidebar = ({ isOpen, onClose }) => {
@@ -96,6 +97,12 @@ const Sidebar = ({ isOpen, onClose }) => {
             path: "/dashboard/student/dashboard",
           },
           {
+            icon: Video,
+            label: "Start Meeting",
+            path: "https://deeppati2005.github.io/mumble/",
+            external: true,
+          },
+          {
             icon: BookOpen,
             label: "My Courses",
             path: "/dashboard/student/courses",
@@ -164,18 +171,31 @@ const Sidebar = ({ isOpen, onClose }) => {
 
               return (
                 <li key={item.path}>
-                  <Link
-                    to={item.path}
-                    onClick={onClose}
-                    className={`flex items-center px-4 py-2 rounded-lg transition-colors duration-200 ${
-                      isActive
-                        ? "bg-blue-600 text-white font-medium"
-                        : "text-gray-300 hover:bg-gray-700 hover:text-white"
-                    }`}
-                  >
-                    <Icon className="mr-3 h-5 w-5" />
-                    {item.label}
-                  </Link>
+                  {item.external ? (
+                    <a
+                      href={item.path}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={onClose}
+                      className="flex items-center px-4 py-2 rounded-lg transition-colors duration-200 text-gray-300 hover:bg-gray-700 hover:text-white"
+                    >
+                      <Icon className="mr-3 h-5 w-5" />
+                      {item.label}
+                    </a>
+                  ) : (
+                    <Link
+                      to={item.path}
+                      onClick={onClose}
+                      className={`flex items-center px-4 py-2 rounded-lg transition-colors duration-200 ${
+                        isActive
+                          ? "bg-blue-600 text-white font-medium"
+                          : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                      }`}
+                    >
+                      <Icon className="mr-3 h-5 w-5" />
+                      {item.label}
+                    </Link>
+                  )}
                 </li>
               );
             })}
