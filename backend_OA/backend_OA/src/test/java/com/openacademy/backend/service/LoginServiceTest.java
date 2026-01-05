@@ -58,6 +58,6 @@ public class LoginServiceTest {
         assertEquals(user.getRole(), response.getRole());
         assertEquals(user.getFirstName(), response.getFirstName());
         assertEquals(user.getEmail(), response.getEmail());
-        assertEquals("Login Successfull", response.getMessage());
+        assertEquals("Login Successful", response.getMessage());
     }
 }
