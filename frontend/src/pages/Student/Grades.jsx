@@ -7,14 +7,12 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import { mockGrades } from "../../data/mockData";
 
 const Grades = () => {
   const [expandedCourse, setExpandedCourse] = useState(null);
 
-  // Get current student's grades
-  // In the future, replace with actual API call
-  const studentGrades = mockGrades.filter((grade) => grade.studentId === 1);
+  // No grades - will be loaded from backend API
+  const studentGrades = [];
 
   // Calculate overall GPA
   const calculateGPA = () => {

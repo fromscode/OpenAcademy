@@ -1,13 +1,11 @@
 import { useState } from "react";
 import { Calendar, Clock, MapPin, User, BookOpen } from "lucide-react";
-import { mockSchedule } from "../../data/mockData";
 
 const Schedule = () => {
   const [selectedDay, setSelectedDay] = useState("Monday");
 
-  // Get current student's schedule
-  // In the future, replace with actual API call
-  const studentSchedule = mockSchedule.filter((item) => item.studentId === 1);
+  // No schedule - will be loaded from backend API
+  const studentSchedule = [];
 
   const daysOfWeek = [
     "Monday",

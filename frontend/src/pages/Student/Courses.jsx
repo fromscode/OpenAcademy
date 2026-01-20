@@ -8,20 +8,14 @@ import {
   CheckCircle,
   Award,
 } from "lucide-react";
-import { mockCourses, mockStudents } from "../../data/mockData";
 import { useAuth } from "../../context/AuthContext";
 
 const Courses = () => {
   const { user } = useAuth();
   const [selectedCourse, setSelectedCourse] = useState(null);
 
-  // Get current student's courses
-  // In the future, replace with actual API call
-  const currentStudent =
-    mockStudents.find((s) => s.email === user?.email) || mockStudents[0];
-  const studentCourses = mockCourses.filter((course) =>
-    currentStudent.courses.includes(course.id)
-  );
+  // No courses - will be loaded from backend API
+  const studentCourses = [];
 
   const handleCourseClick = (course) => {
     setSelectedCourse(selectedCourse?.id === course.id ? null : course);

@@ -9,16 +9,12 @@ import {
   Award,
   BookOpen,
 } from "lucide-react";
-import { mockStudentAssignments } from "../../data/mockData";
 
 const Assignments = () => {
   const [filter, setFilter] = useState("all");
 
-  // Get current student's assignments
-  // In the future, replace with actual API call
-  const studentAssignments = mockStudentAssignments.filter(
-    (assignment) => assignment.studentId === 1
-  );
+  // No assignments - will be loaded from backend API
+  const studentAssignments = [];
 
   const getFilteredAssignments = () => {
     switch (filter) {
