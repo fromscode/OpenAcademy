@@ -35,6 +35,10 @@ public class Submission {
 
   // SUBMISSION CONTENT -------------------------------------------
 
+  // If the submission is just text
+  @Column(columnDefinition = "TEXT")
+  private String content;
+
   // If the submission is a file upload (store the URL/Path to S3/Local storage)
   @Column(name = "file_url")
   private String fileUrl;
