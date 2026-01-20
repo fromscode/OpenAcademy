@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.openacademy.backend.entities.common.Role;
 
 import jakarta.persistence.Column;
@@ -25,6 +26,7 @@ import lombok.Setter;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" }) // <--- ADD THIS
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,7 +34,7 @@ public class User {
 
     @Column(nullable = false, unique = true)
     private String email;
-    
+
     @Column(nullable = false)
     private String password;
 
@@ -58,7 +60,8 @@ public class User {
     public String getFullName() {
         StringBuilder fullName = new StringBuilder();
         fullName.append(firstName).append(" ");
-        if (middleName != null) fullName.append(middleName).append(" ");
+        if (middleName != null)
+            fullName.append(middleName).append(" ");
         fullName.append(lastName);
         return fullName.toString();
     }

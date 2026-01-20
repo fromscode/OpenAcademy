@@ -5,6 +5,8 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.openacademy.backend.entities.common.CourseStatus;
 
 import java.time.LocalDate;
@@ -18,6 +20,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class Course {
 
   @Id
@@ -57,11 +60,13 @@ public class Course {
   // Replaces the old Set<User> students.
   // We use OneToMany because One Course has Many Enrollments.
   @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonIgnore
   private List<Enrollment> enrollments = new ArrayList<>();
 
   // 3. Assignments (ADDED)
   // One Course has Many Assignments.
   @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonIgnore
   private List<Assignment> assignments = new ArrayList<>();
 
   // TIMESTAMPS ---------------------------------------------------
