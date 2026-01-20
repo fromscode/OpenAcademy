@@ -1,6 +1,7 @@
 package com.openacademy.backend.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.openacademy.backend.entities.Enrollment;
@@ -20,4 +21,10 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
   // Get all enrollments for a course (e.g., for the "Class Roster" view)
   List<Enrollment> findByCourseId(Long courseId);
+
+  // In EnrollmentRepository
+  @Query("SELECT e FROM Enrollment e WHERE e.student.id = :studentId")
+  List<Enrollment> findAllByStudentId(Long studentId);
+
+  List<Enrollment> findCoursesByStudentId(Long StudentId);
 }
