@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   FileText,
   Calendar,
@@ -9,26 +9,110 @@ import {
   Award,
   BookOpen,
 } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import { courseAPI, assignmentAPI } from "../../services/api";
+import LoadingSpinner from "../../components/Common/LoadingSpinner";
+import Modal from "../../components/Common/Modal";
 
 const Assignments = () => {
+  const { user } = useAuth();
   const [filter, setFilter] = useState("all");
+  const [studentAssignments, setStudentAssignments] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [selectedAssignment, setSelectedAssignment] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submissionData, setSubmissionData] = useState({
+    content: "",
+    fileUrl: "",
+  });
 
-  // No assignments - will be loaded from backend API
-  const studentAssignments = [];
+  useEffect(() => {
+    fetchAssignments();
+  }, []);
+
+  const fetchAssignments = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Get all courses first
+      const courses = await courseAPI.getAllCourses();
+      
+      // Get assignments for each course
+      const allAssignments = [];
+      for (const course of courses) {
+        try {
+          const assignments = await courseAPI.getCourseAssignments(course.id);
+          // Add course info to each assignment
+          assignments.forEach(assignment => {
+            allAssignments.push({
+              ...assignment,
+              courseName: course.title,
+              courseCode: course.courseCode,
+              courseId: course.id,
+            });
+          });
+        } catch (err) {
+          console.error(`Failed to fetch assignments for course ${course.id}:`, err);
+        }
+      }
+      
+      setStudentAssignments(allAssignments);
+    } catch (err) {
+      console.error("Failed to fetch assignments:", err);
+      setError("Failed to load assignments. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmitAssignment = async () => {
+    if (!selectedAssignment || !user?.id) {
+      setError("Missing required information");
+      return;
+    }
+
+    if (!submissionData.content.trim()) {
+      setError("Please provide submission content");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      await assignmentAPI.submitAssignment(selectedAssignment.id, {
+        studentId: user.id,
+        content: submissionData.content,
+        fileUrl: submissionData.fileUrl,
+      });
+      
+      // Refresh assignments
+      await fetchAssignments();
+      
+      // Close modal and reset
+      setShowSubmitModal(false);
+      setSelectedAssignment(null);
+      setSubmissionData({ content: "", fileUrl: "" });
+      setError(null);
+    } catch (err) {
+      console.error("Failed to submit assignment:", err);
+      setError("Failed to submit assignment. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const openSubmitModal = (assignment) => {
+    setSelectedAssignment(assignment);
+    setShowSubmitModal(true);
+    setError(null);
+  };
 
   const getFilteredAssignments = () => {
-    switch (filter) {
-      case "pending":
-        return studentAssignments.filter((a) => a.status === "pending");
-      case "in_progress":
-        return studentAssignments.filter((a) => a.status === "in_progress");
-      case "submitted":
-        return studentAssignments.filter((a) => a.status === "submitted");
-      case "graded":
-        return studentAssignments.filter((a) => a.status === "graded");
-      default:
-        return studentAssignments;
-    }
+    // Note: Backend might not return submission status per student
+    // This is a simplified version - adjust based on actual API response
+    return studentAssignments;
   };
 
   const filteredAssignments = getFilteredAssignments();
@@ -61,7 +145,7 @@ const Assignments = () => {
       case "not_started":
         return "Not Started";
       default:
-        return status;
+        return "Available";
     }
   };
 
@@ -82,8 +166,7 @@ const Assignments = () => {
     }
   };
 
-  const isOverdue = (dueDate, status) => {
-    if (status === "graded" || status === "submitted") return false;
+  const isOverdue = (dueDate) => {
     return new Date(dueDate) < new Date();
   };
 
@@ -98,14 +181,18 @@ const Assignments = () => {
   // Calculate stats
   const stats = {
     total: studentAssignments.length,
-    pending: studentAssignments.filter(
-      (a) => a.status === "pending" || a.status === "not_started"
-    ).length,
-    submitted: studentAssignments.filter((a) => a.status === "submitted")
-      .length,
-    graded: studentAssignments.filter((a) => a.status === "graded").length,
+    pending: studentAssignments.filter((a) => !isOverdue(a.dueDate)).length,
+    submitted: 0, // Would need to track submissions
+    graded: 0, // Would need to track graded submissions
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -118,6 +205,12 @@ const Assignments = () => {
             Track and manage your assignments
           </p>
         </div>
+
+        {error && (
+          <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            {error}
+          </div>
+        )}
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -178,33 +271,10 @@ const Assignments = () => {
           </div>
         </div>
 
-        {/* Filter Tabs */}
-        <div className="mb-6 flex flex-wrap gap-2">
-          {[
-            { key: "all", label: "All Assignments" },
-            { key: "pending", label: "Pending" },
-            { key: "in_progress", label: "In Progress" },
-            { key: "submitted", label: "Submitted" },
-            { key: "graded", label: "Graded" },
-          ].map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setFilter(tab.key)}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                filter === tab.key
-                  ? "bg-blue-600 text-white"
-                  : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
         {/* Assignments List */}
         <div className="space-y-4">
           {filteredAssignments.map((assignment) => {
-            const overdue = isOverdue(assignment.dueDate, assignment.status);
+            const overdue = isOverdue(assignment.dueDate);
             const daysUntil = getDaysUntilDue(assignment.dueDate);
 
             return (
@@ -229,7 +299,7 @@ const Assignments = () => {
                         <div className="flex items-center gap-2 mb-2">
                           <BookOpen className="h-4 w-4 text-gray-400" />
                           <span className="text-sm text-gray-600 dark:text-gray-400">
-                            {assignment.courseName} ({assignment.courseCode})
+                            {assignment.courseName || 'Course'} ({assignment.courseCode || 'N/A'})
                           </span>
                         </div>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -238,19 +308,14 @@ const Assignments = () => {
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${getStatusColor(
-                          assignment.status
-                        )}`}
-                      >
-                        {getStatusIcon(assignment.status)}
-                        {getStatusText(assignment.status)}
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200`}>
+                        Available
                       </span>
-                      {assignment.grade !== null && (
-                        <div className="flex items-center gap-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-3 py-1 rounded-full">
+                      {assignment.maxScore && (
+                        <div className="flex items-center gap-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-3 py-1 rounded-full">
                           <Award className="h-4 w-4" />
                           <span className="text-sm font-medium">
-                            {assignment.grade}/{assignment.maxGrade}
+                            {assignment.maxScore} pts
                           </span>
                         </div>
                       )}
@@ -258,74 +323,38 @@ const Assignments = () => {
                   </div>
 
                   {/* Assignment Details */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                       <Calendar className="h-4 w-4 mr-2" />
                       <span>
-                        Due: {new Date(assignment.dueDate).toLocaleDateString()}
+                        Due: {new Date(assignment.dueDate).toLocaleString()}
                       </span>
                       {overdue && (
                         <span className="ml-2 text-red-600 dark:text-red-400 font-medium">
                           (Overdue)
                         </span>
                       )}
-                      {!overdue &&
-                        daysUntil >= 0 &&
-                        daysUntil <= 7 &&
-                        assignment.status !== "graded" &&
-                        assignment.status !== "submitted" && (
-                          <span className="ml-2 text-orange-600 dark:text-orange-400 font-medium">
-                            ({daysUntil} days left)
-                          </span>
-                        )}
-                    </div>
-
-                    {assignment.submittedDate && (
-                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                        <Upload className="h-4 w-4 mr-2" />
-                        <span>
-                          Submitted:{" "}
-                          {new Date(
-                            assignment.submittedDate
-                          ).toLocaleDateString()}
+                      {!overdue && daysUntil >= 0 && daysUntil <= 7 && (
+                        <span className="ml-2 text-orange-600 dark:text-orange-400 font-medium">
+                          ({daysUntil} days left)
                         </span>
-                      </div>
-                    )}
+                      )}
+                    </div>
 
                     <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                       <Award className="h-4 w-4 mr-2" />
-                      <span>Max Points: {assignment.maxGrade}</span>
+                      <span>Max Score: {assignment.maxScore || 100}</span>
                     </div>
                   </div>
 
-                  {/* Feedback */}
-                  {assignment.feedback && (
-                    <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">
-                        Teacher Feedback:
-                      </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {assignment.feedback}
-                      </p>
-                    </div>
-                  )}
-
                   {/* Action Button */}
                   <div className="mt-4 flex justify-end">
-                    {assignment.status === "not_started" ||
-                    assignment.status === "in_progress" ? (
-                      <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
-                        Submit Assignment
-                      </button>
-                    ) : assignment.status === "submitted" ? (
-                      <button className="px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium cursor-not-allowed">
-                        Waiting for Grade
-                      </button>
-                    ) : (
-                      <button className="px-4 py-2 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-lg font-medium">
-                        View Submission
-                      </button>
-                    )}
+                    <button 
+                      onClick={() => openSubmitModal(assignment)}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                    >
+                      Submit Assignment
+                    </button>
                   </div>
                 </div>
               </div>
@@ -334,20 +363,91 @@ const Assignments = () => {
         </div>
 
         {/* Empty State */}
-        {filteredAssignments.length === 0 && (
+        {filteredAssignments.length === 0 && !isLoading && (
           <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-xl">
             <FileText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
               No Assignments Found
             </h3>
             <p className="text-gray-600 dark:text-gray-400">
-              {filter === "all"
-                ? "You don't have any assignments yet."
-                : `No ${filter} assignments at the moment.`}
+              You don't have any assignments yet.
             </p>
           </div>
         )}
       </div>
+
+      {/* Submit Assignment Modal */}
+      <Modal
+        isOpen={showSubmitModal}
+        onClose={() => {
+          setShowSubmitModal(false);
+          setSelectedAssignment(null);
+          setSubmissionData({ content: "", fileUrl: "" });
+        }}
+        title="Submit Assignment"
+      >
+        <div className="space-y-4">
+          <div>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+              {selectedAssignment?.title}
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {selectedAssignment?.description}
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Submission Content *
+            </label>
+            <textarea
+              value={submissionData.content}
+              onChange={(e) =>
+                setSubmissionData({ ...submissionData, content: e.target.value })
+              }
+              rows={6}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter your submission content or description..."
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              File URL (optional)
+            </label>
+            <input
+              type="url"
+              value={submissionData.fileUrl}
+              onChange={(e) =>
+                setSubmissionData({ ...submissionData, fileUrl: e.target.value })
+              }
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+              placeholder="https://github.com/username/repo or drive link..."
+            />
+          </div>
+
+          <div className="flex gap-3 justify-end">
+            <button
+              onClick={() => {
+                setShowSubmitModal(false);
+                setSelectedAssignment(null);
+                setSubmissionData({ content: "", fileUrl: "" });
+              }}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+              disabled={submitting}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSubmitAssignment}
+              disabled={submitting || !submissionData.content.trim()}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {submitting ? "Submitting..." : "Submit"}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

@@ -154,9 +154,15 @@ export const authAPI = {
 // ===================================================================
 export const dashboardAPI = {
   // Student Dashboard
-  getStudentDashboard: async () => {
+  getStudentDashboard: async (studentId) => {
     const user = JSON.parse(localStorage.getItem("openacademy_user") || "{}");
-    const response = await fetch(`${BASE_URL}/dashboard/student`, {
+    const id = studentId || user.id;
+
+    if (!id) {
+      throw new Error("Student ID is required");
+    }
+
+    const response = await fetch(`${BASE_URL}/dashboard/student/${id}`, {
       headers: {
         ...getAuthHeaders(),
         "X-Student-Email": user.email || "",
@@ -514,6 +520,191 @@ export const basicAPI = {
 };
 
 // ===================================================================
+// COURSE API - Course management functionality
+// ===================================================================
+export const courseAPI = {
+  // Get all courses
+  getAllCourses: async () => {
+    const response = await fetch(`${BASE_URL}/courses`, {
+      headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  // Get course by ID
+  getCourseById: async (courseId) => {
+    const response = await fetch(`${BASE_URL}/courses/${courseId}`, {
+      headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  // Create course (Teacher/Admin only)
+  createCourse: async (courseData) => {
+    const response = await fetch(`${BASE_URL}/courses`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(courseData),
+    });
+    return handleResponse(response);
+  },
+
+  // Update course
+  updateCourse: async (courseId, courseData) => {
+    const response = await fetch(`${BASE_URL}/courses/${courseId}`, {
+      method: "PUT",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(courseData),
+    });
+    return handleResponse(response);
+  },
+
+  // Delete course
+  deleteCourse: async (courseId) => {
+    const response = await fetch(`${BASE_URL}/courses/${courseId}`, {
+      method: "DELETE",
+      headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  // Enroll student in course
+  enrollStudent: async (courseId, studentId) => {
+    const response = await fetch(`${BASE_URL}/courses/${courseId}/enroll`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ studentId }),
+    });
+    return handleResponse(response);
+  },
+
+  // Get course assignments
+  getCourseAssignments: async (courseId) => {
+    const response = await fetch(
+      `${BASE_URL}/courses/${courseId}/assignments`,
+      {
+        headers: getAuthHeaders(),
+      }
+    );
+    return handleResponse(response);
+  },
+
+  // Create assignment for course
+  createAssignment: async (courseId, assignmentData) => {
+    const response = await fetch(
+      `${BASE_URL}/courses/${courseId}/assignments`,
+      {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(assignmentData),
+      }
+    );
+    return handleResponse(response);
+  },
+};
+
+// ===================================================================
+// ASSIGNMENT API - Assignment management functionality
+// ===================================================================
+export const assignmentAPI = {
+  // Get assignment by ID
+  getAssignmentById: async (assignmentId) => {
+    const response = await fetch(`${BASE_URL}/assignments/${assignmentId}`, {
+      headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  // Get all submissions for an assignment
+  getAssignmentSubmissions: async (assignmentId) => {
+    const response = await fetch(
+      `${BASE_URL}/assignments/${assignmentId}/submissions`,
+      {
+        headers: getAuthHeaders(),
+      }
+    );
+    return handleResponse(response);
+  },
+
+  // Submit assignment
+  submitAssignment: async (assignmentId, submissionData) => {
+    const response = await fetch(
+      `${BASE_URL}/assignments/${assignmentId}/submit`,
+      {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(submissionData),
+      }
+    );
+    return handleResponse(response);
+  },
+
+  // Update assignment
+  updateAssignment: async (assignmentId, assignmentData) => {
+    const response = await fetch(`${BASE_URL}/assignments/${assignmentId}`, {
+      method: "PUT",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(assignmentData),
+    });
+    return handleResponse(response);
+  },
+
+  // Delete assignment
+  deleteAssignment: async (assignmentId) => {
+    const response = await fetch(`${BASE_URL}/assignments/${assignmentId}`, {
+      method: "DELETE",
+      headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+};
+
+// ===================================================================
+// SUBMISSION API - Submission management functionality
+// ===================================================================
+export const submissionAPI = {
+  // Get submission by ID
+  getSubmissionById: async (submissionId) => {
+    const response = await fetch(`${BASE_URL}/submissions/${submissionId}`, {
+      headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  // Grade submission
+  gradeSubmission: async (submissionId, gradeData) => {
+    const response = await fetch(
+      `${BASE_URL}/submissions/${submissionId}/grade`,
+      {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(gradeData),
+      }
+    );
+    return handleResponse(response);
+  },
+
+  // Update submission
+  updateSubmission: async (submissionId, submissionData) => {
+    const response = await fetch(`${BASE_URL}/submissions/${submissionId}`, {
+      method: "PUT",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(submissionData),
+    });
+    return handleResponse(response);
+  },
+
+  // Delete submission
+  deleteSubmission: async (submissionId) => {
+    const response = await fetch(`${BASE_URL}/submissions/${submissionId}`, {
+      method: "DELETE",
+      headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+};
+
+// ===================================================================
 // UTILITY FUNCTIONS
 // ===================================================================
 export const authUtils = {
@@ -546,5 +737,8 @@ export default {
   gradingAPI,
   filesAPI,
   basicAPI,
+  courseAPI,
+  assignmentAPI,
+  submissionAPI,
   authUtils,
 };

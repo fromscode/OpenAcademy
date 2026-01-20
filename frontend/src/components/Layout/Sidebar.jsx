@@ -68,20 +68,14 @@ const Sidebar = ({ isOpen, onClose }) => {
           },
           {
             icon: BookOpen,
-            label: "My Courses",
+            label: "Manage Courses",
             path: "/dashboard/teacher/courses",
           },
           {
-            icon: FileText,
-            label: "Assignments",
-            path: "/dashboard/teacher/assignments",
+            icon: Award,
+            label: "Grade Submissions",
+            path: "/dashboard/teacher/grade-submissions",
           },
-          {
-            icon: Users,
-            label: "Students",
-            path: "/dashboard/teacher/students",
-          },
-          { icon: Award, label: "Grading", path: "/dashboard/teacher/grading" },
           {
             icon: MessageSquare,
             label: "Messages",

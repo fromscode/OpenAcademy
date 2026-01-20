@@ -17,6 +17,14 @@ const StudentDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setIsLoading(true);
+      // The backend expects studentId in the URL
+      // The dashboardAPI.getStudentDashboard should be updated or we call directly
+      const studentId = user?.id;
+      if (!studentId) {
+        setError("Student ID not found. Please login again.");
+        return;
+      }
+
       const data = await dashboardAPI.getStudentDashboard();
       setDashboardData(data);
     } catch (err) {

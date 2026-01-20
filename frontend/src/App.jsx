@@ -11,7 +11,10 @@ import LandingPage from "./pages/Landing/LandingPage";
 import Login from "./pages/Auth/Login";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import Students from "./pages/Admin/Students";
+import AdminCourses from "./pages/Admin/Courses";
 import TeacherDashboard from "./pages/Teacher/TeacherDashboard";
+import ManageCourses from "./pages/Teacher/ManageCourses";
+import GradeSubmissions from "./pages/Teacher/GradeSubmissions";
 import StudentDashboard from "./pages/Student/StudentDashboard";
 import Courses from "./pages/Student/Courses";
 import Assignments from "./pages/Student/Assignments";
@@ -121,6 +124,14 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="admin/courses"
+                  element={
+                    <ProtectedRoute allowedRoles={["admin"]}>
+                      <AdminCourses />
+                    </ProtectedRoute>
+                  }
+                />
 
                 {/* Teacher Routes */}
                 <Route
@@ -128,6 +139,22 @@ function App() {
                   element={
                     <ProtectedRoute allowedRoles={["teacher"]}>
                       <TeacherDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="teacher/courses"
+                  element={
+                    <ProtectedRoute allowedRoles={["teacher"]}>
+                      <ManageCourses />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="teacher/grade-submissions"
+                  element={
+                    <ProtectedRoute allowedRoles={["teacher"]}>
+                      <GradeSubmissions />
                     </ProtectedRoute>
                   }
                 />
