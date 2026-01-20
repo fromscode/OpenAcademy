@@ -155,7 +155,7 @@ export const authAPI = {
 export const dashboardAPI = {
   // Student Dashboard
   getStudentDashboard: async (studentId) => {
-    const user = JSON.parse(localStorage.getItem("openacademy_user") || "{}");
+    const user = JSON.parse(sessionStorage.getItem("openacademy_user") || "{}");
     const id = studentId || user.id;
 
     if (!id) {

@@ -25,7 +25,7 @@ const StudentDashboard = () => {
         return;
       }
 
-      const data = await dashboardAPI.getStudentDashboard();
+      const data = await dashboardAPI.getStudentDashboard(studentId);
       setDashboardData(data);
     } catch (err) {
       console.error("Failed to fetch dashboard data:", err);
