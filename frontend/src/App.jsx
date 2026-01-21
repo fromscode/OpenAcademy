@@ -15,6 +15,7 @@ import AdminCourses from "./pages/Admin/Courses";
 import TeacherDashboard from "./pages/Teacher/TeacherDashboard";
 import ManageCourses from "./pages/Teacher/ManageCourses";
 import GradeSubmissions from "./pages/Teacher/GradeSubmissions";
+import TeacherAssignments from "./pages/Teacher/Assignments";
 import StudentDashboard from "./pages/Student/StudentDashboard";
 import Courses from "./pages/Student/Courses";
 import Assignments from "./pages/Student/Assignments";
@@ -154,6 +155,14 @@ function App() {
                   element={
                     <ProtectedRoute allowedRoles={["teacher"]}>
                       <GradeSubmissions />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="teacher/assignments"
+                  element={
+                    <ProtectedRoute allowedRoles={["teacher"]}>
+                      <TeacherAssignments />
                     </ProtectedRoute>
                   }
                 />

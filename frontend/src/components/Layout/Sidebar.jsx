@@ -72,6 +72,11 @@ const Sidebar = ({ isOpen, onClose }) => {
             path: "/dashboard/teacher/courses",
           },
           {
+            icon: FileText,
+            label: "Assignments",
+            path: "/dashboard/teacher/assignments",
+          },
+          {
             icon: Award,
             label: "Grade Submissions",
             path: "/dashboard/teacher/grade-submissions",
