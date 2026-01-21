@@ -30,16 +30,24 @@ const Assignments = () => {
   const [submittedMap, setSubmittedMap] = useState({}); // assignmentId -> submission object
 
   useEffect(() => {
-    fetchAssignments();
-  }, []);
+    // Refetch when the authenticated user becomes available/changes
+    if (user?.id) fetchAssignments();
+  }, [user?.id]);
 
   const fetchAssignments = async () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      // Get all courses first
-      const courses = await courseAPI.getAllCourses();
+      // Get only courses the current student is enrolled in
+      if (!user?.id) {
+        setStudentAssignments([]);
+        setSubmittedMap({});
+        setIsLoading(false);
+        return;
+      }
+
+      const courses = await courseAPI.getStudentCourses(user.id);
 
       // Get assignments for each course
       const allAssignments = [];
@@ -67,21 +75,19 @@ const Assignments = () => {
 
       // Fetch submission status for each assignment for this student
       const map = {};
-      if (user?.id) {
-        await Promise.all(
-          allAssignments.map(async (a) => {
-            try {
-              const sub = await submissionAPI.getStudentSubmissionForAssignment(
-                a.id,
-                user.id
-              );
-              if (sub) map[a.id] = sub;
-            } catch (e) {
-              // ignore per-assignment errors to avoid blocking the page
-            }
-          })
-        );
-      }
+      await Promise.all(
+        allAssignments.map(async (a) => {
+          try {
+            const sub = await submissionAPI.getStudentSubmissionForAssignment(
+              a.id,
+              user.id
+            );
+            if (sub) map[a.id] = sub;
+          } catch (e) {
+            // ignore per-assignment errors to avoid blocking the page
+          }
+        })
+      );
       setSubmittedMap(map);
     } catch (err) {
       console.error("Failed to fetch assignments:", err);
