@@ -35,13 +35,15 @@ const Courses = () => {
       setIsLoading(true);
       setError(null);
       const courses = await courseAPI.getAllCourses();
-      
-      // Filter enrolled courses for the student
-      // Assuming the backend returns enrollment info or we need to check separately
       setAllCourses(courses);
-      
-      // For now, assume all courses are available (backend should handle enrollment status)
-      setStudentCourses(courses);
+
+      // Fetch only courses the current student is enrolled in
+      if (user?.id) {
+        const myCourses = await courseAPI.getStudentCourses(user.id);
+        setStudentCourses(myCourses);
+      } else {
+        setStudentCourses([]);
+      }
     } catch (err) {
       console.error("Failed to fetch courses:", err);
       setError("Failed to load courses. Please try again.");
@@ -76,7 +78,7 @@ const Courses = () => {
 
   const getFilteredCourses = () => {
     if (!searchTerm) return studentCourses;
-    
+
     return studentCourses.filter(
       (course) =>
         course.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -94,6 +96,19 @@ const Courses = () => {
       </div>
     );
   }
+
+  const formatInstructorName = (course) => {
+    const i = course?.instructor;
+    if (i) {
+      const name = [i.firstName, i.middleName, i.lastName]
+        .filter(Boolean)
+        .join(" ");
+      if (name) return name;
+      if (i.fullName) return i.fullName;
+    }
+    if (course?.instructorName) return course.instructorName;
+    return course?.instructorId ? `ID #${course.instructorId}` : "Unknown";
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -162,12 +177,14 @@ const Courses = () => {
                   Active Courses
                 </p>
                 <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                  {studentCourses.filter((c) => {
-                    const now = new Date();
-                    const start = new Date(c.startDate);
-                    const end = new Date(c.endDate);
-                    return start <= now && now <= end;
-                  }).length}
+                  {
+                    studentCourses.filter((c) => {
+                      const now = new Date();
+                      const start = new Date(c.startDate);
+                      const end = new Date(c.endDate);
+                      return start <= now && now <= end;
+                    }).length
+                  }
                 </p>
               </div>
               <div className="h-12 w-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
@@ -183,7 +200,13 @@ const Courses = () => {
                   Total Instructors
                 </p>
                 <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                  {new Set(studentCourses.map((c) => c.instructorId)).size}
+                  {
+                    new Set(
+                      studentCourses.map(
+                        (c) => c.instructor?.id ?? c.instructorId
+                      )
+                    ).size
+                  }
                 </p>
               </div>
               <div className="h-12 w-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
@@ -231,7 +254,7 @@ const Courses = () => {
 
                 <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                   <User className="h-4 w-4 mr-2" />
-                  <span>Instructor ID: {course.instructorId}</span>
+                  <span>Instructor: {formatInstructorName(course)}</span>
                 </div>
 
                 <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
@@ -293,9 +316,7 @@ const Courses = () => {
         title="Enroll in Course"
       >
         <div className="space-y-4">
-          <p className="text-gray-600 dark:text-gray-400">
-            Available courses:
-          </p>
+          <p className="text-gray-600 dark:text-gray-400">Available courses:</p>
           <div className="max-h-96 overflow-y-auto space-y-2">
             {allCourses.map((course) => (
               <div

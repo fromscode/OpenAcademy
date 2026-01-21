@@ -531,6 +531,14 @@ export const courseAPI = {
     return handleResponse(response);
   },
 
+  // Get courses a specific student is enrolled in
+  getStudentCourses: async (studentId) => {
+    const response = await fetch(`${BASE_URL}/courses/student/${studentId}`, {
+      headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+
   // Get course by ID
   getCourseById: async (courseId) => {
     const response = await fetch(`${BASE_URL}/courses/${courseId}`, {
@@ -668,6 +676,16 @@ export const submissionAPI = {
     const response = await fetch(`${BASE_URL}/submissions/${submissionId}`, {
       headers: getAuthHeaders(),
     });
+    return handleResponse(response);
+  },
+
+  // Get the current student's submission for an assignment (if any)
+  getStudentSubmissionForAssignment: async (assignmentId, studentId) => {
+    const response = await fetch(
+      `${BASE_URL}/assignments/${assignmentId}/submission-of/${studentId}`,
+      { headers: getAuthHeaders() }
+    );
+    if (response.status === 204) return null;
     return handleResponse(response);
   },
 

@@ -10,7 +10,7 @@ import {
   BookOpen,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
-import { courseAPI, assignmentAPI } from "../../services/api";
+import { courseAPI, assignmentAPI, submissionAPI } from "../../services/api";
 import LoadingSpinner from "../../components/Common/LoadingSpinner";
 import Modal from "../../components/Common/Modal";
 
@@ -27,6 +27,7 @@ const Assignments = () => {
     content: "",
     fileUrl: "",
   });
+  const [submittedMap, setSubmittedMap] = useState({}); // assignmentId -> submission object
 
   useEffect(() => {
     fetchAssignments();
@@ -36,17 +37,17 @@ const Assignments = () => {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       // Get all courses first
       const courses = await courseAPI.getAllCourses();
-      
+
       // Get assignments for each course
       const allAssignments = [];
       for (const course of courses) {
         try {
           const assignments = await courseAPI.getCourseAssignments(course.id);
           // Add course info to each assignment
-          assignments.forEach(assignment => {
+          assignments.forEach((assignment) => {
             allAssignments.push({
               ...assignment,
               courseName: course.title,
@@ -55,11 +56,33 @@ const Assignments = () => {
             });
           });
         } catch (err) {
-          console.error(`Failed to fetch assignments for course ${course.id}:`, err);
+          console.error(
+            `Failed to fetch assignments for course ${course.id}:`,
+            err
+          );
         }
       }
-      
+
       setStudentAssignments(allAssignments);
+
+      // Fetch submission status for each assignment for this student
+      const map = {};
+      if (user?.id) {
+        await Promise.all(
+          allAssignments.map(async (a) => {
+            try {
+              const sub = await submissionAPI.getStudentSubmissionForAssignment(
+                a.id,
+                user.id
+              );
+              if (sub) map[a.id] = sub;
+            } catch (e) {
+              // ignore per-assignment errors to avoid blocking the page
+            }
+          })
+        );
+      }
+      setSubmittedMap(map);
     } catch (err) {
       console.error("Failed to fetch assignments:", err);
       setError("Failed to load assignments. Please try again.");
@@ -86,10 +109,10 @@ const Assignments = () => {
         content: submissionData.content,
         fileUrl: submissionData.fileUrl,
       });
-      
+
       // Refresh assignments
       await fetchAssignments();
-      
+
       // Close modal and reset
       setShowSubmitModal(false);
       setSelectedAssignment(null);
@@ -178,12 +201,14 @@ const Assignments = () => {
     return diffDays;
   };
 
-  // Calculate stats
+  // Calculate stats dynamically
   const stats = {
     total: studentAssignments.length,
     pending: studentAssignments.filter((a) => !isOverdue(a.dueDate)).length,
-    submitted: 0, // Would need to track submissions
-    graded: 0, // Would need to track graded submissions
+    submitted: Object.keys(submittedMap).length,
+    graded: Object.values(submittedMap).filter(
+      (s) => s && s.grade !== null && s.grade !== undefined
+    ).length,
   };
 
   if (isLoading) {
@@ -276,6 +301,12 @@ const Assignments = () => {
           {filteredAssignments.map((assignment) => {
             const overdue = isOverdue(assignment.dueDate);
             const daysUntil = getDaysUntilDue(assignment.dueDate);
+            const submission = submittedMap[assignment.id];
+            const alreadySubmitted = !!submission;
+            const isGradedSubmission =
+              alreadySubmitted &&
+              submission.grade !== null &&
+              submission.grade !== undefined;
 
             return (
               <div
@@ -299,7 +330,8 @@ const Assignments = () => {
                         <div className="flex items-center gap-2 mb-2">
                           <BookOpen className="h-4 w-4 text-gray-400" />
                           <span className="text-sm text-gray-600 dark:text-gray-400">
-                            {assignment.courseName || 'Course'} ({assignment.courseCode || 'N/A'})
+                            {assignment.courseName || "Course"} (
+                            {assignment.courseCode || "N/A"})
                           </span>
                         </div>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -308,8 +340,20 @@ const Assignments = () => {
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200`}>
-                        Available
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          alreadySubmitted
+                            ? isGradedSubmission
+                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                              : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                            : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+                        }`}
+                      >
+                        {alreadySubmitted
+                          ? isGradedSubmission
+                            ? "Graded"
+                            : "Submitted"
+                          : "Available"}
                       </span>
                       {assignment.maxScore && (
                         <div className="flex items-center gap-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-3 py-1 rounded-full">
@@ -349,12 +393,18 @@ const Assignments = () => {
 
                   {/* Action Button */}
                   <div className="mt-4 flex justify-end">
-                    <button 
-                      onClick={() => openSubmitModal(assignment)}
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
-                    >
-                      Submit Assignment
-                    </button>
+                    {alreadySubmitted ? (
+                      <span className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium">
+                        {isGradedSubmission ? "Graded" : "Already submitted"}
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => openSubmitModal(assignment)}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                      >
+                        Submit Assignment
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -403,7 +453,10 @@ const Assignments = () => {
             <textarea
               value={submissionData.content}
               onChange={(e) =>
-                setSubmissionData({ ...submissionData, content: e.target.value })
+                setSubmissionData({
+                  ...submissionData,
+                  content: e.target.value,
+                })
               }
               rows={6}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
@@ -419,7 +472,10 @@ const Assignments = () => {
               type="url"
               value={submissionData.fileUrl}
               onChange={(e) =>
-                setSubmissionData({ ...submissionData, fileUrl: e.target.value })
+                setSubmissionData({
+                  ...submissionData,
+                  fileUrl: e.target.value,
+                })
               }
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               placeholder="https://github.com/username/repo or drive link..."

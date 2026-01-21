@@ -74,4 +74,8 @@ public class SubmissionService {
   public List<Submission> getSubmissionsForAssignment(Long assignmentId) {
     return submissionRepository.findByAssignmentId(assignmentId);
   }
+
+  public Optional<Submission> getStudentSubmissionForAssignment(Long assignmentId, Long studentId) {
+    return submissionRepository.findByAssignmentIdAndStudentId(assignmentId, studentId);
+  }
 }

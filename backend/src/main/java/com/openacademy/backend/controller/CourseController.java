@@ -34,6 +34,13 @@ public class CourseController {
     return ResponseEntity.ok(courseService.getAllCourses());
   }
 
+  // GET /api/courses/student/{studentId}
+  // Get courses the given student is enrolled in
+  @GetMapping("/student/{studentId}")
+  public ResponseEntity<List<Course>> getStudentCourses(@PathVariable Long studentId) {
+    return ResponseEntity.ok(courseService.getCoursesForStudent(studentId));
+  }
+
   // POST /api/courses/{courseId}/enroll
   // Enroll a student in a course
   @PostMapping("/{courseId}/enroll")

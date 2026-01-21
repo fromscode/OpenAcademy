@@ -46,4 +46,15 @@ public class SubmissionController {
   public ResponseEntity<List<Submission>> getSubmissions(@PathVariable Long assignmentId) {
     return ResponseEntity.ok(submissionService.getSubmissionsForAssignment(assignmentId));
   }
+
+  // STUDENT: Get my submission for a specific assignment (if any)
+  // GET /api/assignments/{assignmentId}/submission-of/{studentId}
+  @GetMapping("/assignments/{assignmentId}/submission-of/{studentId}")
+  public ResponseEntity<Submission> getStudentSubmission(
+      @PathVariable Long assignmentId,
+      @PathVariable Long studentId) {
+    return submissionService.getStudentSubmissionForAssignment(assignmentId, studentId)
+        .map(ResponseEntity::ok)
+        .orElseGet(() -> ResponseEntity.noContent().build());
+  }
 }
