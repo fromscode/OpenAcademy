@@ -8,13 +8,11 @@ import {
   Clock,
   CheckCircle,
   AlertCircle,
-  TrendingUp,
-  Plus,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { courseAPI, assignmentAPI } from "../../services/api";
 import LoadingSpinner from "../../components/Common/LoadingSpinner";
-import Modal from "../../components/Common/Modal";
+// Modal removed with create-assignment quick action
 
 const TeacherDashboard = () => {
   const { user } = useAuth();
@@ -23,15 +21,7 @@ const TeacherDashboard = () => {
   const [submissions, setSubmissions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showAssignmentModal, setShowAssignmentModal] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [assignmentFormData, setAssignmentFormData] = useState({
-    courseId: "",
-    title: "",
-    description: "",
-    maxScore: 100,
-    dueDate: "",
-  });
+  // No inline create-assignment on dashboard; handled in Manage Courses
 
   useEffect(() => {
     fetchDashboardData();
@@ -46,9 +36,15 @@ const TeacherDashboard = () => {
       const allCourses = await courseAPI.getAllCourses();
 
       // Filter courses taught by this instructor
-      const instructorCourses = allCourses.filter(
-        (course) => course.instructorId === user?.id
-      );
+      const currentInstructorId = user?.id;
+      const instructorCourses = allCourses.filter((course) => {
+        const courseInstructorId =
+          course.instructorId ?? course.instructor?.id ?? null;
+        return (
+          courseInstructorId !== null &&
+          String(courseInstructorId) === String(currentInstructorId)
+        );
+      });
       setTeacherCourses(instructorCourses);
 
       // Get assignments for each course
@@ -58,7 +54,13 @@ const TeacherDashboard = () => {
       for (const course of instructorCourses) {
         try {
           const assignments = await courseAPI.getCourseAssignments(course.id);
-          allAssignments.push(...assignments);
+          // annotate with course info for UI
+          const annotated = (assignments || []).map((a) => ({
+            ...a,
+            courseId: course.id,
+            courseName: course.title,
+          }));
+          allAssignments.push(...annotated);
 
           // Get submissions for each assignment
           for (const assignment of assignments) {
@@ -91,57 +93,7 @@ const TeacherDashboard = () => {
     }
   };
 
-  const handleCreateAssignment = async () => {
-    if (
-      !assignmentFormData.courseId ||
-      !assignmentFormData.title ||
-      !assignmentFormData.dueDate
-    ) {
-      setError("Please fill in all required fields");
-      return;
-    }
-
-    try {
-      setSubmitting(true);
-      setError(null);
-
-      await courseAPI.createAssignment(assignmentFormData.courseId, {
-        title: assignmentFormData.title,
-        description: assignmentFormData.description,
-        maxScore: assignmentFormData.maxScore,
-        dueDate: assignmentFormData.dueDate,
-      });
-
-      // Refresh dashboard data
-      await fetchDashboardData();
-
-      // Close modal and reset form
-      setShowAssignmentModal(false);
-      setAssignmentFormData({
-        courseId: "",
-        title: "",
-        description: "",
-        maxScore: 100,
-        dueDate: "",
-      });
-    } catch (err) {
-      console.error("Failed to create assignment:", err);
-      setError("Failed to create assignment. Please try again.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const openAssignmentModal = () => {
-    if (teacherCourses.length > 0) {
-      setAssignmentFormData({
-        ...assignmentFormData,
-        courseId: teacherCourses[0].id,
-      });
-    }
-    setShowAssignmentModal(true);
-    setError(null);
-  };
+  // Assignment creation is available inside Manage Courses page
 
   if (isLoading) {
     return (
@@ -286,19 +238,6 @@ const TeacherDashboard = () => {
             </p>
           </Link>
 
-          <button
-            onClick={openAssignmentModal}
-            className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-primary-300 hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-800 text-left"
-          >
-            <Plus className="h-8 w-8 text-primary-600 mb-2" />
-            <h4 className="font-medium text-gray-900 dark:text-white">
-              Create Assignment
-            </h4>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Add new assignments for students
-            </p>
-          </button>
-
           <Link
             to="/dashboard/teacher/grade-submissions"
             className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-primary-300 hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-800"
@@ -345,11 +284,21 @@ const TeacherDashboard = () => {
             {recentSubmissions.length > 0 ? (
               recentSubmissions.map((submission) => {
                 const assignment = teacherAssignments.find(
-                  (a) => a.id === submission.assignmentId
+                  (a) =>
+                    a.id ===
+                    (submission.assignmentId ?? submission.assignment?.id)
                 );
-                const student = mockStudents.find(
-                  (s) => s.id === submission.studentId
-                );
+                const studentName =
+                  submission.student?.firstName ||
+                  submission.student?.name ||
+                  "Student";
+                const avatar = undefined;
+                const status =
+                  submission.grade != null ? "graded" : "submitted";
+                const submittedDate =
+                  submission.submittedAt ||
+                  submission.submissionDate ||
+                  submission.createdAt;
 
                 return (
                   <div
@@ -357,34 +306,30 @@ const TeacherDashboard = () => {
                     className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
                   >
                     <div className="flex-shrink-0">
-                      <img
-                        className="h-8 w-8 rounded-full object-cover"
-                        src={student?.avatar}
-                        alt={student?.name}
-                      />
+                      <div className="h-8 w-8 rounded-full bg-gray-300 dark:bg-gray-600" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                         {assignment?.title}
                       </p>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {student?.name} •{" "}
-                        {new Date(
-                          submission.submissionDate
-                        ).toLocaleDateString()}
+                        {studentName} •{" "}
+                        {submittedDate
+                          ? new Date(submittedDate).toLocaleDateString()
+                          : ""}
                       </p>
                     </div>
                     <div className="flex-shrink-0">
                       <span
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          submission.status === "graded"
+                          status === "graded"
                             ? "bg-green-100 text-green-800"
-                            : submission.status === "submitted"
+                            : status === "submitted"
                             ? "bg-yellow-100 text-yellow-800"
                             : "bg-gray-100 text-gray-800"
                         }`}
                       >
-                        {submission.status}
+                        {status}
                       </span>
                     </div>
                   </div>
@@ -480,184 +425,23 @@ const TeacherDashboard = () => {
                   {course.title}
                 </h4>
                 <span className="text-xs text-gray-500 dark:text-gray-400">
-                  {course.code}
+                  {course.courseCode}
                 </span>
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                {course.students.length} students enrolled
-              </p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-                {course.schedule}
+                {course.startDate && course.endDate
+                  ? `${new Date(
+                      course.startDate
+                    ).toLocaleDateString()} - ${new Date(
+                      course.endDate
+                    ).toLocaleDateString()}`
+                  : ""}
               </p>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500 dark:text-gray-400">
-                  {course.credits} credits
-                </span>
-                <Link
-                  to={`/teacher/courses/${course.id}`}
-                  className="text-sm text-primary-600 hover:text-primary-700 font-medium"
-                >
-                  Manage Course
-                </Link>
-              </div>
+              {/* View-only: no manage controls here */}
             </div>
           ))}
         </div>
       </div>
-
-      {/* Create Assignment Modal */}
-      <Modal
-        isOpen={showAssignmentModal}
-        onClose={() => {
-          setShowAssignmentModal(false);
-          setAssignmentFormData({
-            courseId: "",
-            title: "",
-            description: "",
-            maxScore: 100,
-            dueDate: "",
-          });
-          setError(null);
-        }}
-        title="Create New Assignment"
-      >
-        <div className="space-y-4">
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-              {error}
-            </div>
-          )}
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Course *
-            </label>
-            <select
-              value={assignmentFormData.courseId}
-              onChange={(e) =>
-                setAssignmentFormData({
-                  ...assignmentFormData,
-                  courseId: Number(e.target.value),
-                })
-              }
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Select a course</option>
-              {teacherCourses.map((course) => (
-                <option key={course.id} value={course.id}>
-                  {course.title} ({course.courseCode})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Assignment Title *
-            </label>
-            <input
-              type="text"
-              value={assignmentFormData.title}
-              onChange={(e) =>
-                setAssignmentFormData({
-                  ...assignmentFormData,
-                  title: e.target.value,
-                })
-              }
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g., Midterm Project"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Description
-            </label>
-            <textarea
-              value={assignmentFormData.description}
-              onChange={(e) =>
-                setAssignmentFormData({
-                  ...assignmentFormData,
-                  description: e.target.value,
-                })
-              }
-              rows={4}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-              placeholder="Build a REST API using Spring Boot..."
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Max Score *
-              </label>
-              <input
-                type="number"
-                min="0"
-                value={assignmentFormData.maxScore}
-                onChange={(e) =>
-                  setAssignmentFormData({
-                    ...assignmentFormData,
-                    maxScore: Number(e.target.value),
-                  })
-                }
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                placeholder="100"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Due Date *
-              </label>
-              <input
-                type="datetime-local"
-                value={assignmentFormData.dueDate}
-                onChange={(e) =>
-                  setAssignmentFormData({
-                    ...assignmentFormData,
-                    dueDate: e.target.value,
-                  })
-                }
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-3 justify-end pt-4">
-            <button
-              onClick={() => {
-                setShowAssignmentModal(false);
-                setAssignmentFormData({
-                  courseId: "",
-                  title: "",
-                  description: "",
-                  maxScore: 100,
-                  dueDate: "",
-                });
-                setError(null);
-              }}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
-              disabled={submitting}
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleCreateAssignment}
-              disabled={
-                submitting ||
-                !assignmentFormData.courseId ||
-                !assignmentFormData.title ||
-                !assignmentFormData.dueDate
-              }
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {submitting ? "Creating..." : "Create Assignment"}
-            </button>
-          </div>
-        </div>
-      </Modal>
     </div>
   );
 };

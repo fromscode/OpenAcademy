@@ -1,13 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  BookOpen,
-  Plus,
-  Edit,
-  Trash2,
-  FileText,
-  Calendar,
-  Search,
-} from "lucide-react";
+import { BookOpen, Plus, FileText, Calendar, Search } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { courseAPI } from "../../services/api";
 import LoadingSpinner from "../../components/Common/LoadingSpinner";
@@ -335,22 +327,6 @@ const ManageCourses = () => {
                 <div className="flex items-start justify-between mb-3">
                   <div className="h-12 w-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                     <BookOpen className="h-6 w-6 text-white" />
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => openEditModal(course)}
-                      className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                      title="Edit course"
-                    >
-                      <Edit className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteCourse(course.id)}
-                      className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                      title="Delete course"
-                    >
-                      <Trash2 className="h-4 w-4 text-red-600 dark:text-red-400" />
-                    </button>
                   </div>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
