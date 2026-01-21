@@ -50,9 +50,17 @@ const ManageCourses = () => {
       const allCourses = await courseAPI.getAllCourses();
 
       // Filter courses taught by this instructor
-      const instructorCourses = allCourses.filter(
-        (course) => course.instructorId === user?.id
-      );
+      // Backend returns `instructor` object, not `instructorId`.
+      // Normalize IDs to strings to handle number/string mismatches.
+      const currentInstructorId = user?.id;
+      const instructorCourses = allCourses.filter((course) => {
+        const courseInstructorId =
+          course.instructorId ?? course.instructor?.id ?? null;
+        return (
+          courseInstructorId !== null &&
+          String(courseInstructorId) === String(currentInstructorId)
+        );
+      });
 
       setCourses(instructorCourses);
     } catch (err) {
@@ -71,12 +79,16 @@ const ManageCourses = () => {
 
     try {
       setSubmitting(true);
-      await courseAPI.createCourse({
+      const createdCourse = await courseAPI.createCourse({
         ...courseFormData,
         instructorId: user?.id || 1,
       });
 
-      await fetchCourses();
+      // Optimistically add the newly created course to local state
+      setCourses((prev) => [createdCourse, ...prev]);
+
+      // Also perform a background refresh to keep in sync
+      fetchCourses();
       setShowCourseModal(false);
       resetCourseForm();
       setError(null);
