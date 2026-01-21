@@ -140,19 +140,7 @@ const StudentDashboard = () => {
           </div>
         </div>
 
-        {/* Coming Soon Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8 text-center">
-          <div className="max-w-md mx-auto">
-            <GraduationCap className="h-16 w-16 text-blue-600 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              More Features Coming Soon!
-            </h3>
-            <p className="text-gray-600 dark:text-gray-300">
-              We're working hard to bring you courses, assignments, grades, and
-              much more. Stay tuned for exciting updates!
-            </p>
-          </div>
-        </div>
+        {/* Additional sections can be added here */}
       </div>
     </div>
   );
