@@ -84,14 +84,16 @@ const Navbar = ({ onToggleSidebar }) => {
               {showUserMenu && (
                 <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-gray-800 ring-1 ring-gray-700 focus:outline-none z-50">
                   <div className="py-1">
-                    <Link
-                      to="/settings"
-                      className="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
-                      onClick={() => setShowUserMenu(false)}
-                    >
-                      <Settings className="mr-3 h-4 w-4" />
-                      Settings
-                    </Link>
+                    {user?.role === "admin" && (
+                      <Link
+                        to="/dashboard/settings"
+                        className="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        <Settings className="mr-3 h-4 w-4" />
+                        Settings
+                      </Link>
+                    )}
                     <button
                       onClick={handleLogout}
                       className="flex items-center w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"

@@ -81,7 +81,6 @@ const Sidebar = ({ isOpen, onClose }) => {
             label: "Messages",
             path: "/dashboard/messages",
           },
-          { icon: Settings, label: "Settings", path: "/dashboard/settings" },
         ];
       case "student":
         return [
@@ -113,7 +112,6 @@ const Sidebar = ({ isOpen, onClose }) => {
             label: "Messages",
             path: "/dashboard/messages",
           },
-          { icon: Settings, label: "Settings", path: "/dashboard/settings" },
         ];
       default:
         return [];
