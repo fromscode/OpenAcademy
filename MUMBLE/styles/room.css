@@ -12,8 +12,9 @@
 }
 
 #members__container {
-  background-color: #262625;
+  background-color:  rgb(31 41 55);
   border-right: 1px solid #797a79;
+  border-top: 1px solid #797a79;
   overflow-y: auto;
   width: 90%;
   max-width: 250px;
@@ -23,7 +24,7 @@
 }
 
 #members__count {
-  background-color: #1d1d1c;
+  background-image: linear-gradient(to right, #2563eb, #7e22ce);
   padding: 7px 15px;
   font-size: 14px;
   font-weight: 600;
@@ -74,14 +75,17 @@
 }
 
 #messages__container {
-  height: calc(100vh - 85px);
-  background-color: #262625;
+  display: flex;
+  flex-direction: column;
+
+  background-color:  rgb(31 41 55);
   right: 0;
   position: absolute;
   width: 100%;
+  height: calc(100vh - 75px);
   max-width: 25rem;
   overflow-y: auto;
-  border-left: 1px solid #111;
+  border-left: 1px solid #797a79;
 }
 
 #messages {
@@ -101,10 +105,9 @@
 }
 
 .message__body {
-  background-color: #363739;
-  border-radius: 10px;
+  border-top: 1px solid grey;
+  width: 100%;
   padding: 10px 15px;
-  width: fit-content;
   max-width: 900px;
 }
 
@@ -126,7 +129,14 @@
 
 .message__author__bot {
   margin-right: 10px;
-  color: #a52aca !important;
+  background-image: linear-gradient(to right, #2563eb, #7e22ce);
+
+  /* 2. Clip the background to the text */
+  -webkit-background-clip: text; /* Required for WebKit/Blink (Chrome, Safari) */
+  background-clip: text;
+
+  /* 3. Make the text transparent */
+  color: transparent;
 }
 
 .message__text {
@@ -135,10 +145,7 @@
 
 #message__form {
   width: 23.2rem;
-  position: fixed;
-  bottom: 0;
-  display: block;
-  background-color: #1a1a1a;
+  margin-top: auto;
   padding: 1em;
 }
 
@@ -204,14 +211,13 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 2px solid #b366f9;
+  border: 2px solid #7e22ce;
   border-radius: 50%;
   cursor: pointer;
   overflow: hidden;
   height: 300px;
   width: 300px;
 
-  background-image: url("/images/logo.png");
   background-repeat: no-repeat;
   background-position: center;
   background-size: 75px;
@@ -330,7 +336,7 @@
 
 .stream__actions a.active,
 .stream__actions button.active {
-  background-color: #845695;
+  background-image: linear-gradient(to right, #2563eb, #7e22ce);
 }
 
 .stream__actions a:hover,
@@ -458,7 +464,7 @@
 }
 
 #join-btn {
-  background-color: #845695;
+  background-image: linear-gradient(to right, #2563eb, #7e22ce);
   font-size: 18px;
   padding: 25px 50px;
   border: none;
@@ -470,4 +476,9 @@
   left: 50%;
   transform: translateX(-50%);
   cursor: pointer;
+}
+
+#join-btn:hover {
+  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.25),
+              0 4px 6px -4px rgba(59, 130, 246, 0.25);
 }

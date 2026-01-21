@@ -2,7 +2,7 @@
   width: 90%;
   max-width: 600px;
   border-radius: 10px;
-  background-color: #262625;
+  background-color: rgb(31 41 55);
   position: fixed;
   top: 50%;
   left: 50%;
@@ -14,10 +14,12 @@
 }
 
 #form__container__header {
+  border-bottom: 2.5px solid rgb(17 24 39);
+
   border-radius: 10px 10px 0 0;
   padding: 10px;
   text-align: center;
-  background-color: #363739;
+  background-color: rgb(31 41 55);
   margin: 0;
   font-size: 18px;
   font-size: 300;
@@ -46,13 +48,19 @@
   border-radius: 5px;
   padding: 16px 20px;
   font-size: 15px;
-  background-color: #3f434a;
+  background-color: rgb(31 41 55);
+  border: 2px solid #374151;
+}
+
+.form__field__wrapper input::placeholder {
+  color: #374151;
+  font-weight: 600;
 }
 
 .form__field__wrapper button[type='submit'] {
   margin-top: 32px;
   cursor: pointer;
-  background-color: #845695;
+  background-image: linear-gradient(to right, #2563eb, #7e22ce);
   border: none;
   color: #fff;
   font-size: 16px;
@@ -63,6 +71,11 @@
   padding: 12px;
   border-radius: 5px;
   gap: 10px;
+}
+
+.form__field__wrapper button[type='submit']:hover {
+  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.25),
+              0 4px 6px -4px rgba(59, 130, 246, 0.25);
 }
 
 .form__field__wrapper button[type='submit'] svg {
