@@ -49,6 +49,10 @@ public class CourseService {
     return courseRepository.findCoursesByStudentId(studentId);
   }
 
+  public List<Course> getCoursesByInstructor(Long instructorId) {
+    return courseRepository.findByInstructorId(instructorId);
+  }
+
   @Transactional
   public Enrollment enrollStudent(Long courseId, Long studentId) {
     // 1. Check if already enrolled

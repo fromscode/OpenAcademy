@@ -51,17 +51,17 @@ const GradeSubmissions = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const allCourses = await courseAPI.getAllCourses();
-
-      // Filter courses taught by this instructor
-      const instructorCourses = allCourses.filter(
-        (course) => course.instructorId === user?.id
-      );
+      if (!user?.id) throw new Error("Missing teacher id");
+      const instructorCourses = await courseAPI.getInstructorCourses(user.id);
 
       setCourses(instructorCourses);
 
       if (instructorCourses.length > 0) {
         setSelectedCourse(instructorCourses[0]);
+      } else {
+        setSelectedCourse(null);
+        setAssignments([]);
+        setSubmissions([]);
       }
     } catch (err) {
       console.error("Failed to fetch courses:", err);
@@ -145,7 +145,16 @@ const GradeSubmissions = () => {
 
     return submissions.filter(
       (submission) =>
-        submission.studentId?.toString().includes(searchTerm) ||
+        submission.student?.id?.toString().includes(searchTerm) ||
+        submission.student?.fullName
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        submission.student?.firstName
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        submission.student?.lastName
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
         submission.content?.toLowerCase().includes(searchTerm.toLowerCase())
     );
   };
@@ -330,15 +339,22 @@ const GradeSubmissions = () => {
                     </div>
                     <div className="flex-1">
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
-                        Student ID: {submission.studentId}
+                        Student:{" "}
+                        {submission.student?.fullName ||
+                          `${submission.student?.firstName || ""} ${
+                            submission.student?.lastName || ""
+                          }`.trim()}{" "}
+                        <span className="font-normal text-gray-600 dark:text-gray-400">
+                          (ID: {submission.student?.id})
+                        </span>
                       </h3>
                       <div className="flex items-center gap-2 mb-2">
                         <Calendar className="h-4 w-4 text-gray-400" />
                         <span className="text-sm text-gray-600 dark:text-gray-400">
                           Submitted:{" "}
-                          {new Date(
-                            submission.submittedAt || Date.now()
-                          ).toLocaleString()}
+                          {submission.submittedAt
+                            ? new Date(submission.submittedAt).toLocaleString()
+                            : "--"}
                         </span>
                       </div>
                       <div className="mt-3 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
@@ -444,7 +460,12 @@ const GradeSubmissions = () => {
         <div className="space-y-4">
           <div>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              <strong>Student ID:</strong> {selectedSubmission?.studentId}
+              <strong>Student:</strong>{" "}
+              {selectedSubmission?.student?.fullName ||
+                `${selectedSubmission?.student?.firstName || ""} ${
+                  selectedSubmission?.student?.lastName || ""
+                }`.trim()}{" "}
+              (ID: {selectedSubmission?.student?.id})
             </p>
           </div>
 

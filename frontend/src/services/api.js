@@ -531,6 +531,17 @@ export const courseAPI = {
     return handleResponse(response);
   },
 
+  // Get courses by instructor (teacher)
+  getInstructorCourses: async (instructorId) => {
+    const response = await fetch(
+      `${BASE_URL}/courses/instructor/${instructorId}`,
+      {
+        headers: getAuthHeaders(),
+      }
+    );
+    return handleResponse(response);
+  },
+
   // Get courses a specific student is enrolled in
   getStudentCourses: async (studentId) => {
     const response = await fetch(`${BASE_URL}/courses/student/${studentId}`, {

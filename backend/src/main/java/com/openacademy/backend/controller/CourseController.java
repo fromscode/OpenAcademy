@@ -34,6 +34,13 @@ public class CourseController {
     return ResponseEntity.ok(courseService.getAllCourses());
   }
 
+  // GET /api/courses/instructor/{instructorId}
+  // Get courses created by a specific instructor (teacher)
+  @GetMapping("/instructor/{instructorId}")
+  public ResponseEntity<List<Course>> getInstructorCourses(@PathVariable Long instructorId) {
+    return ResponseEntity.ok(courseService.getCoursesByInstructor(instructorId));
+  }
+
   // GET /api/courses/student/{studentId}
   // Get courses the given student is enrolled in
   @GetMapping("/student/{studentId}")
