@@ -289,10 +289,25 @@ const TeacherDashboard = () => {
                     (submission.assignmentId ?? submission.assignment?.id)
                 );
                 const studentName =
-                  submission.student?.firstName ||
-                  submission.student?.name ||
-                  "Student";
-                const avatar = undefined;
+                  submission.student?.firstName && submission.student?.lastName
+                    ? `${submission.student.firstName} ${submission.student.lastName}`
+                    : submission.student?.name ||
+                      submission.student?.firstName ||
+                      submission.studentName ||
+                      "Student";
+                const avatarUrl =
+                  submission.student?.avatar ||
+                  submission.student?.profileImageUrl ||
+                  submission.studentAvatar ||
+                  submission.avatar ||
+                  null;
+                const initials = (name) => {
+                  if (!name || typeof name !== "string") return "";
+                  const parts = name.trim().split(/\s+/);
+                  const first = parts[0]?.[0] || "";
+                  const second = parts[1]?.[0] || "";
+                  return (first + second).toUpperCase() || first.toUpperCase();
+                };
                 const status =
                   submission.grade != null ? "graded" : "submitted";
                 const submittedDate =
@@ -306,7 +321,25 @@ const TeacherDashboard = () => {
                     className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
                   >
                     <div className="flex-shrink-0">
-                      <div className="h-8 w-8 rounded-full bg-gray-300 dark:bg-gray-600" />
+                      {avatarUrl ? (
+                        <img
+                          src={avatarUrl}
+                          alt={studentName}
+                          className="h-8 w-8 rounded-full object-cover"
+                          referrerPolicy="no-referrer"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                            const sibling = e.currentTarget.nextElementSibling;
+                            if (sibling) sibling.style.display = "flex";
+                          }}
+                        />
+                      ) : null}
+                      <div
+                        className="h-8 w-8 rounded-full bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-100 flex items-center justify-center text-xs font-semibold"
+                        style={{ display: avatarUrl ? "none" : "flex" }}
+                      >
+                        {initials(studentName)}
+                      </div>
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
