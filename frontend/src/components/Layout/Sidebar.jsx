@@ -134,20 +134,19 @@ const Sidebar = ({ isOpen, onClose }) => {
 
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+        className={`fixed top-16 bottom-0 left-0 z-40 w-64 bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        } relative`}
       >
-        <div className="flex items-center justify-end h-16 px-4 border-b border-gray-700">
-          <button
-            onClick={onClose}
-            className="p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 lg:hidden"
-          >
-            <X className="h-6 w-6" />
-          </button>
-        </div>
+        {/* Mobile close button (no header/border) */}
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 lg:hidden"
+        >
+          <X className="h-6 w-6" />
+        </button>
 
-        <nav className="mt-8 px-4">
+        <nav className="px-4 pt-4">
           <ul className="space-y-2">
             {menuItems.map((item) => {
               const Icon = item.icon;

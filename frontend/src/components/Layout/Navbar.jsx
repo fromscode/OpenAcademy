@@ -35,7 +35,7 @@ const Navbar = ({ onToggleSidebar }) => {
   };
 
   return (
-    <nav className="bg-gray-800 shadow-sm border-b border-gray-700 fixed w-full top-0 z-40">
+    <nav className="bg-gray-800 shadow-sm border-b border-gray-700 fixed w-full top-0 z-50">
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Left side */}
