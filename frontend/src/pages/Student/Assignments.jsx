@@ -73,6 +73,14 @@ const Assignments = () => {
               courseName: course.title,
               courseCode: course.courseCode,
               courseId: course.id,
+              // Derive teacher/instructor name from course instructor fields
+              teacherName: [
+                course?.instructor?.firstName,
+                course?.instructor?.middleName,
+                course?.instructor?.lastName,
+              ]
+                .filter(Boolean)
+                .join(" "),
             });
           });
         } catch (err) {
@@ -377,6 +385,13 @@ const Assignments = () => {
                             {assignment.courseCode || "N/A"})
                           </span>
                         </div>
+                        {assignment.teacherName && (
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              Instructor: {assignment.teacherName}
+                            </span>
+                          </div>
+                        )}
                         <p className="text-sm text-gray-600 dark:text-gray-400">
                           {assignment.description}
                         </p>
