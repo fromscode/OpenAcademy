@@ -138,13 +138,7 @@ const Sidebar = ({ isOpen, onClose }) => {
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-700">
-          <Link to="/dashboard" className="flex items-center">
-            <GraduationCap className="h-8 w-8 text-blue-400" />
-            <span className="ml-2 text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              OpenAcademy
-            </span>
-          </Link>
+        <div className="flex items-center justify-end h-16 px-4 border-b border-gray-700">
           <button
             onClick={onClose}
             className="p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 lg:hidden"
@@ -191,21 +185,6 @@ const Sidebar = ({ isOpen, onClose }) => {
             })}
           </ul>
         </nav>
-
-        {/* User info at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700">
-          <div className="flex items-center space-x-3">
-            <div className="h-10 w-10 rounded-full bg-gray-600 flex items-center justify-center">
-              <User className="h-6 w-6 text-gray-300" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">
-                {user?.firstName || user?.name || "User"}
-              </p>
-              <p className="text-xs text-gray-400 capitalize">{user?.role}</p>
-            </div>
-          </div>
-        </div>
       </div>
     </>
   );

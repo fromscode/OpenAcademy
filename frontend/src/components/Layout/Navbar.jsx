@@ -2,17 +2,23 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import ThemeToggle from "../Common/ThemeToggle";
-import { Bell, Search, User, Settings, LogOut, Menu, X } from "lucide-react";
+import LoadingSpinner from "../Common/LoadingSpinner";
+import { User, Settings, LogOut, Menu, X } from "lucide-react";
 
 const Navbar = ({ onToggleSidebar }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    await logout();
+    setTimeout(() => {
+      setIsLoggingOut(false);
+      navigate("/login");
+    }, 500);
   };
 
   const getUserDashboard = () => {
@@ -53,29 +59,10 @@ const Navbar = ({ onToggleSidebar }) => {
             </Link>
           </div>
 
-          {/* Center - Search */}
-          <div className="hidden md:block flex-1 max-w-lg mx-8">
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-500" />
-              </div>
-              <input
-                className="block w-full pl-10 pr-3 py-2 border border-gray-600 rounded-md leading-5 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:placeholder-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="Search..."
-                type="search"
-              />
-            </div>
-          </div>
-
           {/* Right side */}
           <div className="flex items-center space-x-4">
             {/* Theme Toggle */}
             <ThemeToggle />
-
-            {/* Notifications */}
-            <button className="p-2 rounded-full text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <Bell className="h-6 w-6" />
-            </button>
 
             {/* User menu */}
             <div className="relative">
@@ -87,9 +74,8 @@ const Navbar = ({ onToggleSidebar }) => {
                   <User className="h-5 w-5 text-gray-300" />
                 </div>
                 <div className="hidden md:block text-left">
-                  <p className="text-sm font-medium text-white">{user?.name}</p>
-                  <p className="text-xs text-gray-400 capitalize">
-                    {user?.role}
+                  <p className="text-sm font-medium text-white">
+                    {user?.firstName || user?.name}
                   </p>
                 </div>
               </button>
@@ -120,6 +106,16 @@ const Navbar = ({ onToggleSidebar }) => {
           </div>
         </div>
       </div>
+
+      {/* Logout Spinner Overlay */}
+      {isLoggingOut && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-gray-800 rounded-lg p-6 flex flex-col items-center space-y-4">
+            <LoadingSpinner size="lg" />
+            <p className="text-white text-lg font-medium">Logging out...</p>
+          </div>
+        </div>
+      )}
     </nav>
   );
 };
