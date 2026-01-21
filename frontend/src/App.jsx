@@ -19,7 +19,6 @@ import StudentDashboard from "./pages/Student/StudentDashboard";
 import Courses from "./pages/Student/Courses";
 import Assignments from "./pages/Student/Assignments";
 import Grades from "./pages/Student/Grades";
-import Schedule from "./pages/Student/Schedule";
 import Messages from "./pages/Messages/Messages";
 import Settings from "./pages/Settings/Settings";
 import DashboardLayout from "./components/Layout/DashboardLayout";
@@ -192,14 +191,7 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
-                <Route
-                  path="student/schedule"
-                  element={
-                    <ProtectedRoute allowedRoles={["student"]}>
-                      <Schedule />
-                    </ProtectedRoute>
-                  }
-                />
+                {/** Schedule route removed for students **/}
 
                 {/* Shared Routes */}
                 <Route

@@ -107,11 +107,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             path: "/dashboard/student/assignments",
           },
           { icon: Award, label: "Grades", path: "/dashboard/student/grades" },
-          {
-            icon: Calendar,
-            label: "Schedule",
-            path: "/dashboard/student/schedule",
-          },
+          // Schedule removed from student menu
           {
             icon: MessageSquare,
             label: "Messages",
