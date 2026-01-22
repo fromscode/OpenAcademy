@@ -582,15 +582,13 @@ const Messages = () => {
                   >
                     <Users className="h-5 w-5" />
                   </button>
-                  {user?.role?.toLowerCase() === "student" && (
-                    <button
-                      onClick={() => setShowLeaveConfirm(true)}
-                      className="p-2 text-red-400 hover:text-red-600 dark:hover:text-red-300"
-                      title="Leave Group"
-                    >
-                      <LogOut className="h-5 w-5" />
-                    </button>
-                  )}
+                  <button
+                    onClick={() => setShowLeaveConfirm(true)}
+                    className="p-2 text-red-400 hover:text-red-600 dark:hover:text-red-300"
+                    title="Leave Group"
+                  >
+                    <LogOut className="h-5 w-5" />
+                  </button>
                 </div>
               </div>
 
@@ -604,8 +602,6 @@ const Messages = () => {
                     <>
                       {messages.map((message) => {
                         const isOwnMessage = message.senderId === user.id;
-                        const isStudent =
-                          user?.role?.toLowerCase() === "student";
                         return (
                           <div
                             key={message.id}
@@ -647,8 +643,8 @@ const Messages = () => {
                                     })}
                                   </p>
                                 </div>
-                                {/* Show delete button only for student's own messages */}
-                                {isOwnMessage && isStudent && (
+                                {/* Show delete button for your own messages (all roles) */}
+                                {isOwnMessage && (
                                   <button
                                     onClick={() => setMessageToDelete(message)}
                                     className="p-1 text-red-400 hover:text-red-600 dark:hover:text-red-300 opacity-0 group-hover/message:opacity-100 transition-opacity flex-shrink-0 mt-1"

@@ -6,7 +6,6 @@ import {
   Users,
   BookOpen,
   FileText,
-  BarChart3,
   MessageSquare,
   Settings,
   GraduationCap,
@@ -43,16 +42,6 @@ const Sidebar = ({ isOpen, onClose }) => {
             path: "/dashboard/admin/courses",
           },
           {
-            icon: FileText,
-            label: "Assignments",
-            path: "/dashboard/admin/assignments",
-          },
-          {
-            icon: BarChart3,
-            label: "Reports",
-            path: "/dashboard/admin/reports",
-          },
-          {
             icon: MessageSquare,
             label: "Messages",
             path: "/dashboard/messages",
@@ -72,6 +61,11 @@ const Sidebar = ({ isOpen, onClose }) => {
             path: "/dashboard/teacher/courses",
           },
           {
+            icon: FileText,
+            label: "Assignments",
+            path: "/dashboard/teacher/assignments",
+          },
+          {
             icon: Award,
             label: "Grade Submissions",
             path: "/dashboard/teacher/grade-submissions",
@@ -81,7 +75,6 @@ const Sidebar = ({ isOpen, onClose }) => {
             label: "Messages",
             path: "/dashboard/messages",
           },
-          { icon: Settings, label: "Settings", path: "/dashboard/settings" },
         ];
       case "student":
         return [
@@ -106,14 +99,12 @@ const Sidebar = ({ isOpen, onClose }) => {
             label: "Assignments",
             path: "/dashboard/student/assignments",
           },
-          { icon: Award, label: "Grades", path: "/dashboard/student/grades" },
           // Schedule removed from student menu
           {
             icon: MessageSquare,
             label: "Messages",
             path: "/dashboard/messages",
           },
-          { icon: Settings, label: "Settings", path: "/dashboard/settings" },
         ];
       default:
         return [];
@@ -134,26 +125,19 @@ const Sidebar = ({ isOpen, onClose }) => {
 
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+        className={`fixed top-16 bottom-0 left-0 z-40 w-64 bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        } relative`}
       >
-        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-700">
-          <Link to="/dashboard" className="flex items-center">
-            <GraduationCap className="h-8 w-8 text-blue-400" />
-            <span className="ml-2 text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              OpenAcademy
-            </span>
-          </Link>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 lg:hidden"
-          >
-            <X className="h-6 w-6" />
-          </button>
-        </div>
+        {/* Mobile close button (no header/border) */}
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 lg:hidden"
+        >
+          <X className="h-6 w-6" />
+        </button>
 
-        <nav className="mt-8 px-4">
+        <nav className="px-4 pt-4">
           <ul className="space-y-2">
             {menuItems.map((item) => {
               const Icon = item.icon;
@@ -191,21 +175,6 @@ const Sidebar = ({ isOpen, onClose }) => {
             })}
           </ul>
         </nav>
-
-        {/* User info at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700">
-          <div className="flex items-center space-x-3">
-            <div className="h-10 w-10 rounded-full bg-gray-600 flex items-center justify-center">
-              <User className="h-6 w-6 text-gray-300" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">
-                {user?.firstName || user?.name || "User"}
-              </p>
-              <p className="text-xs text-gray-400 capitalize">{user?.role}</p>
-            </div>
-          </div>
-        </div>
       </div>
     </>
   );

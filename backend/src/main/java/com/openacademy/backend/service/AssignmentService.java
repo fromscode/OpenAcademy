@@ -40,6 +40,11 @@ public class AssignmentService {
     return assignmentRepository.findByCourseId(courseId);
   }
 
+  public Assignment getAssignmentById(Long assignmentId) {
+    return assignmentRepository.findById(assignmentId)
+        .orElseThrow(() -> new RuntimeException("Assignment not found"));
+  }
+
   // Optional: Update Assignment (e.g., extend deadline)
   public Assignment updateAssignment(Long assignmentId, CreateAssignmentRequest request) {
     Assignment assignment = assignmentRepository.findById(assignmentId)

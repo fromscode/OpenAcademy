@@ -10,7 +10,12 @@ import {
   BookOpen,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
-import { courseAPI, assignmentAPI, submissionAPI } from "../../services/api";
+import {
+  courseAPI,
+  assignmentAPI,
+  submissionAPI,
+  gradingAPI,
+} from "../../services/api";
 import LoadingSpinner from "../../components/Common/LoadingSpinner";
 import Modal from "../../components/Common/Modal";
 
@@ -28,18 +33,33 @@ const Assignments = () => {
     fileUrl: "",
   });
   const [submittedMap, setSubmittedMap] = useState({}); // assignmentId -> submission object
+  const [showGradeModal, setShowGradeModal] = useState(false);
+  const [gradeLoading, setGradeLoading] = useState(false);
+  const [gradeError, setGradeError] = useState(null);
+  const [gradeDetails, setGradeDetails] = useState(null); // fetched grade details for selected submission
+  const [selectedGradedAssignment, setSelectedGradedAssignment] =
+    useState(null);
+  const [selectedSubmission, setSelectedSubmission] = useState(null);
 
   useEffect(() => {
-    fetchAssignments();
-  }, []);
+    // Refetch when the authenticated user becomes available/changes
+    if (user?.id) fetchAssignments();
+  }, [user?.id]);
 
   const fetchAssignments = async () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      // Get all courses first
-      const courses = await courseAPI.getAllCourses();
+      // Get only courses the current student is enrolled in
+      if (!user?.id) {
+        setStudentAssignments([]);
+        setSubmittedMap({});
+        setIsLoading(false);
+        return;
+      }
+
+      const courses = await courseAPI.getStudentCourses(user.id);
 
       // Get assignments for each course
       const allAssignments = [];
@@ -53,6 +73,14 @@ const Assignments = () => {
               courseName: course.title,
               courseCode: course.courseCode,
               courseId: course.id,
+              // Derive teacher/instructor name from course instructor fields
+              teacherName: [
+                course?.instructor?.firstName,
+                course?.instructor?.middleName,
+                course?.instructor?.lastName,
+              ]
+                .filter(Boolean)
+                .join(" "),
             });
           });
         } catch (err) {
@@ -67,21 +95,19 @@ const Assignments = () => {
 
       // Fetch submission status for each assignment for this student
       const map = {};
-      if (user?.id) {
-        await Promise.all(
-          allAssignments.map(async (a) => {
-            try {
-              const sub = await submissionAPI.getStudentSubmissionForAssignment(
-                a.id,
-                user.id
-              );
-              if (sub) map[a.id] = sub;
-            } catch (e) {
-              // ignore per-assignment errors to avoid blocking the page
-            }
-          })
-        );
-      }
+      await Promise.all(
+        allAssignments.map(async (a) => {
+          try {
+            const sub = await submissionAPI.getStudentSubmissionForAssignment(
+              a.id,
+              user.id
+            );
+            if (sub) map[a.id] = sub;
+          } catch (e) {
+            // ignore per-assignment errors to avoid blocking the page
+          }
+        })
+      );
       setSubmittedMap(map);
     } catch (err) {
       console.error("Failed to fetch assignments:", err);
@@ -130,6 +156,31 @@ const Assignments = () => {
     setSelectedAssignment(assignment);
     setShowSubmitModal(true);
     setError(null);
+  };
+
+  const openViewGrade = async (assignment, submission) => {
+    setSelectedGradedAssignment(assignment);
+    setSelectedSubmission(submission);
+    setShowGradeModal(true);
+    setGradeError(null);
+    setGradeDetails(null);
+    // Try fetching detailed grade; fall back to submission data if API not available
+    try {
+      setGradeLoading(true);
+      if (submission?.id) {
+        const details = await gradingAPI.student.getGradeBySubmission(
+          submission.id
+        );
+        setGradeDetails(details);
+      } else {
+        setGradeDetails(null);
+      }
+    } catch (e) {
+      // If endpoint not available or fails, we'll still show basic submission grade
+      setGradeDetails(null);
+    } finally {
+      setGradeLoading(false);
+    }
   };
 
   const getFilteredAssignments = () => {
@@ -334,6 +385,13 @@ const Assignments = () => {
                             {assignment.courseCode || "N/A"})
                           </span>
                         </div>
+                        {assignment.teacherName && (
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              Instructor: {assignment.teacherName}
+                            </span>
+                          </div>
+                        )}
                         <p className="text-sm text-gray-600 dark:text-gray-400">
                           {assignment.description}
                         </p>
@@ -394,9 +452,18 @@ const Assignments = () => {
                   {/* Action Button */}
                   <div className="mt-4 flex justify-end">
                     {alreadySubmitted ? (
-                      <span className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium">
-                        {isGradedSubmission ? "Graded" : "Already submitted"}
-                      </span>
+                      isGradedSubmission ? (
+                        <button
+                          onClick={() => openViewGrade(assignment, submission)}
+                          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+                        >
+                          View Grade
+                        </button>
+                      ) : (
+                        <span className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium">
+                          Already submitted
+                        </span>
+                      )
                     ) : (
                       <button
                         onClick={() => openSubmitModal(assignment)}
@@ -503,6 +570,91 @@ const Assignments = () => {
             </button>
           </div>
         </div>
+      </Modal>
+
+      {/* View Grade Modal */}
+      <Modal
+        isOpen={showGradeModal}
+        onClose={() => {
+          setShowGradeModal(false);
+          setSelectedGradedAssignment(null);
+          setSelectedSubmission(null);
+          setGradeDetails(null);
+          setGradeError(null);
+          setGradeLoading(false);
+        }}
+        title="Assignment Grade"
+      >
+        {gradeLoading ? (
+          <div className="flex items-center justify-center h-32">
+            <LoadingSpinner size="md" />
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {gradeError && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                {gradeError}
+              </div>
+            )}
+
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+                {selectedGradedAssignment?.title}
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {selectedGradedAssignment?.courseName} (
+                {selectedGradedAssignment?.courseCode})
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/40">
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Grade
+                </p>
+                <p className="text-2xl font-bold text-green-700 dark:text-green-300">
+                  {gradeDetails?.grade ?? selectedSubmission?.grade ?? "—"}
+                </p>
+              </div>
+              <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-900/40">
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Max Score
+                </p>
+                <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">
+                  {selectedGradedAssignment?.maxScore ?? "—"}
+                </p>
+              </div>
+              <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/40">
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Status
+                </p>
+                <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+                  Graded
+                </p>
+              </div>
+            </div>
+
+            {(gradeDetails?.feedback || selectedSubmission?.feedback) && (
+              <div>
+                <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                  Feedback
+                </p>
+                <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200">
+                  {gradeDetails?.feedback ?? selectedSubmission?.feedback}
+                </div>
+              </div>
+            )}
+
+            {(gradeDetails?.gradedAt || selectedSubmission?.gradedAt) && (
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Graded on:{" "}
+                {new Date(
+                  gradeDetails?.gradedAt || selectedSubmission?.gradedAt
+                ).toLocaleString()}
+              </p>
+            )}
+          </div>
+        )}
       </Modal>
     </div>
   );

@@ -35,6 +35,13 @@ public class AssignmentController {
     return ResponseEntity.ok(assignmentService.getAssignmentsByCourse(courseId));
   }
 
+  // GET /api/assignments/{id}
+  // Get a single assignment by id
+  @GetMapping("/assignments/{id}")
+  public ResponseEntity<Assignment> getAssignment(@PathVariable Long id) {
+    return ResponseEntity.ok(assignmentService.getAssignmentById(id));
+  }
+
   // PUT /api/assignments/{id}
   // Update details
   @PutMapping("/assignments/{id}")
