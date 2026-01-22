@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.openacademy.backend.dto.CourseDTO;
 import com.openacademy.backend.dto.CreateCourseRequest;
 import com.openacademy.backend.dto.EnrollRequest;
 import com.openacademy.backend.entities.Course;
@@ -30,8 +31,8 @@ public class CourseController {
   // GET /api/courses
   // Get all available courses
   @GetMapping
-  public ResponseEntity<List<Course>> getAllCourses() {
-    return ResponseEntity.ok(courseService.getAllCourses());
+  public ResponseEntity<List<CourseDTO>> getAllCourses() {
+    return ResponseEntity.ok(courseService.getAllCoursesDTO());
   }
 
   // GET /api/courses/instructor/{instructorId}

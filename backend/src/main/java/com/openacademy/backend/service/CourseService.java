@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import com.openacademy.backend.dto.CourseDTO;
 import com.openacademy.backend.dto.CreateCourseRequest;
 import com.openacademy.backend.entities.Course;
 import com.openacademy.backend.entities.Enrollment;
@@ -14,6 +15,7 @@ import com.openacademy.backend.repository.EnrollmentRepository;
 import com.openacademy.backend.repository.UserRepository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -44,6 +46,13 @@ public class CourseService {
   public List<Course> getAllCourses() {
     return courseRepository.findAll();
   }
+  
+  public List<CourseDTO> getAllCoursesDTO() {
+    List<Course> courses = courseRepository.findAll();
+    return courses.stream()
+        .map(this::convertToCourseDTO)
+        .collect(Collectors.toList());
+  }
 
   public List<Course> getCoursesForStudent(Long studentId) {
     return courseRepository.findCoursesByStudentId(studentId);
@@ -51,6 +60,28 @@ public class CourseService {
 
   public List<Course> getCoursesByInstructor(Long instructorId) {
     return courseRepository.findByInstructorId(instructorId);
+  }
+  
+  // Helper method to convert Course entity to CourseDTO
+  private CourseDTO convertToCourseDTO(Course course) {
+    User instructor = course.getInstructor();
+    
+    return CourseDTO.builder()
+        .id(course.getId())
+        .title(course.getTitle())
+        .description(course.getDescription())
+        .courseCode(course.getCourseCode())
+        .maxStudents(course.getMaxStudents())
+        .startDate(course.getStartDate())
+        .endDate(course.getEndDate())
+        .status(course.getStatus())
+        .instructorId(instructor != null ? instructor.getId() : null)
+        .instructorName(instructor != null ? instructor.getFullName() : null)
+        .instructorEmail(instructor != null ? instructor.getEmail() : null)
+        .createdAt(course.getCreatedAt())
+        .updatedAt(course.getUpdatedAt())
+        .enrolledStudentsCount(course.getEnrollments() != null ? course.getEnrollments().size() : 0)
+        .build();
   }
 
   @Transactional
