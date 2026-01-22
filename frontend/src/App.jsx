@@ -10,7 +10,6 @@ import { ThemeProvider } from "./context/ThemeContext";
 import LandingPage from "./pages/Landing/LandingPage";
 import Login from "./pages/Auth/Login";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
-import Students from "./pages/Admin/Students";
 import AdminCourses from "./pages/Admin/Courses";
 import TeacherDashboard from "./pages/Teacher/TeacherDashboard";
 import ManageCourses from "./pages/Teacher/ManageCourses";
@@ -113,14 +112,6 @@ function App() {
                   element={
                     <ProtectedRoute allowedRoles={["admin"]}>
                       <AdminDashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="admin/students"
-                  element={
-                    <ProtectedRoute allowedRoles={["admin"]}>
-                      <Students />
                     </ProtectedRoute>
                   }
                 />

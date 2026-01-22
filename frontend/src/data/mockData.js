@@ -5,51 +5,6 @@
 // Mock users for development/testing (REMOVE WHEN BACKEND IS READY)
 export const mockUsers = [];
 
-export const mockStudents = [
-  {
-    id: 1,
-    name: "Mike Johnson",
-    email: "mike.johnson@student.openacademy.com",
-    studentId: "STU001",
-    phone: "+1 234-567-8901",
-    dateOfBirth: "2001-05-15",
-    address: "123 Oak Street, City, State 12345",
-    enrollmentDate: "2023-09-01",
-    status: "active",
-    courses: [1, 2],
-    avatar:
-      "https://images.pexels.com/photos/1043471/pexels-photo-1043471.jpeg?auto=compress&cs=tinysrgb&w=150",
-  },
-  {
-    id: 2,
-    name: "Emily Davis",
-    email: "emily.davis@student.openacademy.com",
-    studentId: "STU002",
-    phone: "+1 234-567-8902",
-    dateOfBirth: "2000-12-22",
-    address: "456 Pine Avenue, City, State 12345",
-    enrollmentDate: "2023-09-01",
-    status: "active",
-    courses: [1, 3],
-    avatar:
-      "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150",
-  },
-  {
-    id: 3,
-    name: "David Wilson",
-    email: "david.wilson@student.openacademy.com",
-    studentId: "STU003",
-    phone: "+1 234-567-8903",
-    dateOfBirth: "2001-08-10",
-    address: "789 Elm Drive, City, State 12345",
-    enrollmentDate: "2023-09-01",
-    status: "active",
-    courses: [2, 3],
-    avatar:
-      "https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=150",
-  },
-];
-
 export const mockTeachers = [
   {
     id: 1,
@@ -90,10 +45,13 @@ export const mockCourses = [
     id: 1,
     title: "Introduction to Web Development",
     code: "CS101",
+    courseCode: "CS101",
     description:
       "Learn the basics of HTML, CSS, and JavaScript to build modern web applications.",
     teacherId: 1,
     teacherName: "Sarah Wilson",
+    instructorId: 1,
+    instructorName: "Sarah Wilson",
     credits: 3,
     duration: "16 weeks",
     schedule: "Mon, Wed, Fri - 10:00 AM",
@@ -106,10 +64,13 @@ export const mockCourses = [
     id: 2,
     title: "Advanced JavaScript",
     code: "CS201",
+    courseCode: "CS201",
     description:
       "Deep dive into JavaScript frameworks, async programming, and modern development practices.",
     teacherId: 1,
     teacherName: "Sarah Wilson",
+    instructorId: 1,
+    instructorName: "Sarah Wilson",
     credits: 4,
     duration: "16 weeks",
     schedule: "Tue, Thu - 2:00 PM",
@@ -122,9 +83,12 @@ export const mockCourses = [
     id: 3,
     title: "Calculus I",
     code: "MATH101",
+    courseCode: "MATH101",
     description: "Fundamental concepts of differential and integral calculus.",
     teacherId: 2,
     teacherName: "Robert Brown",
+    instructorId: 2,
+    instructorName: "Robert Brown",
     credits: 4,
     duration: "16 weeks",
     schedule: "Mon, Wed, Fri - 9:00 AM",
@@ -226,42 +190,7 @@ export const mockMessages = [
   },
 ];
 
-// Mock grades for students
-export const mockGrades = [
-  {
-    id: 1,
-    studentId: 1,
-    courseId: 1,
-    courseName: "Introduction to Web Development",
-    courseCode: "CS101",
-    assignmentScores: [
-      { name: "Build a Portfolio Website", score: 85, maxScore: 100 },
-      { name: "HTML/CSS Quiz", score: 92, maxScore: 100 },
-      { name: "JavaScript Project", score: 88, maxScore: 100 },
-    ],
-    midtermScore: 87,
-    finalScore: null,
-    currentGrade: "B+",
-    letterGrade: "B+",
-    percentage: 87.5,
-  },
-  {
-    id: 2,
-    studentId: 1,
-    courseId: 2,
-    courseName: "Advanced JavaScript",
-    courseCode: "CS201",
-    assignmentScores: [
-      { name: "JavaScript Functions Exercise", score: 78, maxScore: 100 },
-      { name: "Async Programming", score: 85, maxScore: 100 },
-    ],
-    midtermScore: 82,
-    finalScore: null,
-    currentGrade: "B",
-    letterGrade: "B",
-    percentage: 81.7,
-  },
-];
+
 
 // Mock schedule for students
 export const mockSchedule = [
@@ -298,51 +227,7 @@ export const mockSchedule = [
     studentId: 1,
     courseId: 3,
     courseName: "Calculus I",
-    courseCode: "MATH101",
-    teacherName: "Robert Brown",
-    room: "Room 101",
-    building: "Mathematics Building",
-    days: ["Monday", "Wednesday", "Friday"],
-    startTime: "9:00 AM",
-    endTime: "10:00 AM",
-    color: "#10B981", // green
-  },
-];
-
-// Mock student assignments with submission status
-export const mockStudentAssignments = [
-  {
-    id: 1,
-    assignmentId: 1,
-    studentId: 1,
-    title: "Build a Portfolio Website",
-    description:
-      "Create a personal portfolio website using HTML, CSS, and JavaScript.",
-    courseId: 1,
-    courseName: "Introduction to Web Development",
-    courseCode: "CS101",
-    dueDate: "2024-02-15",
-    submittedDate: "2024-02-14",
-    status: "graded",
-    grade: 85,
-    maxGrade: 100,
-    feedback:
-      "Great work! The design is clean and the code is well-structured.",
-  },
-  {
-    id: 2,
-    assignmentId: 2,
-    studentId: 1,
-    title: "JavaScript Functions Exercise",
-    description:
-      "Complete the JavaScript functions worksheet with proper documentation.",
-    courseId: 2,
-    courseName: "Advanced JavaScript",
-    courseCode: "CS201",
-    dueDate: "2024-02-20",
-    submittedDate: "2024-02-19",
-    status: "submitted",
-    grade: null,
+  grade: null,
     maxGrade: 50,
     feedback: null,
   },
@@ -353,48 +238,3 @@ export const mockStudentAssignments = [
     title: "Derivative Problems Set",
     description:
       "Solve the provided calculus problems focusing on derivatives.",
-    courseId: 3,
-    courseName: "Calculus I",
-    courseCode: "MATH101",
-    dueDate: "2024-02-18",
-    submittedDate: null,
-    status: "pending",
-    grade: null,
-    maxGrade: 75,
-    feedback: null,
-  },
-  {
-    id: 4,
-    assignmentId: 4,
-    studentId: 1,
-    title: "Responsive Design Project",
-    description:
-      "Create a responsive website that works on mobile, tablet, and desktop.",
-    courseId: 1,
-    courseName: "Introduction to Web Development",
-    courseCode: "CS101",
-    dueDate: "2024-03-01",
-    submittedDate: null,
-    status: "not_started",
-    grade: null,
-    maxGrade: 100,
-    feedback: null,
-  },
-  {
-    id: 5,
-    assignmentId: 5,
-    studentId: 1,
-    title: "Promise and Async/Await",
-    description:
-      "Implement asynchronous JavaScript using Promises and Async/Await patterns.",
-    courseId: 2,
-    courseName: "Advanced JavaScript",
-    courseCode: "CS201",
-    dueDate: "2024-02-25",
-    submittedDate: null,
-    status: "in_progress",
-    grade: null,
-    maxGrade: 75,
-    feedback: null,
-  },
-];

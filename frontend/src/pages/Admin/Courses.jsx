@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { courseAPI } from "../../services/api";
 import LoadingSpinner from "../../components/Common/LoadingSpinner";
+import Modal from "../../components/Common/Modal";
 
 const AdminCourses = () => {
   const [courses, setCourses] = useState([]);
@@ -49,6 +50,11 @@ const AdminCourses = () => {
   const handleViewCourse = (course) => {
     setSelectedCourse(course);
     fetchCourseAssignments(course.id);
+  };
+
+  const closeCourseModal = () => {
+    setSelectedCourse(null);
+    setCourseAssignments([]);
   };
 
   const getFilteredCourses = () => {
@@ -260,7 +266,12 @@ const AdminCourses = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900 dark:text-white">
-                          Instructor ID: {course.instructorId}
+                          Instructor ID:{" "}
+                          {course.instructorId ?? course.teacherId ?? "N/A"}
+                        </div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          Name:{" "}
+                          {course.instructorName ?? course.teacherName ?? "N/A"}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -310,54 +321,76 @@ const AdminCourses = () => {
           </div>
         )}
 
-        {/* Course Details Panel */}
-        {selectedCourse && (
-          <div className="mt-8 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <div className="flex justify-between items-start mb-6">
+        {/* Course Details Modal */}
+        <Modal
+          isOpen={!!selectedCourse}
+          onClose={closeCourseModal}
+          title={selectedCourse ? selectedCourse.title : "Course Details"}
+          size="lg"
+        >
+          {selectedCourse && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Code
+                  </p>
+                  <p className="text-gray-900 dark:text-white font-medium">
+                    {selectedCourse.courseCode ?? selectedCourse.code ?? "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Status
+                  </p>
+                  <p className="text-gray-900 dark:text-white font-medium">
+                    {(() => {
+                      const now = new Date();
+                      const start = new Date(selectedCourse.startDate);
+                      const end = new Date(selectedCourse.endDate);
+                      if (start <= now && now <= end) return "active";
+                      if (end < now) return "completed";
+                      return "upcoming";
+                    })()}
+                  </p>
+                </div>
+              </div>
+
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                  {selectedCourse.title}
-                </h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Instructor
+                </p>
+                <p className="text-gray-900 dark:text-white font-medium">
+                  ID:{" "}
+                  {selectedCourse.instructorId ??
+                    selectedCourse.teacherId ??
+                    "N/A"}
+                </p>
                 <p className="text-gray-600 dark:text-gray-400">
-                  {selectedCourse.courseCode}
+                  Name:{" "}
+                  {selectedCourse.instructorName ??
+                    selectedCourse.teacherName ??
+                    "N/A"}
                 </p>
               </div>
-              <button
-                onClick={() => setSelectedCourse(null)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-              >
-                ✕
-              </button>
-            </div>
 
-            <div className="space-y-4">
               <div>
-                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Duration
+                </p>
+                <p className="text-gray-900 dark:text-white font-medium">
+                  {new Date(selectedCourse.startDate).toLocaleDateString()} -{" "}
+                  {new Date(selectedCourse.endDate).toLocaleDateString()}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
                   Description
-                </h3>
+                </p>
                 <p className="text-gray-900 dark:text-white">
                   {selectedCourse.description}
                 </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                    Instructor ID
-                  </h3>
-                  <p className="text-gray-900 dark:text-white">
-                    {selectedCourse.instructorId}
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                    Duration
-                  </h3>
-                  <p className="text-gray-900 dark:text-white">
-                    {new Date(selectedCourse.startDate).toLocaleDateString()} -{" "}
-                    {new Date(selectedCourse.endDate).toLocaleDateString()}
-                  </p>
-                </div>
               </div>
 
               <div>
@@ -402,8 +435,8 @@ const AdminCourses = () => {
                 )}
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </Modal>
       </div>
     </div>
   );

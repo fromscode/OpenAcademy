@@ -30,7 +30,6 @@ const Sidebar = ({ isOpen, onClose }) => {
             label: "Dashboard",
             path: "/dashboard/admin/dashboard",
           },
-          { icon: Users, label: "Students", path: "/dashboard/admin/students" },
           {
             icon: UserCheck,
             label: "Teachers",
