@@ -6,7 +6,6 @@ import {
   Users,
   BookOpen,
   FileText,
-  BarChart3,
   MessageSquare,
   Settings,
   GraduationCap,
@@ -41,16 +40,6 @@ const Sidebar = ({ isOpen, onClose }) => {
             icon: BookOpen,
             label: "Courses",
             path: "/dashboard/admin/courses",
-          },
-          {
-            icon: FileText,
-            label: "Assignments",
-            path: "/dashboard/admin/assignments",
-          },
-          {
-            icon: BarChart3,
-            label: "Reports",
-            path: "/dashboard/admin/reports",
           },
           {
             icon: MessageSquare,
