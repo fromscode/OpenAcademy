@@ -2,10 +2,9 @@ import React, { useState } from "react";
 import { Plus, Edit, Trash2, Eye } from "lucide-react";
 import DataTable from "../../components/Common/DataTable";
 import Modal from "../../components/Common/Modal";
-import { mockStudents } from "../../data/mockData";
 
 const Students = () => {
-  const [students, setStudents] = useState(mockStudents);
+  const [students, setStudents] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [modalType, setModalType] = useState("create"); // 'create', 'edit', 'view'
