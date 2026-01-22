@@ -139,6 +139,9 @@ a {
   gap: 1rem;
   align-items: center;
   height: 42px;
+  background-image: linear-gradient(to right, #60a5fa, #c084fc);
+  -webkit-background-clip: text; /* Required for WebKit/Blink (Chrome, Safari) */
+  background-clip: text;
 }
 
 #members__button,
@@ -198,16 +201,7 @@ a {
   background-color: #374151
 }
 
+
 .open-academy {
-  background-image: linear-gradient(to right, #60a5fa, #c084fc);
-
-  /* 2. Clip the background to the text */
-  -webkit-background-clip: text; /* Required for WebKit/Blink (Chrome, Safari) */
-  background-clip: text;
-
-  /* 3. Make the text transparent */
   color: transparent;
-  font-size: 20px;
-
-  z-index: 2;
 }
