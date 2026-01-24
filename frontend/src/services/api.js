@@ -171,8 +171,6 @@ export const gradingAPI = {
   },
 };
 
-// (removed unused FILE HANDLING and BASIC OPERATIONS APIs)
-
 // ===================================================================
 // COURSE API - Course management functionality
 // ===================================================================
@@ -203,9 +201,6 @@ export const courseAPI = {
     });
     return handleResponse(response);
   },
-
-  // Get course by ID
-  // (unused)
 
   // Create course (Teacher/Admin only)
   createCourse: async (courseData) => {
@@ -275,9 +270,6 @@ export const courseAPI = {
 // ASSIGNMENT API - Assignment management functionality
 // ===================================================================
 export const assignmentAPI = {
-  // Get assignment by ID
-  // (unused)
-
   // Get all submissions for an assignment
   getAssignmentSubmissions: async (assignmentId) => {
     const response = await fetch(
@@ -312,16 +304,12 @@ export const assignmentAPI = {
     return handleResponse(response);
   },
 
-  // Delete assignment
-  // (unused)
 };
 
 // ===================================================================
 // SUBMISSION API - Submission management functionality
 // ===================================================================
 export const submissionAPI = {
-  // Get submission by ID
-  // (unused)
 
   // Get the current student's submission for an assignment (if any)
   getStudentSubmissionForAssignment: async (assignmentId, studentId) => {
@@ -345,12 +333,6 @@ export const submissionAPI = {
     );
     return handleResponse(response);
   },
-
-  // Update submission
-  // (unused)
-
-  // Delete submission
-  // (unused)
 };
 
 // ===================================================================
