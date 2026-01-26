@@ -55,31 +55,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    try {
-      // Call backend logout endpoint based on user role
-      if (user && user.role) {
-        switch (user.role) {
-          case "student":
-            await authAPI.student.logout();
-            break;
-          case "teacher":
-            await authAPI.teacher.logout();
-            break;
-          case "admin":
-            await authAPI.admin.logout();
-            break;
-          default:
-            console.warn("Unknown user role, proceeding with local logout");
-        }
-      }
-    } catch (error) {
-      console.error("Logout error:", error);
-      // Continue with local logout even if backend call fails
-    } finally {
-      setUser(null);
-      sessionStorage.removeItem("openacademy_user");
-      sessionStorage.removeItem("openacademy_token");
-    }
+    // Clear local session
+    setUser(null);
+    sessionStorage.removeItem("openacademy_user");
+    sessionStorage.removeItem("openacademy_token");
   };
 
   const register = async (userData) => {

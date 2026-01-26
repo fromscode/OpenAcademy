@@ -10,12 +10,7 @@ import {
   BookOpen,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
-import {
-  courseAPI,
-  assignmentAPI,
-  submissionAPI,
-  gradingAPI,
-} from "../../services/api";
+import { courseAPI, assignmentAPI, submissionAPI } from "../../services/api";
 import LoadingSpinner from "../../components/Common/LoadingSpinner";
 import Modal from "../../components/Common/Modal";
 
@@ -163,24 +158,9 @@ const Assignments = () => {
     setSelectedSubmission(submission);
     setShowGradeModal(true);
     setGradeError(null);
+    // Display basic submission data (grade is already in submission object)
     setGradeDetails(null);
-    // Try fetching detailed grade; fall back to submission data if API not available
-    try {
-      setGradeLoading(true);
-      if (submission?.id) {
-        const details = await gradingAPI.student.getGradeBySubmission(
-          submission.id
-        );
-        setGradeDetails(details);
-      } else {
-        setGradeDetails(null);
-      }
-    } catch (e) {
-      // If endpoint not available or fails, we'll still show basic submission grade
-      setGradeDetails(null);
-    } finally {
-      setGradeLoading(false);
-    }
+    setGradeLoading(false);
   };
 
   const getFilteredAssignments = () => {

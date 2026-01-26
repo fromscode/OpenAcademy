@@ -59,14 +59,6 @@ export const authAPI = {
       });
       return handleResponse(response);
     },
-
-    logout: async () => {
-      const response = await fetch(`${BASE_URL}/auth/student/logout`, {
-        method: "POST",
-        headers: getAuthHeaders(),
-      });
-      return handleResponse(response);
-    },
   },
 
   // Teacher Authentication
@@ -88,14 +80,6 @@ export const authAPI = {
       });
       return handleResponse(response);
     },
-
-    logout: async () => {
-      const response = await fetch(`${BASE_URL}/auth/teacher/logout`, {
-        method: "POST",
-        headers: getAuthHeaders(),
-      });
-      return handleResponse(response);
-    },
   },
 
   // Admin Authentication
@@ -114,14 +98,6 @@ export const authAPI = {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userData),
-      });
-      return handleResponse(response);
-    },
-
-    logout: async () => {
-      const response = await fetch(`${BASE_URL}/auth/admin/logout`, {
-        method: "POST",
-        headers: getAuthHeaders(),
       });
       return handleResponse(response);
     },
@@ -148,26 +124,6 @@ export const dashboardAPI = {
       },
     });
     return handleResponse(response);
-  },
-};
-
-// ===================================================================
-// GRADING & FEEDBACK API - Essential for grading functionality
-// ===================================================================
-export const gradingAPI = {
-  // Removed teacher-specific grading operations (unused)
-
-  // Student grade viewing
-  student: {
-    getGradeBySubmission: async (submissionId) => {
-      const response = await fetch(
-        `${BASE_URL}/student/submissions/${submissionId}/grade`,
-        {
-          headers: getAuthHeaders(),
-        }
-      );
-      return handleResponse(response);
-    },
   },
 };
 
@@ -208,25 +164,6 @@ export const courseAPI = {
       method: "POST",
       headers: getAuthHeaders(),
       body: JSON.stringify(courseData),
-    });
-    return handleResponse(response);
-  },
-
-  // Update course
-  updateCourse: async (courseId, courseData) => {
-    const response = await fetch(`${BASE_URL}/courses/${courseId}`, {
-      method: "PUT",
-      headers: getAuthHeaders(),
-      body: JSON.stringify(courseData),
-    });
-    return handleResponse(response);
-  },
-
-  // Delete course
-  deleteCourse: async (courseId) => {
-    const response = await fetch(`${BASE_URL}/courses/${courseId}`, {
-      method: "DELETE",
-      headers: getAuthHeaders(),
     });
     return handleResponse(response);
   },
@@ -303,14 +240,12 @@ export const assignmentAPI = {
     });
     return handleResponse(response);
   },
-
 };
 
 // ===================================================================
 // SUBMISSION API - Submission management functionality
 // ===================================================================
 export const submissionAPI = {
-
   // Get the current student's submission for an assignment (if any)
   getStudentSubmissionForAssignment: async (assignmentId, studentId) => {
     const response = await fetch(
@@ -348,7 +283,6 @@ export { default as chatAPI } from "./chatAPI";
 export default {
   authAPI,
   dashboardAPI,
-  gradingAPI,
   courseAPI,
   assignmentAPI,
   submissionAPI,

@@ -92,39 +92,6 @@ const ManageCourses = () => {
     }
   };
 
-  const handleUpdateCourse = async () => {
-    if (!editingCourse) return;
-
-    try {
-      setSubmitting(true);
-      await courseAPI.updateCourse(editingCourse.id, courseFormData);
-
-      await fetchCourses();
-      setShowCourseModal(false);
-      setEditingCourse(null);
-      resetCourseForm();
-      setError(null);
-    } catch (err) {
-      console.error("Failed to update course:", err);
-      setError("Failed to update course. Please try again.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleDeleteCourse = async (courseId) => {
-    if (!confirm("Are you sure you want to delete this course?")) return;
-
-    try {
-      await courseAPI.deleteCourse(courseId);
-      await fetchCourses();
-      setError(null);
-    } catch (err) {
-      console.error("Failed to delete course:", err);
-      setError("Failed to delete course. Please try again.");
-    }
-  };
-
   const handleCreateAssignment = async () => {
     if (!selectedCourse || !assignmentFormData.title) {
       setError("Please fill in all required fields");
@@ -503,18 +470,19 @@ const ManageCourses = () => {
               Cancel
             </button>
             <button
-              onClick={editingCourse ? handleUpdateCourse : handleCreateCourse}
+              onClick={handleCreateCourse}
               disabled={
                 submitting ||
                 !courseFormData.title ||
-                !courseFormData.courseCode
+                !courseFormData.courseCode ||
+                editingCourse // Disable if editing (backend doesn't support update)
               }
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitting
                 ? "Saving..."
                 : editingCourse
-                ? "Update Course"
+                ? "Update Not Supported"
                 : "Create Course"}
             </button>
           </div>
