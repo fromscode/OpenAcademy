@@ -1,6 +1,7 @@
 package com.openacademy.backend.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -28,4 +29,10 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
   // yet
   @Query("SELECT s FROM Submission s WHERE s.assignment.id = :assignmentId AND s.grade IS NULL")
   List<Submission> findUngradedByAssignmentId(Long assignmentId);
+
+  void deleteByStudentId(Long studentId);
+
+  @Modifying
+  @Query("DELETE FROM Submission s WHERE s.assignment.course.instructor.id = :instructorId")
+  void deleteByInstructorId(Long instructorId);
 }

@@ -10,4 +10,6 @@ public interface MessageRepository extends JpaRepository<ChatMessage, Long> {
     List<ChatMessage> findByGroupIdOrderByCreatedAtAsc(Long groupId);
 
     List<ChatMessage> findTop50ByGroupIdOrderByCreatedAtDesc(Long groupId);
+
+    void deleteBySenderId(Long senderId);
 }

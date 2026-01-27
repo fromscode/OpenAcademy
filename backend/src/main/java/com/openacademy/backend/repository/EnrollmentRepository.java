@@ -1,13 +1,13 @@
 package com.openacademy.backend.repository;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.openacademy.backend.entities.Enrollment;
-
-import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
@@ -27,4 +27,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
   List<Enrollment> findAllByStudentId(Long studentId);
 
   List<Enrollment> findCoursesByStudentId(Long StudentId);
+
+  void deleteByStudentId(Long studentId);
+
 }

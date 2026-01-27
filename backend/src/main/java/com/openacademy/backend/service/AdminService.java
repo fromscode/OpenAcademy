@@ -10,12 +10,18 @@ import com.openacademy.backend.dto.UpdateAdminRequest;
 import com.openacademy.backend.dto.UpdateStudentRequest;
 import com.openacademy.backend.dto.UpdateTeacherRequest;
 import com.openacademy.backend.entities.Admin;
+import com.openacademy.backend.entities.Course;
 import com.openacademy.backend.entities.Student;
 import com.openacademy.backend.entities.Teacher;
 import com.openacademy.backend.entities.User;
 import com.openacademy.backend.entities.common.Role;
 import com.openacademy.backend.repository.AdminRepository;
+import com.openacademy.backend.repository.CourseRepository;
+import com.openacademy.backend.repository.EnrollmentRepository;
+import com.openacademy.backend.repository.GroupMemberRepository;
+import com.openacademy.backend.repository.MessageRepository;
 import com.openacademy.backend.repository.StudentRepository;
+import com.openacademy.backend.repository.SubmissionRepository;
 import com.openacademy.backend.repository.TeacherRepository;
 import com.openacademy.backend.repository.UserRepository;
 
@@ -27,8 +33,13 @@ import lombok.RequiredArgsConstructor;
 public class AdminService {
 
   private final UserRepository userRepository;
-  private final TeacherRepository teacherRepository;
   private final StudentRepository studentRepository;
+  private final TeacherRepository teacherRepository;
+  private final CourseRepository courseRepository;
+  private final EnrollmentRepository enrollmentRepository;
+  private final SubmissionRepository submissionRepository;
+  private final MessageRepository chatMessageRepository;
+  private final GroupMemberRepository groupMemberRepository;
   private final AdminRepository adminRepository;
   // private final PasswordEncoder passwordEncoder; // Uncomment when you add
   // Security
@@ -152,29 +163,59 @@ public class AdminService {
 
   // --- DELETE METHODS ---
 
-  @Transactional
-  public void deleteTeacher(Long id) {
-    if (!teacherRepository.existsById(id)) {
-      throw new RuntimeException("Teacher not found");
-    }
-    // Because of @MapsId, deleting the child (Teacher) usually leaves the User
-    // orphan
-    // OR throws constraint errors depending on DB setup.
-    // Best practice: Delete the generic User, and let Cascade handle the child.
-    // BUT, since your User entity does NOT have 'mappedBy' and
-    // 'CascadeType.REMOVE',
-    // we must manually delete both to be safe and clean.
-
-    teacherRepository.deleteById(id); // Delete from 'teachers' table
-    userRepository.deleteById(id); // Delete from 'users' table
-  }
-
+  // --- HARD DELETE STUDENT ---
   @Transactional
   public void deleteStudent(Long id) {
     if (!studentRepository.existsById(id)) {
       throw new RuntimeException("Student not found");
     }
+
+    // 1. Delete all Submissions made by this student
+    submissionRepository.deleteByStudentId(id);
+
+    // 2. Delete all Enrollments for this student
+    enrollmentRepository.deleteByStudentId(id);
+
+    // 3. Delete all Chat Messages sent by this student
+    chatMessageRepository.deleteBySenderId(id);
+
+    // 4. Remove student from any Chat Groups
+    groupMemberRepository.deleteByUserId(id);
+
+    // 5. Finally, delete the Student and User entities
     studentRepository.deleteById(id);
+    userRepository.deleteById(id);
+
+  }
+
+  // --- HARD DELETE TEACHER ---
+  @Transactional
+  public void deleteTeacher(Long id) {
+    if (!teacherRepository.existsById(id)) {
+      throw new RuntimeException("Teacher not found");
+    }
+
+    // 1. Delete ALL Submissions for ALL courses taught by this teacher
+    // (If we don't do this, we can't delete the Assignments later)
+    submissionRepository.deleteByInstructorId(id);
+
+    // 2. Find all courses taught by this teacher
+    List<Course> courses = courseRepository.findByInstructorId(id);
+
+    // 3. Delete those courses
+    // Because Course.java has `cascade = CascadeType.ALL` on `assignments` and
+    // `enrollments`,
+    // deleting the Course will automatically wipe its Assignments and Enrollments.
+    courseRepository.deleteAll(courses);
+
+    // 4. Delete Chat Messages sent by this teacher
+    chatMessageRepository.deleteBySenderId(id);
+
+    // 5. Remove teacher from any Chat Groups
+    groupMemberRepository.deleteByUserId(id);
+
+    // 6. Finally, delete the Teacher and User entities
+    teacherRepository.deleteById(id);
     userRepository.deleteById(id);
   }
 }
