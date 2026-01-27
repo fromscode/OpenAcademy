@@ -451,22 +451,7 @@ const Teachers = () => {
                   />
                 </div>
               )}
-              {modalType === "edit" && (
-                <div>
-                  <label htmlFor="password" className="form-label">
-                    Password (leave empty to keep current)
-                  </label>
-                  <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    className="form-input"
-                    value={formData.password}
-                    onChange={handleChange}
-                    placeholder="New password (optional)"
-                  />
-                </div>
-              )}
+              {/* Password update removed for edit mode */}
               <div>
                 <label htmlFor="phoneNumber" className="form-label">
                   Phone Number *

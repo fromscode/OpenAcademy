@@ -8,6 +8,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 import DataTable from "../../components/Common/DataTable";
+import { formatDateDDMMYYYY } from "../../utils/date";
 import Modal from "../../components/Common/Modal";
 import LoadingSpinner from "../../components/Common/LoadingSpinner";
 import { adminAPI } from "../../services/api";
@@ -100,7 +101,7 @@ const Students = () => {
     {
       key: "dateOfBirth",
       label: "Date of Birth",
-      render: (value) => (value ? new Date(value).toLocaleDateString() : "N/A"),
+      render: (value) => formatDateDDMMYYYY(value),
     },
     {
       key: "actions",
@@ -382,11 +383,7 @@ const Students = () => {
                     Date of Birth
                   </label>
                   <p className="mt-1 text-sm text-gray-900 dark:text-gray-300">
-                    {selectedStudent?.dateOfBirth
-                      ? new Date(
-                          selectedStudent.dateOfBirth
-                        ).toLocaleDateString()
-                      : "N/A"}
+                    {formatDateDDMMYYYY(selectedStudent?.dateOfBirth)}
                   </p>
                 </div>
                 <div>
@@ -480,22 +477,7 @@ const Students = () => {
                 </div>
               )}
 
-              {modalType === "edit" && (
-                <div>
-                  <label htmlFor="password" className="form-label">
-                    Password (leave empty to keep current)
-                  </label>
-                  <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    className="form-input"
-                    value={formData.password}
-                    onChange={handleChange}
-                    placeholder="New password (optional)"
-                  />
-                </div>
-              )}
+              {/* Password update removed for edit mode */}
 
               <div>
                 <label htmlFor="phoneNumber" className="form-label">
