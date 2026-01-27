@@ -88,7 +88,9 @@ const Students = () => {
       render: (value, student) => (
         <div>
           <div className="text-sm font-medium text-gray-900 dark:text-white">
-            {`${student.firstName || ""} ${student.lastName || ""}`}
+            {`${student.firstName || ""}${
+              student.middleName ? " " + student.middleName : ""
+            } ${student.lastName || ""}`}
           </div>
           <div className="text-sm text-gray-500">{student.email}</div>
         </div>
@@ -360,6 +362,14 @@ const Students = () => {
                   </label>
                   <p className="mt-1 text-sm text-gray-900 dark:text-gray-300">
                     {selectedStudent?.lastName || "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Middle Name
+                  </label>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-gray-300">
+                    {selectedStudent?.middleName || "N/A"}
                   </p>
                 </div>
                 <div>
