@@ -188,7 +188,7 @@ const Students = () => {
       try {
         setSubmitting(true);
         await adminAPI.deleteStudent(studentId);
-        setStudents(students.filter((s) => s.id !== studentId));
+        setStudents((prev) => prev.filter((s) => s.id !== studentId));
         showSuccessMessage("Student deleted successfully");
       } catch (err) {
         setError(err.message || "Failed to delete student");

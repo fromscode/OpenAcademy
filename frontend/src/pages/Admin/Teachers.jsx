@@ -179,7 +179,7 @@ const Teachers = () => {
       try {
         setSubmitting(true);
         await adminAPI.deleteTeacher(teacherId);
-        setTeachers(teachers.filter((t) => t.id !== teacherId));
+        setTeachers((prev) => prev.filter((t) => t.id !== teacherId));
         showSuccessMessage("Teacher deleted successfully");
       } catch (err) {
         setError(err.message || "Failed to delete teacher");

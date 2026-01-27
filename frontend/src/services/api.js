@@ -16,15 +16,37 @@ const getAuthHeaders = () => {
   };
 };
 
-// Helper function to handle API responses
+// Helper function to handle API responses (robust to non-JSON/empty bodies)
 const handleResponse = async (response) => {
+  const contentType = response.headers.get("content-type") || "";
+
+  // Helper to parse body safely once
+  const parseBody = async () => {
+    if (response.status === 204) return null;
+    const text = await response.text();
+    if (!text) return null;
+    if (contentType.includes("application/json")) {
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        // Fall back to raw text wrapped in message
+        return { message: text };
+      }
+    }
+    // Non-JSON responses
+    return text;
+  };
+
   if (!response.ok) {
-    const error = await response
-      .json()
-      .catch(() => ({ message: "Network error" }));
-    throw new Error(error.message || "API request failed");
+    const body = await parseBody();
+    const message =
+      (body && (body.message || body.error)) ||
+      response.statusText ||
+      "API request failed";
+    throw new Error(message);
   }
-  return response.json();
+
+  return parseBody();
 };
 
 // ===================================================================
