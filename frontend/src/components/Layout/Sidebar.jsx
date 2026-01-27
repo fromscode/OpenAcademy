@@ -131,7 +131,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       <div
         className={`fixed top-16 bottom-0 left-0 z-40 w-64 bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        } relative`}
+        } relative h-[calc(100vh-4rem)] lg:h-[calc(100vh-4rem)] overflow-y-auto`}
       >
         {/* Mobile close button (no header/border) */}
         <button

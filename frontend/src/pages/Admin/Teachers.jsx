@@ -430,7 +430,7 @@ const Teachers = () => {
                   name="email"
                   required
                   disabled={modalType === "edit"}
-                  className="form-input disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  className="form-input disabled:bg-gray-100 dark:disabled:bg-gray-700 dark:disabled:text-gray-300 disabled:cursor-not-allowed"
                   value={formData.email}
                   onChange={handleChange}
                 />
