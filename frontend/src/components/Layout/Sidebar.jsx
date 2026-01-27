@@ -31,6 +31,11 @@ const Sidebar = ({ isOpen, onClose }) => {
             path: "/dashboard/admin/dashboard",
           },
           {
+            icon: Users,
+            label: "Students",
+            path: "/dashboard/admin/students",
+          },
+          {
             icon: UserCheck,
             label: "Teachers",
             path: "/dashboard/admin/teachers",

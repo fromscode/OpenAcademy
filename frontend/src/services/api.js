@@ -271,6 +271,85 @@ export const submissionAPI = {
 };
 
 // ===================================================================
+// ADMIN API - Admin management functionality
+// ===================================================================
+export const adminAPI = {
+  // Get all students
+  getAllStudents: async () => {
+    const response = await fetch(`${BASE_URL}/admin/students`, {
+      headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  // Get all teachers
+  getAllTeachers: async () => {
+    const response = await fetch(`${BASE_URL}/admin/teachers`, {
+      headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  // Create a new student
+  createStudent: async (studentData) => {
+    const response = await fetch(`${BASE_URL}/admin/students`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(studentData),
+    });
+    return handleResponse(response);
+  },
+
+  // Create a new teacher
+  createTeacher: async (teacherData) => {
+    const response = await fetch(`${BASE_URL}/admin/teachers`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(teacherData),
+    });
+    return handleResponse(response);
+  },
+
+  // Update student
+  updateStudent: async (studentId, studentData) => {
+    const response = await fetch(`${BASE_URL}/admin/students/${studentId}`, {
+      method: "PUT",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(studentData),
+    });
+    return handleResponse(response);
+  },
+
+  // Update teacher
+  updateTeacher: async (teacherId, teacherData) => {
+    const response = await fetch(`${BASE_URL}/admin/teachers/${teacherId}`, {
+      method: "PUT",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(teacherData),
+    });
+    return handleResponse(response);
+  },
+
+  // Delete student
+  deleteStudent: async (studentId) => {
+    const response = await fetch(`${BASE_URL}/admin/students/${studentId}`, {
+      method: "DELETE",
+      headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  // Delete teacher
+  deleteTeacher: async (teacherId) => {
+    const response = await fetch(`${BASE_URL}/admin/teachers/${teacherId}`, {
+      method: "DELETE",
+      headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+};
+
+// ===================================================================
 // UTILITY FUNCTIONS
 // ===================================================================
 
@@ -286,4 +365,5 @@ export default {
   courseAPI,
   assignmentAPI,
   submissionAPI,
+  adminAPI,
 };

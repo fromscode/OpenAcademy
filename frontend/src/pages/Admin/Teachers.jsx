@@ -12,10 +12,10 @@ import Modal from "../../components/Common/Modal";
 import LoadingSpinner from "../../components/Common/LoadingSpinner";
 import { adminAPI } from "../../services/api";
 
-const Students = () => {
-  const [students, setStudents] = useState([]);
+const Teachers = () => {
+  const [teachers, setTeachers] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [selectedTeacher, setSelectedTeacher] = useState(null);
   const [modalType, setModalType] = useState("create"); // 'create', 'edit', 'view'
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -28,41 +28,39 @@ const Students = () => {
     email: "",
     password: "",
     phoneNumber: "",
-    dateOfBirth: "",
+    education: "",
   });
 
-  // Load students on component mount
   useEffect(() => {
-    loadStudents();
+    loadTeachers();
   }, []);
 
-  // Flatten backend student shape (handles nested user fields)
-  const flattenStudent = (s) => {
-    const user = s?.user || {};
+  // Flatten backend teacher shape (handles nested user fields)
+  const flattenTeacher = (t) => {
+    const user = t?.user || {};
     return {
-      id: s?.id ?? user?.id,
-      firstName: user?.firstName ?? s?.firstName ?? "",
-      middleName: user?.middleName ?? s?.middleName ?? "",
-      lastName: user?.lastName ?? s?.lastName ?? "",
-      email: user?.email ?? s?.email ?? "",
-      phoneNumber: user?.phoneNumber ?? s?.phoneNumber ?? "",
-      dateOfBirth: s?.dateOfBirth ?? user?.dateOfBirth ?? "",
-      role: user?.role ?? "STUDENT",
-      createdAt: s?.createdAt ?? user?.createdAt,
-      studentCode: s?.studentId ?? s?.studentCode ?? null,
+      id: t?.id ?? user?.id,
+      firstName: user?.firstName ?? t?.firstName ?? "",
+      middleName: user?.middleName ?? t?.middleName ?? "",
+      lastName: user?.lastName ?? t?.lastName ?? "",
+      email: user?.email ?? t?.email ?? "",
+      phoneNumber: user?.phoneNumber ?? t?.phoneNumber ?? "",
+      education: t?.education ?? "",
+      role: user?.role ?? "TEACHER",
+      createdAt: t?.createdAt ?? user?.createdAt,
     };
   };
 
-  const loadStudents = async () => {
+  const loadTeachers = async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await adminAPI.getAllStudents();
-      const list = (response?.data ?? response ?? []).map(flattenStudent);
-      setStudents(list);
+      const response = await adminAPI.getAllTeachers();
+      const list = (response?.data ?? response ?? []).map(flattenTeacher);
+      setTeachers(list);
     } catch (err) {
-      setError(err.message || "Failed to load students");
-      console.error("Error loading students:", err);
+      setError(err.message || "Failed to load teachers");
+      console.error("Error loading teachers:", err);
     } finally {
       setLoading(false);
     }
@@ -76,7 +74,7 @@ const Students = () => {
   const columns = [
     {
       key: "id",
-      label: "Student ID",
+      label: "Teacher ID",
       render: (value) => (
         <span className="font-medium text-primary-600">{value}</span>
       ),
@@ -84,34 +82,27 @@ const Students = () => {
     {
       key: "firstName",
       label: "Name",
-      render: (value, student) => (
+      render: (value, teacher) => (
         <div>
           <div className="text-sm font-medium text-gray-900 dark:text-white">
-            {`${student.firstName || ""} ${student.lastName || ""}`}
+            {`${teacher.firstName || ""} ${teacher.lastName || ""}`}
           </div>
-          <div className="text-sm text-gray-500">{student.email}</div>
+          <div className="text-sm text-gray-500">{teacher.email}</div>
         </div>
       ),
     },
-    {
-      key: "phoneNumber",
-      label: "Phone",
-    },
-    {
-      key: "dateOfBirth",
-      label: "Date of Birth",
-      render: (value) => (value ? new Date(value).toLocaleDateString() : "N/A"),
-    },
+    { key: "phoneNumber", label: "Phone" },
+    { key: "education", label: "Education" },
     {
       key: "actions",
       label: "Actions",
       sortable: false,
-      render: (_, student) => (
+      render: (_, teacher) => (
         <div className="flex space-x-2">
           <button
             onClick={(e) => {
               e.stopPropagation();
-              handleView(student);
+              handleView(teacher);
             }}
             className="p-1 text-gray-600 hover:text-primary-600"
             title="View"
@@ -121,7 +112,7 @@ const Students = () => {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              handleEdit(student);
+              handleEdit(teacher);
             }}
             className="p-1 text-gray-600 hover:text-primary-600"
             title="Edit"
@@ -131,7 +122,7 @@ const Students = () => {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              handleDelete(student.id);
+              handleDelete(teacher.id);
             }}
             className="p-1 text-gray-600 hover:text-red-600"
             title="Delete"
@@ -145,7 +136,7 @@ const Students = () => {
 
   const handleCreate = () => {
     setModalType("create");
-    setSelectedStudent(null);
+    setSelectedTeacher(null);
     setFormData({
       firstName: "",
       middleName: "",
@@ -153,46 +144,46 @@ const Students = () => {
       email: "",
       password: "",
       phoneNumber: "",
-      dateOfBirth: "",
+      education: "",
     });
     setShowModal(true);
   };
 
-  const handleEdit = (student) => {
+  const handleEdit = (teacher) => {
     setModalType("edit");
-    setSelectedStudent(student);
+    setSelectedTeacher(teacher);
     setFormData({
-      firstName: student.firstName || "",
-      middleName: student.middleName || "",
-      lastName: student.lastName || "",
-      email: student.email || "",
-      password: "", // Don't show password on edit
-      phoneNumber: student.phoneNumber || "",
-      dateOfBirth: student.dateOfBirth || "",
+      firstName: teacher.firstName || "",
+      middleName: teacher.middleName || "",
+      lastName: teacher.lastName || "",
+      email: teacher.email || "",
+      password: "",
+      phoneNumber: teacher.phoneNumber || "",
+      education: teacher.education || "",
     });
     setShowModal(true);
   };
 
-  const handleView = (student) => {
+  const handleView = (teacher) => {
     setModalType("view");
-    setSelectedStudent(student);
+    setSelectedTeacher(teacher);
     setShowModal(true);
   };
 
-  const handleDelete = async (studentId) => {
+  const handleDelete = async (teacherId) => {
     if (
       window.confirm(
-        "Are you sure you want to delete this student? This action cannot be undone."
+        "Are you sure you want to delete this teacher? This action cannot be undone."
       )
     ) {
       try {
         setSubmitting(true);
-        await adminAPI.deleteStudent(studentId);
-        setStudents(students.filter((s) => s.id !== studentId));
-        showSuccessMessage("Student deleted successfully");
+        await adminAPI.deleteTeacher(teacherId);
+        setTeachers(teachers.filter((t) => t.id !== teacherId));
+        showSuccessMessage("Teacher deleted successfully");
       } catch (err) {
-        setError(err.message || "Failed to delete student");
-        console.error("Error deleting student:", err);
+        setError(err.message || "Failed to delete teacher");
+        console.error("Error deleting teacher:", err);
       } finally {
         setSubmitting(false);
       }
@@ -206,45 +197,38 @@ const Students = () => {
 
     try {
       if (modalType === "create") {
-        // Validate required fields
         if (
           !formData.firstName ||
           !formData.lastName ||
           !formData.email ||
           !formData.password ||
-          !formData.dateOfBirth
+          !formData.phoneNumber
         ) {
           setError("Please fill in all required fields");
           setSubmitting(false);
           return;
         }
-
-        const response = await adminAPI.createStudent(formData);
-        const created = flattenStudent(response?.data ?? response);
-        setStudents([...students, created]);
-        showSuccessMessage("Student created successfully");
+        const response = await adminAPI.createTeacher(formData);
+        const created = flattenTeacher(response?.data ?? response);
+        setTeachers([...teachers, created]);
+        showSuccessMessage("Teacher created successfully");
       } else if (modalType === "edit") {
-        // For edit, don't include password if not provided
         const updateData = { ...formData };
-        if (!updateData.password) {
-          delete updateData.password;
-        }
-
-        const response = await adminAPI.updateStudent(
-          selectedStudent.id,
+        if (!updateData.password) delete updateData.password;
+        const response = await adminAPI.updateTeacher(
+          selectedTeacher.id,
           updateData
         );
-        const updated = flattenStudent(response?.data ?? response);
-        setStudents(
-          students.map((s) => (s.id === selectedStudent.id ? updated : s))
+        const updated = flattenTeacher(response?.data ?? response);
+        setTeachers(
+          teachers.map((t) => (t.id === selectedTeacher.id ? updated : t))
         );
-        showSuccessMessage("Student updated successfully");
+        showSuccessMessage("Teacher updated successfully");
       }
-
       setShowModal(false);
     } catch (err) {
-      setError(err.message || "Failed to save student");
-      console.error("Error saving student:", err);
+      setError(err.message || "Failed to save teacher");
+      console.error("Error saving teacher:", err);
     } finally {
       setSubmitting(false);
     }
@@ -252,10 +236,7 @@ const Students = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   if (loading) {
@@ -298,10 +279,10 @@ const Students = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Students
+            Teachers
           </h1>
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            Manage student profiles and enrollment information
+            Manage teacher profiles and information
           </p>
         </div>
         <button
@@ -309,17 +290,17 @@ const Students = () => {
           className="btn-primary flex items-center space-x-2"
         >
           <Plus className="h-4 w-4" />
-          <span>Add Student</span>
+          <span>Add Teacher</span>
         </button>
       </div>
 
-      {/* Students Table */}
+      {/* Teachers Table */}
       <DataTable
-        data={students}
+        data={teachers}
         columns={columns}
-        searchable={true}
-        sortable={true}
-        pagination={true}
+        searchable
+        sortable
+        pagination
       />
 
       {/* Modal */}
@@ -328,10 +309,10 @@ const Students = () => {
         onClose={() => setShowModal(false)}
         title={
           modalType === "create"
-            ? "Add New Student"
+            ? "Add New Teacher"
             : modalType === "edit"
-            ? "Edit Student"
-            : "Student Details"
+            ? "Edit Teacher"
+            : "Teacher Details"
         }
         size="lg"
       >
@@ -339,18 +320,17 @@ const Students = () => {
           <div className="space-y-4">
             <div>
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                {`${selectedStudent?.firstName || ""} ${
-                  selectedStudent?.lastName || ""
+                {`${selectedTeacher?.firstName || ""} ${
+                  selectedTeacher?.lastName || ""
                 }`}
               </h3>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     First Name
                   </label>
                   <p className="mt-1 text-sm text-gray-900 dark:text-gray-300">
-                    {selectedStudent?.firstName || "N/A"}
+                    {selectedTeacher?.firstName || "N/A"}
                   </p>
                 </div>
                 <div>
@@ -358,7 +338,7 @@ const Students = () => {
                     Last Name
                   </label>
                   <p className="mt-1 text-sm text-gray-900 dark:text-gray-300">
-                    {selectedStudent?.lastName || "N/A"}
+                    {selectedTeacher?.lastName || "N/A"}
                   </p>
                 </div>
                 <div>
@@ -366,7 +346,7 @@ const Students = () => {
                     Email
                   </label>
                   <p className="mt-1 text-sm text-gray-900 dark:text-gray-300">
-                    {selectedStudent?.email || "N/A"}
+                    {selectedTeacher?.email || "N/A"}
                   </p>
                 </div>
                 <div>
@@ -374,27 +354,23 @@ const Students = () => {
                     Phone
                   </label>
                   <p className="mt-1 text-sm text-gray-900 dark:text-gray-300">
-                    {selectedStudent?.phoneNumber || "N/A"}
+                    {selectedTeacher?.phoneNumber || "N/A"}
                   </p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Date of Birth
+                    Education
                   </label>
                   <p className="mt-1 text-sm text-gray-900 dark:text-gray-300">
-                    {selectedStudent?.dateOfBirth
-                      ? new Date(
-                          selectedStudent.dateOfBirth
-                        ).toLocaleDateString()
-                      : "N/A"}
+                    {selectedTeacher?.education || "N/A"}
                   </p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Student ID
+                    Teacher ID
                   </label>
                   <p className="mt-1 text-sm text-gray-900 dark:text-gray-300">
-                    {selectedStudent?.id || "N/A"}
+                    {selectedTeacher?.id || "N/A"}
                   </p>
                 </div>
               </div>
@@ -417,7 +393,6 @@ const Students = () => {
                   onChange={handleChange}
                 />
               </div>
-
               <div>
                 <label htmlFor="lastName" className="form-label">
                   Last Name *
@@ -432,7 +407,6 @@ const Students = () => {
                   onChange={handleChange}
                 />
               </div>
-
               <div>
                 <label htmlFor="middleName" className="form-label">
                   Middle Name
@@ -446,7 +420,6 @@ const Students = () => {
                   onChange={handleChange}
                 />
               </div>
-
               <div>
                 <label htmlFor="email" className="form-label">
                   Email *
@@ -462,7 +435,6 @@ const Students = () => {
                   onChange={handleChange}
                 />
               </div>
-
               {modalType === "create" && (
                 <div>
                   <label htmlFor="password" className="form-label">
@@ -479,7 +451,6 @@ const Students = () => {
                   />
                 </div>
               )}
-
               {modalType === "edit" && (
                 <div>
                   <label htmlFor="password" className="form-label">
@@ -496,7 +467,6 @@ const Students = () => {
                   />
                 </div>
               )}
-
               <div>
                 <label htmlFor="phoneNumber" className="form-label">
                   Phone Number *
@@ -511,23 +481,20 @@ const Students = () => {
                   onChange={handleChange}
                 />
               </div>
-
               <div>
-                <label htmlFor="dateOfBirth" className="form-label">
-                  Date of Birth *
+                <label htmlFor="education" className="form-label">
+                  Education
                 </label>
                 <input
-                  type="date"
-                  id="dateOfBirth"
-                  name="dateOfBirth"
-                  required
+                  type="text"
+                  id="education"
+                  name="education"
                   className="form-input"
-                  value={formData.dateOfBirth}
+                  value={formData.education}
                   onChange={handleChange}
                 />
               </div>
             </div>
-
             <div className="flex justify-end space-x-3 pt-4">
               <button
                 type="button"
@@ -545,8 +512,8 @@ const Students = () => {
                 {submitting
                   ? "Processing..."
                   : modalType === "create"
-                  ? "Create Student"
-                  : "Update Student"}
+                  ? "Create Teacher"
+                  : "Update Teacher"}
               </button>
             </div>
           </form>
@@ -556,4 +523,4 @@ const Students = () => {
   );
 };
 
-export default Students;
+export default Teachers;
