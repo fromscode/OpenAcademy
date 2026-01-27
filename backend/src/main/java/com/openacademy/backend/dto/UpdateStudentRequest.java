@@ -7,6 +7,7 @@ import lombok.Data;
 @Data
 public class UpdateStudentRequest {
   private String firstName;
+  private String middleName;
   private String lastName;
   private String phoneNumber;
   private LocalDate dateOfBirth;

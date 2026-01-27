@@ -114,6 +114,8 @@ public class AdminService {
     User user = teacher.getUser();
     if (request.getFirstName() != null)
       user.setFirstName(request.getFirstName());
+    if (request.getMiddleName() != null)
+      user.setMiddleName(request.getMiddleName());
     if (request.getLastName() != null)
       user.setLastName(request.getLastName());
     if (request.getPhoneNumber() != null)
@@ -134,6 +136,8 @@ public class AdminService {
     User user = student.getUser();
     if (request.getFirstName() != null)
       user.setFirstName(request.getFirstName());
+    if (request.getMiddleName() != null)
+      user.setMiddleName(request.getMiddleName());
     if (request.getLastName() != null)
       user.setLastName(request.getLastName());
     if (request.getPhoneNumber() != null)
