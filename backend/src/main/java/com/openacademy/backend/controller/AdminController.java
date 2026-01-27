@@ -75,14 +75,14 @@ public class AdminController {
     // --- DELETE ---
 
     @DeleteMapping("/teachers/{id}")
-    public ResponseEntity<Void> deleteTeacher(@PathVariable Long id) {
+    public ResponseEntity<String> deleteTeacher(@PathVariable Long id) {
         adminService.deleteTeacher(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("Teacher deleted successfully");
     }
 
     @DeleteMapping("/students/{id}")
-    public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
+    public ResponseEntity<String> deleteStudent(@PathVariable Long id) {
         adminService.deleteStudent(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("Student deleted successfully");
     }
 }
