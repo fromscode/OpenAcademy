@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.openacademy.backend.dto.CreateAdminRequest;
 import com.openacademy.backend.dto.CreateStudentRequest;
 import com.openacademy.backend.dto.CreateTeacherRequest;
 import com.openacademy.backend.dto.UpdateAdminRequest;
@@ -53,6 +54,11 @@ public class AdminController {
     @PostMapping("/students")
     public ResponseEntity<Student> createStudent(@RequestBody CreateStudentRequest request) {
         return ResponseEntity.ok(adminService.createStudent(request));
+    }
+
+    @PostMapping("/admins")
+    public ResponseEntity<Admin> createAdmin(@RequestBody CreateAdminRequest request) {
+        return ResponseEntity.ok(adminService.createAdmin(request));
     }
 
     // --- UPDATE ---

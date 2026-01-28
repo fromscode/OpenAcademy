@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.openacademy.backend.dto.CreateAdminRequest;
 import com.openacademy.backend.dto.CreateStudentRequest;
 import com.openacademy.backend.dto.CreateTeacherRequest;
 import com.openacademy.backend.dto.UpdateAdminRequest;
@@ -103,6 +104,27 @@ public class AdminService {
     return studentRepository.save(student);
   }
 
+  @Transactional
+  public Admin createAdmin(CreateAdminRequest request) {
+    // 1. Create User
+    User user = new User();
+    user.setFirstName(request.getFirstName());
+    user.setMiddleName(request.getMiddleName());
+    user.setLastName(request.getLastName());
+    user.setEmail(request.getEmail());
+    user.setPhoneNumber(request.getPhoneNumber());
+    user.setRole(Role.ADMIN);
+    user.setPassword(request.getPassword()); // Remember to encrypt!
+
+    User savedUser = userRepository.save(user);
+
+    // 2. Create Admin
+    Admin admin = new Admin();
+    admin.setUser(savedUser);
+
+    return adminRepository.save(admin);
+  }
+
   // --- UPDATE METHODS ---
 
   @Transactional
@@ -157,6 +179,8 @@ public class AdminService {
     User user = admin.getUser();
     if (request.getFirstName() != null)
       user.setFirstName(request.getFirstName());
+    if (request.getMiddleName() != null)
+      user.setMiddleName(request.getMiddleName());
     if (request.getLastName() != null)
       user.setLastName(request.getLastName());
     if (request.getPhoneNumber() != null)
