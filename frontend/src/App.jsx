@@ -13,6 +13,7 @@ import AdminDashboard from "./pages/Admin/AdminDashboard";
 import AdminCourses from "./pages/Admin/Courses";
 import Students from "./pages/Admin/Students";
 import Teachers from "./pages/Admin/Teachers";
+import ManageAdmin from "./pages/Admin/ManageAdmin";
 import TeacherDashboard from "./pages/Teacher/TeacherDashboard";
 import ManageCourses from "./pages/Teacher/ManageCourses";
 import GradeSubmissions from "./pages/Teacher/GradeSubmissions";
@@ -138,6 +139,14 @@ function App() {
                   element={
                     <ProtectedRoute allowedRoles={["admin"]}>
                       <Teachers />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="admin/manage-admin"
+                  element={
+                    <ProtectedRoute allowedRoles={["admin"]}>
+                      <ManageAdmin />
                     </ProtectedRoute>
                   }
                 />

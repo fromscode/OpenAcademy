@@ -369,6 +369,31 @@ export const adminAPI = {
     });
     return handleResponse(response);
   },
+
+  // Create a new admin
+  createAdmin: async (adminData) => {
+    const response = await fetch(`${BASE_URL}/admin/admins`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(adminData),
+    });
+    return handleResponse(response);
+  },
+
+  // Update admin by current email (uses query param for robustness)
+  updateAdmin: async (adminEmail, adminData) => {
+    const response = await fetch(
+      `${BASE_URL}/admin/admins/by-email?email=${encodeURIComponent(
+        adminEmail
+      )}`,
+      {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(adminData),
+      }
+    );
+    return handleResponse(response);
+  },
 };
 
 // ===================================================================

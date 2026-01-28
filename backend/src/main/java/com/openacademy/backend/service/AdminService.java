@@ -172,20 +172,28 @@ public class AdminService {
   }
 
   @Transactional
-  public Admin updateAdmin(Long id, UpdateAdminRequest request) {
-    Admin admin = adminRepository.findById(id)
+  public Admin updateAdminByEmail(String currentEmail, UpdateAdminRequest request) {
+    User user = userRepository.findByEmail(currentEmail)
+        .orElseThrow(() -> new RuntimeException("Admin user not found by email"));
+
+    Admin admin = adminRepository.findById(user.getId())
         .orElseThrow(() -> new RuntimeException("Admin not found"));
 
-    User user = admin.getUser();
-    if (request.getFirstName() != null)
-      user.setFirstName(request.getFirstName());
-    if (request.getMiddleName() != null)
-      user.setMiddleName(request.getMiddleName());
-    if (request.getLastName() != null)
-      user.setLastName(request.getLastName());
-    if (request.getPhoneNumber() != null)
-      user.setPhoneNumber(request.getPhoneNumber());
+    // Only update fields that are provided and non-blank
+    if (request.getFirstName() != null && !request.getFirstName().trim().isEmpty())
+      user.setFirstName(request.getFirstName().trim());
+    if (request.getMiddleName() != null && !request.getMiddleName().trim().isEmpty())
+      user.setMiddleName(request.getMiddleName().trim());
+    if (request.getLastName() != null && !request.getLastName().trim().isEmpty())
+      user.setLastName(request.getLastName().trim());
+    if (request.getPhoneNumber() != null && !request.getPhoneNumber().trim().isEmpty())
+      user.setPhoneNumber(request.getPhoneNumber().trim());
+    if (request.getEmail() != null && !request.getEmail().trim().isEmpty())
+      user.setEmail(request.getEmail().trim());
+    if (request.getPassword() != null && !request.getPassword().trim().isEmpty())
+      user.setPassword(request.getPassword()); // encrypt in real app
 
+    userRepository.save(user);
     return adminRepository.save(admin);
   }
 

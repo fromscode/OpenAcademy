@@ -46,6 +46,11 @@ const Sidebar = ({ isOpen, onClose }) => {
             path: "/dashboard/admin/courses",
           },
           {
+            icon: User,
+            label: "Manage Admin",
+            path: "/dashboard/admin/manage-admin",
+          },
+          {
             icon: MessageSquare,
             label: "Messages",
             path: "/dashboard/messages",

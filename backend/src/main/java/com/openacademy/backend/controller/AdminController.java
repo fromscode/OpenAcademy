@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.openacademy.backend.dto.CreateAdminRequest;
 import com.openacademy.backend.dto.CreateStudentRequest;
@@ -73,9 +74,16 @@ public class AdminController {
         return ResponseEntity.ok(adminService.updateStudent(id, request));
     }
 
-    @PutMapping("/admins/{id}")
-    public ResponseEntity<Admin> updateAdmin(@PathVariable Long id, @RequestBody UpdateAdminRequest request) {
-        return ResponseEntity.ok(adminService.updateAdmin(id, request));
+    @PutMapping("/admins/{email}")
+    public ResponseEntity<Admin> updateAdmin(@PathVariable String email, @RequestBody UpdateAdminRequest request) {
+        return ResponseEntity.ok(adminService.updateAdminByEmail(email, request));
+    }
+
+    // Alternative endpoint using query param to avoid path variable conflicts
+    @PutMapping("/admins/by-email")
+    public ResponseEntity<Admin> updateAdminByEmailParam(@RequestParam("email") String email,
+            @RequestBody UpdateAdminRequest request) {
+        return ResponseEntity.ok(adminService.updateAdminByEmail(email, request));
     }
 
     // --- DELETE ---
