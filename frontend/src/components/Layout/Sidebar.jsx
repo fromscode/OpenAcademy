@@ -7,7 +7,6 @@ import {
   BookOpen,
   FileText,
   MessageSquare,
-  Settings,
   GraduationCap,
   UserCheck,
   Calendar,
@@ -55,7 +54,6 @@ const Sidebar = ({ isOpen, onClose }) => {
             label: "Messages",
             path: "/dashboard/messages",
           },
-          { icon: Settings, label: "Settings", path: "/dashboard/settings" },
         ];
       case "teacher":
         return [

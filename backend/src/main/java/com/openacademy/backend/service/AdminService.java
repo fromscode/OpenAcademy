@@ -186,8 +186,14 @@ public class AdminService {
     // Only update fields that are provided and non-blank
     if (request.getFirstName() != null && !request.getFirstName().trim().isEmpty())
       user.setFirstName(request.getFirstName().trim());
-    if (request.getMiddleName() != null && !request.getMiddleName().trim().isEmpty())
-      user.setMiddleName(request.getMiddleName().trim());
+    if (request.getMiddleName() != null) {
+      if (request.getMiddleName().trim().isEmpty()) {
+        // Explicitly clear middle name when blank provided
+        user.setMiddleName(null);
+      } else {
+        user.setMiddleName(request.getMiddleName().trim());
+      }
+    }
     if (request.getLastName() != null && !request.getLastName().trim().isEmpty())
       user.setLastName(request.getLastName().trim());
     if (request.getPhoneNumber() != null && !request.getPhoneNumber().trim().isEmpty())

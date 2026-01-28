@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import ThemeToggle from "../Common/ThemeToggle";
 import LoadingSpinner from "../Common/LoadingSpinner";
-import { User, Settings, LogOut, Menu, X } from "lucide-react";
+import { User, LogOut, Menu, X } from "lucide-react";
 
 const Navbar = ({ onToggleSidebar }) => {
   const { user, logout } = useAuth();
@@ -84,16 +84,7 @@ const Navbar = ({ onToggleSidebar }) => {
               {showUserMenu && (
                 <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-gray-800 ring-1 ring-gray-700 focus:outline-none z-50">
                   <div className="py-1">
-                    {user?.role === "admin" && (
-                      <Link
-                        to="/dashboard/settings"
-                        className="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
-                        onClick={() => setShowUserMenu(false)}
-                      >
-                        <Settings className="mr-3 h-4 w-4" />
-                        Settings
-                      </Link>
-                    )}
+                    {/* Settings removed for admin */}
                     <button
                       onClick={handleLogout}
                       className="flex items-center w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"

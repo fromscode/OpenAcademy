@@ -23,7 +23,6 @@ import Courses from "./pages/Student/Courses";
 import Assignments from "./pages/Student/Assignments";
 import Grades from "./pages/Student/Grades";
 import Messages from "./pages/Messages/Messages";
-import Settings from "./pages/Settings/Settings";
 import DashboardLayout from "./components/Layout/DashboardLayout";
 import LoadingSpinner from "./components/Common/LoadingSpinner";
 
@@ -226,14 +225,6 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <Messages />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="settings"
-                  element={
-                    <ProtectedRoute allowedRoles={["admin"]}>
-                      <Settings />
                     </ProtectedRoute>
                   }
                 />

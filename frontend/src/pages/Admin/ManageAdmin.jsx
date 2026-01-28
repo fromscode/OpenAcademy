@@ -144,11 +144,17 @@ const ManageAdmin = () => {
         setAdmins([...admins, created]);
         showSuccessMessage("Admin created successfully");
       } else if (modalType === "edit") {
-        const payload = Object.fromEntries(
+        const filtered = Object.fromEntries(
           Object.entries(formData).filter(
-            ([_, v]) => v != null && String(v).trim() !== ""
+            ([key, v]) =>
+              key !== "middleName" && v != null && String(v).trim() !== ""
           )
         );
+        // Include middleName even if blank to allow clearing it
+        const payload = {
+          ...filtered,
+          middleName: formData.middleName ?? undefined,
+        };
         const response = await adminAPI.updateAdmin(
           selectedAdmin.email,
           payload
