@@ -20,7 +20,13 @@ const AdminDashboard = () => {
                   Welcome to OpenAcademy!
                 </h1>
                 <p className="text-purple-100 text-lg">
-                  Hello, {user?.firstName || "Admin"}!
+                  Hello,{" "}
+                  {user
+                    ? `${user.firstName}${
+                        user.middleName ? " " + user.middleName : ""
+                      } ${user.lastName}`
+                    : "Admin"}
+                  !
                 </p>
               </div>
             </div>
@@ -43,7 +49,11 @@ const AdminDashboard = () => {
                   Name:
                 </span>
                 <span className="text-gray-900 dark:text-white font-medium">
-                  {user?.firstName || "Not Available"}
+                  {user
+                    ? `${user.firstName}${
+                        user.middleName ? " " + user.middleName : ""
+                      } ${user.lastName}`
+                    : "Not Available"}
                 </span>
               </div>
               <div className="flex items-center">

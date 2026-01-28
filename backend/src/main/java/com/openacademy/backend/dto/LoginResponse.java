@@ -22,6 +22,8 @@ public class LoginResponse {
         private Long id;
         private String email;
         private String firstName;
+        private String middleName;
+        private String lastName;
         private String role; // Changed to String for lowercase role
 
         public void setRoleFromEnum(Role roleEnum) {

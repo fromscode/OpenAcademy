@@ -31,6 +31,8 @@ public class LoginService {
         userInfo.setId(user.getId());
         userInfo.setEmail(user.getEmail());
         userInfo.setFirstName(user.getFirstName());
+        userInfo.setMiddleName(user.getMiddleName());
+        userInfo.setLastName(user.getLastName());
         userInfo.setRoleFromEnum(user.getRole());
 
         // Set response fields
