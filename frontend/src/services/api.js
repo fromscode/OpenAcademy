@@ -296,6 +296,13 @@ export const submissionAPI = {
 // ADMIN API - Admin management functionality
 // ===================================================================
 export const adminAPI = {
+  // Get all admins
+  getAllAdmins: async () => {
+    const response = await fetch(`${BASE_URL}/admin/admins`, {
+      headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
   // Get all students
   getAllStudents: async () => {
     const response = await fetch(`${BASE_URL}/admin/students`, {
@@ -392,6 +399,14 @@ export const adminAPI = {
         body: JSON.stringify(adminData),
       }
     );
+    return handleResponse(response);
+  },
+  // Delete admin by id
+  deleteAdmin: async (adminId) => {
+    const response = await fetch(`${BASE_URL}/admin/admins/${adminId}`, {
+      method: "DELETE",
+      headers: getAuthHeaders(),
+    });
     return handleResponse(response);
   },
 };

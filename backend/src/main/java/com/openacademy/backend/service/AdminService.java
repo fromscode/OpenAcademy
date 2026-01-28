@@ -55,6 +55,10 @@ public class AdminService {
     return teacherRepository.findAll();
   }
 
+  public List<Admin> getAllAdmins() {
+    return adminRepository.findAll();
+  }
+
   // --- CREATE METHODS ---
 
   @Transactional
@@ -252,6 +256,22 @@ public class AdminService {
 
     // 6. Finally, delete the Teacher and User entities
     teacherRepository.deleteById(id);
+    userRepository.deleteById(id);
+  }
+
+  // --- HARD DELETE ADMIN ---
+  @Transactional
+  public void deleteAdmin(Long id) {
+    if (!adminRepository.existsById(id)) {
+      throw new RuntimeException("Admin not found");
+    }
+
+    // Remove chat messages and group memberships if any
+    chatMessageRepository.deleteBySenderId(id);
+    groupMemberRepository.deleteByUserId(id);
+
+    // Delete Admin and its User (MapsId means same id)
+    adminRepository.deleteById(id);
     userRepository.deleteById(id);
   }
 }

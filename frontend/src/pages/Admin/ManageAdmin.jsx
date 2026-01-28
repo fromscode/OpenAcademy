@@ -1,113 +1,238 @@
-import React, { useState } from "react";
-import { AlertCircle, CheckCircle } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  AlertCircle,
+  CheckCircle,
+} from "lucide-react";
+import DataTable from "../../components/Common/DataTable";
+import Modal from "../../components/Common/Modal";
+import LoadingSpinner from "../../components/Common/LoadingSpinner";
 import { adminAPI } from "../../services/api";
 
 const ManageAdmin = () => {
-  const [createData, setCreateData] = useState({
-    firstName: "",
-    middleName: "",
-    lastName: "",
-    email: "",
-    password: "",
-    phoneNumber: "",
-  });
-  const [updateEmail, setUpdateEmail] = useState("");
-  const [updateData, setUpdateData] = useState({
-    firstName: "",
-    middleName: "",
-    lastName: "",
-    phoneNumber: "",
-    email: "",
-    password: "",
-  });
-
-  const [submittingCreate, setSubmittingCreate] = useState(false);
-  const [submittingUpdate, setSubmittingUpdate] = useState(false);
+  const [admins, setAdmins] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedAdmin, setSelectedAdmin] = useState(null);
+  const [modalType, setModalType] = useState("create"); // 'create', 'edit', 'view'
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    phoneNumber: "",
+  });
 
-  const showSuccess = (msg) => {
-    setSuccessMessage(msg);
+  useEffect(() => {
+    loadAdmins();
+  }, []);
+
+  const showSuccessMessage = (message) => {
+    setSuccessMessage(message);
     setTimeout(() => setSuccessMessage(null), 3000);
   };
 
-  const handleCreateChange = (e) => {
-    const { name, value } = e.target;
-    setCreateData((prev) => ({ ...prev, [name]: value }));
+  const flattenAdmin = (a) => {
+    const user = a?.user || {};
+    return {
+      id: a?.id ?? user?.id,
+      firstName: user?.firstName ?? a?.firstName ?? "",
+      middleName: user?.middleName ?? a?.middleName ?? "",
+      lastName: user?.lastName ?? a?.lastName ?? "",
+      email: user?.email ?? a?.email ?? "",
+      phoneNumber: user?.phoneNumber ?? a?.phoneNumber ?? "",
+      role: user?.role ?? "ADMIN",
+    };
   };
 
-  const handleUpdateChange = (e) => {
-    const { name, value } = e.target;
-    setUpdateData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const onCreateSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
-    setSubmittingCreate(true);
+  const loadAdmins = async () => {
     try {
-      const required = [
-        createData.firstName,
-        createData.lastName,
-        createData.email,
-        createData.password,
-        createData.phoneNumber,
-      ];
-      if (required.some((v) => !v || !String(v).trim())) {
-        setError("Please fill in all required fields for creating admin.");
-        return;
-      }
-      await adminAPI.createAdmin(createData);
-      showSuccess("Admin created successfully");
-      setCreateData({
-        firstName: "",
-        middleName: "",
-        lastName: "",
-        email: "",
-        password: "",
-        phoneNumber: "",
-      });
+      setLoading(true);
+      setError(null);
+      const response = await adminAPI.getAllAdmins();
+      const list = (response?.data ?? response ?? []).map(flattenAdmin);
+      setAdmins(list);
     } catch (err) {
-      setError(err.message || "Failed to create admin");
-      console.error("Create admin error:", err);
+      setError(err.message || "Failed to load admins");
+      console.error("Error loading admins:", err);
     } finally {
-      setSubmittingCreate(false);
+      setLoading(false);
     }
   };
 
-  const onUpdateSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
-    setSubmittingUpdate(true);
-    try {
-      if (!updateEmail || !String(updateEmail).trim()) {
-        setError("Admin email is required to update.");
-        return;
+  const handleCreate = () => {
+    setModalType("create");
+    setSelectedAdmin(null);
+    setFormData({
+      firstName: "",
+      middleName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      phoneNumber: "",
+    });
+    setShowModal(true);
+  };
+
+  const handleEdit = (admin) => {
+    setModalType("edit");
+    setSelectedAdmin(admin);
+    setFormData({
+      firstName: admin.firstName || "",
+      middleName: admin.middleName || "",
+      lastName: admin.lastName || "",
+      email: "", // new email optional
+      password: "", // new password optional
+      phoneNumber: admin.phoneNumber || "",
+    });
+    setShowModal(true);
+  };
+
+  const handleView = (admin) => {
+    setModalType("view");
+    setSelectedAdmin(admin);
+    setShowModal(true);
+  };
+
+  const handleDelete = async (adminId) => {
+    if (
+      window.confirm(
+        "Are you sure you want to delete this admin? This action cannot be undone."
+      )
+    ) {
+      try {
+        setSubmitting(true);
+        await adminAPI.deleteAdmin(adminId);
+        setAdmins((prev) => prev.filter((a) => a.id !== adminId));
+        showSuccessMessage("Admin deleted successfully");
+      } catch (err) {
+        setError(err.message || "Failed to delete admin");
+        console.error("Error deleting admin:", err);
+      } finally {
+        setSubmitting(false);
       }
-      // Build payload with only non-empty fields
-      const payload = Object.fromEntries(
-        Object.entries(updateData).filter(
-          ([_, v]) => v != null && String(v).trim() !== ""
-        )
-      );
-      await adminAPI.updateAdmin(updateEmail.trim(), payload);
-      showSuccess("Admin updated successfully");
-      setUpdateEmail("");
-      setUpdateData({
-        firstName: "",
-        middleName: "",
-        lastName: "",
-        phoneNumber: "",
-        email: "",
-        password: "",
-      });
-    } catch (err) {
-      setError(err.message || "Failed to update admin");
-      console.error("Update admin error:", err);
-    } finally {
-      setSubmittingUpdate(false);
     }
   };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setError(null);
+    try {
+      if (modalType === "create") {
+        const required = [
+          formData.firstName,
+          formData.lastName,
+          formData.email,
+          formData.password,
+          formData.phoneNumber,
+        ];
+        if (required.some((v) => !v || !String(v).trim())) {
+          setError("Please fill in all required fields");
+          setSubmitting(false);
+          return;
+        }
+        const response = await adminAPI.createAdmin(formData);
+        const created = flattenAdmin(response?.data ?? response);
+        setAdmins([...admins, created]);
+        showSuccessMessage("Admin created successfully");
+      } else if (modalType === "edit") {
+        const payload = Object.fromEntries(
+          Object.entries(formData).filter(
+            ([_, v]) => v != null && String(v).trim() !== ""
+          )
+        );
+        const response = await adminAPI.updateAdmin(
+          selectedAdmin.email,
+          payload
+        );
+        const updated = flattenAdmin(response?.data ?? response);
+        setAdmins(admins.map((a) => (a.id === selectedAdmin.id ? updated : a)));
+        showSuccessMessage("Admin updated successfully");
+      }
+      setShowModal(false);
+    } catch (err) {
+      setError(err.message || "Failed to save admin");
+      console.error("Error saving admin:", err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const columns = [
+    {
+      key: "id",
+      label: "Admin ID",
+      render: (value) => (
+        <span className="font-medium text-primary-600">{value}</span>
+      ),
+    },
+    {
+      key: "firstName",
+      label: "Name",
+      render: (value, admin) => (
+        <div>
+          <div className="text-sm font-medium text-gray-900 dark:text-white">
+            {`${admin.firstName || ""}${
+              admin.middleName ? " " + admin.middleName : ""
+            } ${admin.lastName || ""}`}
+          </div>
+          <div className="text-sm text-gray-500">{admin.email}</div>
+        </div>
+      ),
+    },
+    { key: "phoneNumber", label: "Phone" },
+    {
+      key: "actions",
+      label: "Actions",
+      sortable: false,
+      render: (_, admin) => (
+        <div className="flex space-x-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleView(admin);
+            }}
+            className="p-1 text-gray-600 hover:text-primary-600"
+            title="View"
+          >
+            <Eye className="h-4 w-4" />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleEdit(admin);
+            }}
+            className="p-1 text-gray-600 hover:text-primary-600"
+            title="Edit"
+          >
+            <Edit className="h-4 w-4" />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete(admin.id);
+            }}
+            className="p-1 text-gray-600 hover:text-red-600"
+            title="Delete"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
+      ),
+    },
+  ];
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <div className="space-y-6">
@@ -141,232 +266,228 @@ const ManageAdmin = () => {
         </div>
       )}
 
-      {/* Header */}
+      {/* Header Actions */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Manage Admin
+            Admins
           </h1>
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            Create a new admin or update an existing admin
+            Manage admin accounts
           </p>
         </div>
+        <button
+          onClick={handleCreate}
+          className="btn-primary flex items-center space-x-2"
+        >
+          <Plus className="h-4 w-4" />
+          <span>Add Admin</span>
+        </button>
       </div>
 
-      {/* Create Admin Card */}
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Create Admin
-        </h2>
-        <form onSubmit={onCreateSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="firstName" className="form-label">
-                First Name *
-              </label>
-              <input
-                type="text"
-                id="firstName"
-                name="firstName"
-                className="form-input"
-                value={createData.firstName}
-                onChange={handleCreateChange}
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="lastName" className="form-label">
-                Last Name *
-              </label>
-              <input
-                type="text"
-                id="lastName"
-                name="lastName"
-                className="form-input"
-                value={createData.lastName}
-                onChange={handleCreateChange}
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="middleName" className="form-label">
-                Middle Name
-              </label>
-              <input
-                type="text"
-                id="middleName"
-                name="middleName"
-                className="form-input"
-                value={createData.middleName}
-                onChange={handleCreateChange}
-              />
-            </div>
-            <div>
-              <label htmlFor="email" className="form-label">
-                Email *
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                className="form-input"
-                value={createData.email}
-                onChange={handleCreateChange}
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="form-label">
-                Password *
-              </label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                className="form-input"
-                value={createData.password}
-                onChange={handleCreateChange}
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="phoneNumber" className="form-label">
-                Phone Number *
-              </label>
-              <input
-                type="tel"
-                id="phoneNumber"
-                name="phoneNumber"
-                className="form-input"
-                value={createData.phoneNumber}
-                onChange={handleCreateChange}
-                required
-              />
-            </div>
-          </div>
-          <div className="flex justify-end space-x-3 pt-2">
-            <button
-              type="submit"
-              className="btn-primary"
-              disabled={submittingCreate}
-            >
-              {submittingCreate ? "Creating..." : "Create Admin"}
-            </button>
-          </div>
-        </form>
-      </div>
+      {/* Admins Table */}
+      <DataTable
+        data={admins}
+        columns={columns}
+        searchable={true}
+        sortable={true}
+        pagination={true}
+      />
 
-      {/* Update Admin Card */}
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Update Admin
-        </h2>
-        <form onSubmit={onUpdateSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Modal for Create/Edit/View */}
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        title={
+          modalType === "create"
+            ? "Add New Admin"
+            : modalType === "edit"
+            ? "Edit Admin"
+            : "Admin Details"
+        }
+        size="lg"
+      >
+        {modalType === "view" ? (
+          <div className="space-y-4">
             <div>
-              <label htmlFor="adminEmail" className="form-label">
-                Admin Email *
-              </label>
-              <input
-                type="email"
-                id="adminEmail"
-                name="adminEmail"
-                className="form-input"
-                value={updateEmail}
-                onChange={(e) => setUpdateEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="firstNameUpdate" className="form-label">
-                First Name
-              </label>
-              <input
-                type="text"
-                id="firstNameUpdate"
-                name="firstName"
-                className="form-input"
-                value={updateData.firstName}
-                onChange={handleUpdateChange}
-              />
-            </div>
-            <div>
-              <label htmlFor="emailUpdate" className="form-label">
-                New Email
-              </label>
-              <input
-                type="email"
-                id="emailUpdate"
-                name="email"
-                className="form-input"
-                value={updateData.email}
-                onChange={handleUpdateChange}
-              />
-            </div>
-            <div>
-              <label htmlFor="passwordUpdate" className="form-label">
-                New Password
-              </label>
-              <input
-                type="password"
-                id="passwordUpdate"
-                name="password"
-                className="form-input"
-                value={updateData.password}
-                onChange={handleUpdateChange}
-              />
-            </div>
-            <div>
-              <label htmlFor="lastNameUpdate" className="form-label">
-                Last Name
-              </label>
-              <input
-                type="text"
-                id="lastNameUpdate"
-                name="lastName"
-                className="form-input"
-                value={updateData.lastName}
-                onChange={handleUpdateChange}
-              />
-            </div>
-            <div>
-              <label htmlFor="middleNameUpdate" className="form-label">
-                Middle Name
-              </label>
-              <input
-                type="text"
-                id="middleNameUpdate"
-                name="middleName"
-                className="form-input"
-                value={updateData.middleName}
-                onChange={handleUpdateChange}
-              />
-            </div>
-            <div>
-              <label htmlFor="phoneNumberUpdate" className="form-label">
-                Phone Number
-              </label>
-              <input
-                type="tel"
-                id="phoneNumberUpdate"
-                name="phoneNumber"
-                className="form-input"
-                value={updateData.phoneNumber}
-                onChange={handleUpdateChange}
-              />
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">{`${
+                selectedAdmin?.firstName || ""
+              } ${selectedAdmin?.lastName || ""}`}</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    First Name
+                  </label>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-gray-300">
+                    {selectedAdmin?.firstName || "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Last Name
+                  </label>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-gray-300">
+                    {selectedAdmin?.lastName || "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Middle Name
+                  </label>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-gray-300">
+                    {selectedAdmin?.middleName || "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Email
+                  </label>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-gray-300">
+                    {selectedAdmin?.email || "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Phone
+                  </label>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-gray-300">
+                    {selectedAdmin?.phoneNumber || "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Admin ID
+                  </label>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-gray-300">
+                    {selectedAdmin?.id || "N/A"}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
-          <div className="flex justify-end space-x-3 pt-2">
-            <button
-              type="submit"
-              className="btn-primary"
-              disabled={submittingUpdate}
-            >
-              {submittingUpdate ? "Updating..." : "Update Admin"}
-            </button>
-          </div>
-        </form>
-      </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="firstName" className="form-label">
+                  First Name *
+                </label>
+                <input
+                  type="text"
+                  id="firstName"
+                  name="firstName"
+                  className="form-input"
+                  value={formData.firstName}
+                  onChange={(e) =>
+                    setFormData({ ...formData, firstName: e.target.value })
+                  }
+                  required={modalType === "create"}
+                />
+              </div>
+              <div>
+                <label htmlFor="lastName" className="form-label">
+                  Last Name *
+                </label>
+                <input
+                  type="text"
+                  id="lastName"
+                  name="lastName"
+                  className="form-input"
+                  value={formData.lastName}
+                  onChange={(e) =>
+                    setFormData({ ...formData, lastName: e.target.value })
+                  }
+                  required={modalType === "create"}
+                />
+              </div>
+              <div>
+                <label htmlFor="middleName" className="form-label">
+                  Middle Name
+                </label>
+                <input
+                  type="text"
+                  id="middleName"
+                  name="middleName"
+                  className="form-input"
+                  value={formData.middleName}
+                  onChange={(e) =>
+                    setFormData({ ...formData, middleName: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <label htmlFor="email" className="form-label">
+                  {modalType === "create" ? "Email *" : "New Email"}
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  className="form-input"
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
+                  required={modalType === "create"}
+                />
+              </div>
+              <div>
+                <label htmlFor="password" className="form-label">
+                  {modalType === "create" ? "Password *" : "New Password"}
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  className="form-input"
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                  required={modalType === "create"}
+                />
+              </div>
+              <div>
+                <label htmlFor="phoneNumber" className="form-label">
+                  Phone Number *
+                </label>
+                <input
+                  type="tel"
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  className="form-input"
+                  value={formData.phoneNumber}
+                  onChange={(e) =>
+                    setFormData({ ...formData, phoneNumber: e.target.value })
+                  }
+                  required={modalType === "create"}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end space-x-3 pt-4">
+              <button
+                type="button"
+                onClick={() => setShowModal(false)}
+                className="btn-secondary"
+                disabled={submitting}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="btn-primary"
+                disabled={submitting}
+              >
+                {submitting
+                  ? "Processing..."
+                  : modalType === "create"
+                  ? "Create Admin"
+                  : "Update Admin"}
+              </button>
+            </div>
+          </form>
+        )}
+      </Modal>
     </div>
   );
 };

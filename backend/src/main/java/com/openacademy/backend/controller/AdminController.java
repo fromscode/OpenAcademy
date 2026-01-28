@@ -79,6 +79,19 @@ public class AdminController {
         return ResponseEntity.ok(adminService.updateAdminByEmail(email, request));
     }
 
+    // --- ADMIN VIEW ---
+    @GetMapping("/admins")
+    public ResponseEntity<List<Admin>> getAllAdmins() {
+        return ResponseEntity.ok(adminService.getAllAdmins());
+    }
+
+    // --- ADMIN DELETE ---
+    @DeleteMapping("/admins/{id}")
+    public ResponseEntity<String> deleteAdmin(@PathVariable Long id) {
+        adminService.deleteAdmin(id);
+        return ResponseEntity.ok("Admin deleted successfully");
+    }
+
     // Alternative endpoint using query param to avoid path variable conflicts
     @PutMapping("/admins/by-email")
     public ResponseEntity<Admin> updateAdminByEmailParam(@RequestParam("email") String email,
