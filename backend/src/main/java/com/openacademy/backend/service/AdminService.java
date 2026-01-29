@@ -2,6 +2,7 @@ package com.openacademy.backend.service;
 
 import java.util.List;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.openacademy.backend.dto.CreateAdminRequest;
@@ -42,7 +43,7 @@ public class AdminService {
   private final MessageRepository chatMessageRepository;
   private final GroupMemberRepository groupMemberRepository;
   private final AdminRepository adminRepository;
-  // private final PasswordEncoder passwordEncoder; // Uncomment when you add
+  private final PasswordEncoder passwordEncoder; // Uncomment when you add
   // Security
 
   // --- VIEW METHODS ---
@@ -73,8 +74,7 @@ public class AdminService {
     user.setRole(Role.TEACHER);
 
     // IMPORTANT: Encrypt password in real app
-    // user.setPassword(passwordEncoder.encode(request.getPassword()));
-    user.setPassword(request.getPassword());
+    user.setPassword(passwordEncoder.encode(request.getPassword()));
 
     User savedUser = userRepository.save(user);
 
@@ -96,7 +96,7 @@ public class AdminService {
     user.setEmail(request.getEmail());
     user.setPhoneNumber(request.getPhoneNumber());
     user.setRole(Role.STUDENT);
-    user.setPassword(request.getPassword()); // Remember to encrypt!
+    user.setPassword(passwordEncoder.encode(request.getPassword())); // Remember to encrypt!
 
     User savedUser = userRepository.save(user);
 
@@ -118,7 +118,7 @@ public class AdminService {
     user.setEmail(request.getEmail());
     user.setPhoneNumber(request.getPhoneNumber());
     user.setRole(Role.ADMIN);
-    user.setPassword(request.getPassword()); // Remember to encrypt!
+    user.setPassword(passwordEncoder.encode(request.getPassword())); // Remember to encrypt!
 
     User savedUser = userRepository.save(user);
 
