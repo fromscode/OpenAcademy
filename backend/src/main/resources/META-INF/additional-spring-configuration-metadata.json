@@ -1,0 +1,17 @@
+{"properties": [
+  {
+    "name": "security.jwt.secret-key",
+    "type": "java.lang.String",
+    "description": "JWT secret key"
+  },
+  {
+    "name": "security.admin.email",
+    "type": "java.lang.String",
+    "description": "Master admin email"
+  },
+  {
+    "name": "security.admin.password",
+    "type": "java.lang.String",
+    "description": "Master admin password"
+  }
+]}
