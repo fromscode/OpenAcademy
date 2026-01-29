@@ -2,7 +2,7 @@ package com.openacademy.backend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,26 +18,27 @@ public class BackendApplication {
 	}
 
 	@Bean
-	public CommandLineRunner resetAdminPassword(UserRepository repo, PasswordEncoder encoder) {
+	public CommandLineRunner resetAdminPassword(
+			UserRepository repo,
+			PasswordEncoder encoder,
+			// Inject values from properties file
+			@Value("${security.admin.email}") String adminEmail,
+			@Value("${security.admin.password}") String adminPassword) {
 		return args -> {
-			// 1. Replace with the email of your MAIN ADMIN account
-			String adminEmail = "s@mail.com";
-
-			// 2. Find the user
+			// Use the injected variable, not a hardcoded string
 			User admin = repo.findByEmail(adminEmail).orElse(null);
 
 			if (admin != null) {
-				// 3. Set a new temporary password (hashed!)
-				admin.setPassword(encoder.encode("abababa"));
+				// Encode the password from properties
+				admin.setPassword(encoder.encode(adminPassword));
 				repo.save(admin);
 
 				System.out.println("------------------------------------------------");
 				System.out.println("ADMIN PASSWORD RESET SUCCESSFUL");
 				System.out.println("Email: " + adminEmail);
-				System.out.println("New Password: abababa");
 				System.out.println("------------------------------------------------");
 			} else {
-				System.out.println("!!! ADMIN USER NOT FOUND - CHECK EMAIL !!!");
+				System.out.println("!!! ADMIN USER NOT FOUND: " + adminEmail + " !!!");
 			}
 		};
 	}

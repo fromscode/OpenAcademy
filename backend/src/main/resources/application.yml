@@ -24,3 +24,18 @@ logging:
     "[org.hibernate.SQL]": DEBUG
     "[org.hibernate.type.descriptor.sql.BasicBinder]": TRACE
     "[org.hibernate.orm.schema]": DEBUG
+
+
+# ===============================
+# SECURITY CONFIGURATION
+# ===============================
+
+security:
+  jwt:
+    # Maps to @Value("${security.jwt.secret-key}")
+    secret-key: ${SECRET_KEY} 
+  admin:
+    # Maps to @Value("${security.admin.email}")
+    email: ${SECURITY_ADMIN_EMAIL}
+    # Maps to @Value("${security.admin.password}")
+    password: ${SECURITY_ADMIN_PASSWORD}
