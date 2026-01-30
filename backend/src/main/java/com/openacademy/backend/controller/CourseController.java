@@ -54,7 +54,7 @@ public class CourseController {
 
   // POST /api/courses/{courseId}/enroll
   // Enroll a student in a course
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasRole('ADMIN') or (hasRole('STUDENT') and #request.studentId == authentication.principal.id)")
   @PostMapping("/{courseId}/enroll")
   public ResponseEntity<Enrollment> enrollStudent(
       @PathVariable Long courseId,

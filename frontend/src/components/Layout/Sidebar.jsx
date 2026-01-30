@@ -63,6 +63,12 @@ const Sidebar = ({ isOpen, onClose }) => {
             title: "Communication",
             items: [
               {
+                icon: Video,
+                label: "Start Meeting",
+                path: "https://deeppati2005.github.io/mumble/",
+                external: true,
+              },
+              {
                 icon: MessageSquare,
                 label: "Messages",
                 path: "/dashboard/messages",
@@ -105,6 +111,12 @@ const Sidebar = ({ isOpen, onClose }) => {
           {
             title: "Communication",
             items: [
+              {
+                icon: Video,
+                label: "Start Meeting",
+                path: "https://deeppati2005.github.io/mumble/",
+                external: true,
+              },
               {
                 icon: MessageSquare,
                 label: "Messages",
