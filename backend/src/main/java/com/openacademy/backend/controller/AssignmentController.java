@@ -2,6 +2,7 @@ package com.openacademy.backend.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.openacademy.backend.dto.CreateAssignmentRequest;
@@ -19,6 +20,7 @@ public class AssignmentController {
 
   // POST /api/courses/{courseId}/assignments
   // Create a new assignment for a specific course
+  @PreAuthorize("hasRole('TEACHER')")
   @PostMapping("/courses/{courseId}/assignments")
   public ResponseEntity<Assignment> createAssignment(
       @PathVariable Long courseId,
@@ -30,6 +32,7 @@ public class AssignmentController {
 
   // GET /api/courses/{courseId}/assignments
   // Get the syllabus (list of assignments) for a course
+  @PreAuthorize("hasAnyRole('TEACHER', 'STUDENT')")
   @GetMapping("/courses/{courseId}/assignments")
   public ResponseEntity<List<Assignment>> getCourseAssignments(@PathVariable Long courseId) {
     return ResponseEntity.ok(assignmentService.getAssignmentsByCourse(courseId));
@@ -37,6 +40,7 @@ public class AssignmentController {
 
   // GET /api/assignments/{id}
   // Get a single assignment by id
+  @PreAuthorize("hasAnyRole('TEACHER', 'STUDENT')")
   @GetMapping("/assignments/{id}")
   public ResponseEntity<Assignment> getAssignment(@PathVariable Long id) {
     return ResponseEntity.ok(assignmentService.getAssignmentById(id));
@@ -44,6 +48,7 @@ public class AssignmentController {
 
   // PUT /api/assignments/{id}
   // Update details
+  @PreAuthorize("hasRole('TEACHER')")
   @PutMapping("/assignments/{id}")
   public ResponseEntity<Assignment> updateAssignment(
       @PathVariable Long id,
@@ -53,6 +58,7 @@ public class AssignmentController {
 
   // DELETE /api/assignments/{id}
   @DeleteMapping("/assignments/{id}")
+  @PreAuthorize("hasRole('TEACHER')")
   public ResponseEntity<Void> deleteAssignment(@PathVariable Long id) {
     assignmentService.deleteAssignment(id);
     return ResponseEntity.noContent().build();

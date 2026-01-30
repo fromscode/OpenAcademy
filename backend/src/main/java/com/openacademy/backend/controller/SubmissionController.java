@@ -2,6 +2,7 @@ package com.openacademy.backend.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.openacademy.backend.dto.GradeSubmissionRequest;
@@ -20,6 +21,7 @@ public class SubmissionController {
 
   // STUDENT: Submit work
   // POST /api/assignments/{assignmentId}/submit
+  @PreAuthorize("hasRole('STUDENT')")
   @PostMapping("/assignments/{assignmentId}/submit")
   public ResponseEntity<Submission> submitAssignment(
       @PathVariable Long assignmentId,
@@ -31,6 +33,7 @@ public class SubmissionController {
 
   // INSTRUCTOR: Grade work
   // POST /api/submissions/{submissionId}/grade
+  @PreAuthorize("hasRole('TEACHER')")
   @PostMapping("/submissions/{submissionId}/grade")
   public ResponseEntity<Submission> gradeSubmission(
       @PathVariable Long submissionId,
@@ -42,6 +45,7 @@ public class SubmissionController {
 
   // INSTRUCTOR: Get all submissions for an assignment
   // GET /api/assignments/{assignmentId}/submissions
+  @PreAuthorize("hasRole('TEACHER')")
   @GetMapping("/assignments/{assignmentId}/submissions")
   public ResponseEntity<List<Submission>> getSubmissions(@PathVariable Long assignmentId) {
     return ResponseEntity.ok(submissionService.getSubmissionsForAssignment(assignmentId));
@@ -49,6 +53,7 @@ public class SubmissionController {
 
   // STUDENT: Get my submission for a specific assignment (if any)
   // GET /api/assignments/{assignmentId}/submission-of/{studentId}
+  @PreAuthorize("hasAnyRole('TEACHER', 'STUDENT')")
   @GetMapping("/assignments/{assignmentId}/submission-of/{studentId}")
   public ResponseEntity<Submission> getStudentSubmission(
       @PathVariable Long assignmentId,

@@ -2,6 +2,7 @@ package com.openacademy.backend.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.openacademy.backend.dto.CourseDTO;
@@ -22,6 +23,7 @@ public class CourseController {
 
   // POST /api/courses
   // Create a new course
+  @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
   @PostMapping
   public ResponseEntity<Course> createCourse(@RequestBody CreateCourseRequest request) {
     Course newCourse = courseService.createCourse(request);
@@ -51,6 +53,7 @@ public class CourseController {
 
   // POST /api/courses/{courseId}/enroll
   // Enroll a student in a course
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping("/{courseId}/enroll")
   public ResponseEntity<Enrollment> enrollStudent(
       @PathVariable Long courseId,
