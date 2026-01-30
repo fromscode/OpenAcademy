@@ -22,9 +22,21 @@ export const AuthProvider = ({ children }) => {
 
     if (savedUser && token) {
       setUser(JSON.parse(savedUser));
-      // TODO: You can add token validation here
     }
     setIsLoading(false);
+
+    // Listen for unauthorized events from API calls
+    const handleUnauthorized = () => {
+      setUser(null);
+      // Redirect to login page
+      window.location.href = "/login";
+    };
+
+    window.addEventListener("auth:unauthorized", handleUnauthorized);
+
+    return () => {
+      window.removeEventListener("auth:unauthorized", handleUnauthorized);
+    };
   }, []);
 
   const login = async (email, password) => {

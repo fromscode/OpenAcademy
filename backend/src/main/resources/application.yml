@@ -33,7 +33,7 @@ logging:
 security:
   jwt:
     # Maps to @Value("${security.jwt.secret-key}")
-    secret-key: ${SECRET_KEY} 
+    secret-key: ${SECRET_KEY}
   admin:
     # Maps to @Value("${security.admin.email}")
     email: ${SECURITY_ADMIN_EMAIL}

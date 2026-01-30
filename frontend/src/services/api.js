@@ -37,6 +37,23 @@ const handleResponse = async (response) => {
     return text;
   };
 
+  // Handle authentication errors (401 Unauthorized or 403 Forbidden)
+  if (response.status === 401 || response.status === 403) {
+    // Clear invalid token and redirect to login
+    sessionStorage.removeItem("openacademy_token");
+    sessionStorage.removeItem("openacademy_user");
+
+    // Dispatch custom event for logout
+    window.dispatchEvent(new CustomEvent("auth:unauthorized"));
+
+    const body = await parseBody();
+    const message =
+      response.status === 401
+        ? "Session expired. Please login again."
+        : "Access denied. Insufficient permissions.";
+    throw new Error(body?.message || message);
+  }
+
   if (!response.ok) {
     const body = await parseBody();
     const message =

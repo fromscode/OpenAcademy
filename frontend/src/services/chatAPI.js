@@ -3,7 +3,7 @@ const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
 // Helper function to get auth token
 const getAuthToken = () => {
-  return localStorage.getItem("openacademy_token");
+  return sessionStorage.getItem("openacademy_token");
 };
 
 // Helper function to create headers with auth token
@@ -17,17 +17,32 @@ const getAuthHeaders = () => {
 
 // Helper function to handle API responses
 const handleResponse = async (response) => {
+  // Handle authentication errors (401 Unauthorized or 403 Forbidden)
+  if (response.status === 401 || response.status === 403) {
+    // Clear invalid token and redirect to login
+    sessionStorage.removeItem("openacademy_token");
+    sessionStorage.removeItem("openacademy_user");
+
+    // Dispatch custom event for logout
+    window.dispatchEvent(new CustomEvent("auth:unauthorized"));
+
+    const error = await response
+      .json()
+      .catch(() => ({
+        message: response.status === 401 ? "Session expired" : "Access denied",
+      }));
+    throw new Error(
+      error.message ||
+        (response.status === 401
+          ? "Session expired. Please login again."
+          : "Access denied.")
+    );
+  }
+
   if (!response.ok) {
     const error = await response
       .json()
       .catch(() => ({ message: "Network error" }));
-
-    if (response.status === 403) {
-      throw new Error(
-        error.message || "You don't have permission to perform this action"
-      );
-    }
-
     throw new Error(error.message || "API request failed");
   }
 

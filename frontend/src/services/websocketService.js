@@ -24,13 +24,16 @@ class WebSocketService {
     if (!userId) return;
 
     this._userId = userId;
-    const token = localStorage.getItem("openacademy_token");
+    const token = sessionStorage.getItem("openacademy_token");
     const endpoint = this._getWsEndpoint();
 
     this.client = new Client({
       webSocketFactory: () => new SockJS(endpoint),
       reconnectDelay: this.reconnectDelay,
       debug: (msg) => this.debug && console.log("STOMP:", msg),
+      connectHeaders: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
       onConnect: (frame) => {
         this.connected = true;
         console.log("WebSocket connected");
