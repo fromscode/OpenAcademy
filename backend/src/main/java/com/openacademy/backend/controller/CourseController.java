@@ -46,6 +46,7 @@ public class CourseController {
 
   // GET /api/courses/student/{studentId}
   // Get courses the given student is enrolled in
+  @PreAuthorize("(hasRole('ADMIN') or (hasRole('STUDENT') and #studentId == authentication.principal.id))")
   @GetMapping("/student/{studentId}")
   public ResponseEntity<List<Course>> getStudentCourses(@PathVariable Long studentId) {
     return ResponseEntity.ok(courseService.getCoursesForStudent(studentId));

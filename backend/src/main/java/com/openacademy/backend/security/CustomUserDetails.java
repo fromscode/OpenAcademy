@@ -23,6 +23,10 @@ public class CustomUserDetails implements UserDetails {
         return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
     }
 
+    public Long getId() {
+        return user.getId();
+    }
+
     // 2. Map your password
     @Override
     public String getPassword() {

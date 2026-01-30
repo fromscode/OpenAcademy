@@ -53,7 +53,7 @@ public class SubmissionController {
 
   // STUDENT: Get my submission for a specific assignment (if any)
   // GET /api/assignments/{assignmentId}/submission-of/{studentId}
-  @PreAuthorize("hasAnyRole('TEACHER', 'STUDENT')")
+  @PreAuthorize("(hasRole('STUDENT') and #studentId == authentication.principal.id)")
   @GetMapping("/assignments/{assignmentId}/submission-of/{studentId}")
   public ResponseEntity<Submission> getStudentSubmission(
       @PathVariable Long assignmentId,

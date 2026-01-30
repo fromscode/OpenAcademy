@@ -11,12 +11,12 @@ import com.openacademy.backend.service.DashboardService;
 @RestController
 @RequestMapping("/api/dashboard")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('STUDENT')")
 public class DashboardController {
 
   private final DashboardService dashboardService;
 
   // GET /api/dashboard/student/{studentId}
+  @PreAuthorize("(hasRole('STUDENT') and #studentId == authentication.principal.id)")
   @GetMapping("/student/{studentId}")
   public ResponseEntity<StudentDashboardDTO> getStudentDashboard(@PathVariable Long studentId) {
     return ResponseEntity.ok(dashboardService.getStudentDashboard(studentId));
