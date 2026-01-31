@@ -19,6 +19,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class SubmissionService {
 
   private final SubmissionRepository submissionRepository;

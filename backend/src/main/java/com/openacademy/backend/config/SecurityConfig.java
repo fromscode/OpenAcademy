@@ -41,6 +41,7 @@ public class SecurityConfig {
     }
 
     // 2. Auth Provider: Connects the UserDetailsService with the PasswordEncoder
+    @SuppressWarnings("deprecation")
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -65,7 +66,7 @@ public class SecurityConfig {
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setExposedHeaders(Arrays.asList("Authorization"));
         configuration.setAllowCredentials(true);
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
@@ -77,7 +78,7 @@ public class SecurityConfig {
         http
                 // Enable CORS with the configuration above
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                
+
                 // Disable CSRF (Cross-Site Request Forgery) is standard for stateless JWT APIs
                 .csrf(AbstractHttpConfigurer::disable)
 
