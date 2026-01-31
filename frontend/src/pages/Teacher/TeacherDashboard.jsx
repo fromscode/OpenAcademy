@@ -12,7 +12,7 @@ import {
 import { useAuth } from "../../context/AuthContext";
 import { courseAPI, assignmentAPI } from "../../services/api";
 import LoadingSpinner from "../../components/Common/LoadingSpinner";
-// Modal removed with create-assignment quick action
+import Modal from "../../components/Common/Modal";
 
 const TeacherDashboard = () => {
   const { user } = useAuth();
@@ -21,7 +21,8 @@ const TeacherDashboard = () => {
   const [submissions, setSubmissions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  // No inline create-assignment on dashboard; handled in Manage Courses
+  const [showSubmissionsModal, setShowSubmissionsModal] = useState(false);
+  const [showDeadlinesModal, setShowDeadlinesModal] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
@@ -147,10 +148,142 @@ const TeacherDashboard = () => {
     .sort((a, b) => new Date(b.submittedAt || 0) - new Date(a.submittedAt || 0))
     .slice(0, 5);
 
+  const allSubmissions = submissions.sort(
+    (a, b) => new Date(b.submittedAt || 0) - new Date(a.submittedAt || 0)
+  );
+
   const upcomingDeadlines = teacherAssignments
     .filter((assignment) => new Date(assignment.dueDate) > new Date())
     .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
     .slice(0, 5);
+
+  const allDeadlines = teacherAssignments
+    .filter((assignment) => new Date(assignment.dueDate) > new Date())
+    .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+
+  const renderSubmission = (submission) => {
+    const assignment = teacherAssignments.find(
+      (a) => a.id === (submission.assignmentId ?? submission.assignment?.id)
+    );
+    const studentName =
+      submission.student?.firstName && submission.student?.lastName
+        ? `${submission.student.firstName} ${submission.student.lastName}`
+        : submission.student?.name ||
+          submission.student?.firstName ||
+          submission.studentName ||
+          "Student";
+    const avatarUrl =
+      submission.student?.avatar ||
+      submission.student?.profileImageUrl ||
+      submission.studentAvatar ||
+      submission.avatar ||
+      null;
+    const initials = (name) => {
+      if (!name || typeof name !== "string") return "";
+      const parts = name.trim().split(/\s+/);
+      const first = parts[0]?.[0] || "";
+      const second = parts[1]?.[0] || "";
+      return (first + second).toUpperCase() || first.toUpperCase();
+    };
+    const status = submission.grade != null ? "graded" : "submitted";
+    const submittedDate =
+      submission.submittedAt ||
+      submission.submissionDate ||
+      submission.createdAt;
+
+    return (
+      <div
+        key={submission.id}
+        className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
+      >
+        <div className="flex-shrink-0">
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt={studentName}
+              className="h-8 w-8 rounded-full object-cover"
+              referrerPolicy="no-referrer"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+                const sibling = e.currentTarget.nextElementSibling;
+                if (sibling) sibling.style.display = "flex";
+              }}
+            />
+          ) : null}
+          <div
+            className="h-8 w-8 rounded-full bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-100 flex items-center justify-center text-xs font-semibold"
+            style={{ display: avatarUrl ? "none" : "flex" }}
+          >
+            {initials(studentName)}
+          </div>
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+            {assignment?.title}
+          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {studentName} •{" "}
+            {submittedDate ? new Date(submittedDate).toLocaleDateString() : ""}
+          </p>
+        </div>
+        <div className="flex-shrink-0">
+          <span
+            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+              status === "graded"
+                ? "bg-green-100 text-green-800"
+                : status === "submitted"
+                ? "bg-yellow-100 text-yellow-800"
+                : "bg-gray-100 text-gray-800"
+            }`}
+          >
+            {status}
+          </span>
+        </div>
+      </div>
+    );
+  };
+
+  const renderDeadline = (assignment) => {
+    const daysUntilDue = Math.ceil(
+      (new Date(assignment.dueDate) - new Date()) / (1000 * 60 * 60 * 24)
+    );
+    const isUrgent = daysUntilDue <= 3;
+
+    return (
+      <div
+        key={assignment.id}
+        className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
+      >
+        <div className="flex-shrink-0">
+          {isUrgent ? (
+            <AlertCircle className="h-5 w-5 text-red-500" />
+          ) : (
+            <Clock className="h-5 w-5 text-yellow-500" />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+            {assignment.title}
+          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {assignment.courseName} • Due{" "}
+            {new Date(assignment.dueDate).toLocaleDateString()}
+          </p>
+        </div>
+        <div className="flex-shrink-0">
+          <span
+            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+              isUrgent
+                ? "bg-red-100 text-red-800"
+                : "bg-yellow-100 text-yellow-800"
+            }`}
+          >
+            {daysUntilDue} days
+          </span>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -171,10 +304,6 @@ const TeacherDashboard = () => {
               <h1 className="text-3xl font-bold text-white">
                 Good morning, Professor {user?.firstName || user?.name}!
               </h1>
-              <p className="text-primary-100 mt-2">
-                You have {pendingSubmissions.length} submissions waiting for
-                your review.
-              </p>
             </div>
           </div>
         </div>
@@ -273,101 +402,19 @@ const TeacherDashboard = () => {
             <h3 className="text-lg font-medium text-gray-900 dark:text-white">
               Recent Submissions
             </h3>
-            <Link
-              to="/teacher/grading"
-              className="text-sm text-primary-600 hover:text-primary-700"
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                setShowSubmissionsModal(true);
+              }}
+              className="text-sm text-primary-600 hover:text-primary-700 cursor-pointer"
             >
               View all
-            </Link>
+            </button>
           </div>
           <div className="space-y-4">
             {recentSubmissions.length > 0 ? (
-              recentSubmissions.map((submission) => {
-                const assignment = teacherAssignments.find(
-                  (a) =>
-                    a.id ===
-                    (submission.assignmentId ?? submission.assignment?.id)
-                );
-                const studentName =
-                  submission.student?.firstName && submission.student?.lastName
-                    ? `${submission.student.firstName} ${submission.student.lastName}`
-                    : submission.student?.name ||
-                      submission.student?.firstName ||
-                      submission.studentName ||
-                      "Student";
-                const avatarUrl =
-                  submission.student?.avatar ||
-                  submission.student?.profileImageUrl ||
-                  submission.studentAvatar ||
-                  submission.avatar ||
-                  null;
-                const initials = (name) => {
-                  if (!name || typeof name !== "string") return "";
-                  const parts = name.trim().split(/\s+/);
-                  const first = parts[0]?.[0] || "";
-                  const second = parts[1]?.[0] || "";
-                  return (first + second).toUpperCase() || first.toUpperCase();
-                };
-                const status =
-                  submission.grade != null ? "graded" : "submitted";
-                const submittedDate =
-                  submission.submittedAt ||
-                  submission.submissionDate ||
-                  submission.createdAt;
-
-                return (
-                  <div
-                    key={submission.id}
-                    className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
-                  >
-                    <div className="flex-shrink-0">
-                      {avatarUrl ? (
-                        <img
-                          src={avatarUrl}
-                          alt={studentName}
-                          className="h-8 w-8 rounded-full object-cover"
-                          referrerPolicy="no-referrer"
-                          onError={(e) => {
-                            e.currentTarget.style.display = "none";
-                            const sibling = e.currentTarget.nextElementSibling;
-                            if (sibling) sibling.style.display = "flex";
-                          }}
-                        />
-                      ) : null}
-                      <div
-                        className="h-8 w-8 rounded-full bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-100 flex items-center justify-center text-xs font-semibold"
-                        style={{ display: avatarUrl ? "none" : "flex" }}
-                      >
-                        {initials(studentName)}
-                      </div>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                        {assignment?.title}
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {studentName} •{" "}
-                        {submittedDate
-                          ? new Date(submittedDate).toLocaleDateString()
-                          : ""}
-                      </p>
-                    </div>
-                    <div className="flex-shrink-0">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          status === "graded"
-                            ? "bg-green-100 text-green-800"
-                            : status === "submitted"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-gray-100 text-gray-800"
-                        }`}
-                      >
-                        {status}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })
+              recentSubmissions.map(renderSubmission)
             ) : (
               <p className="text-gray-500 dark:text-gray-400 text-center py-4">
                 No recent submissions
@@ -382,57 +429,19 @@ const TeacherDashboard = () => {
             <h3 className="text-lg font-medium text-gray-900 dark:text-white">
               Upcoming Deadlines
             </h3>
-            <Link
-              to="/teacher/assignments"
-              className="text-sm text-primary-600 hover:text-primary-700"
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                setShowDeadlinesModal(true);
+              }}
+              className="text-sm text-primary-600 hover:text-primary-700 cursor-pointer"
             >
               View all
-            </Link>
+            </button>
           </div>
           <div className="space-y-4">
             {upcomingDeadlines.length > 0 ? (
-              upcomingDeadlines.map((assignment) => {
-                const daysUntilDue = Math.ceil(
-                  (new Date(assignment.dueDate) - new Date()) /
-                    (1000 * 60 * 60 * 24)
-                );
-                const isUrgent = daysUntilDue <= 3;
-
-                return (
-                  <div
-                    key={assignment.id}
-                    className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
-                  >
-                    <div className="flex-shrink-0">
-                      {isUrgent ? (
-                        <AlertCircle className="h-5 w-5 text-red-500" />
-                      ) : (
-                        <Clock className="h-5 w-5 text-yellow-500" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                        {assignment.title}
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {assignment.courseName} • Due{" "}
-                        {new Date(assignment.dueDate).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="flex-shrink-0">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          isUrgent
-                            ? "bg-red-100 text-red-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
-                        {daysUntilDue} days
-                      </span>
-                    </div>
-                  </div>
-                );
-              })
+              upcomingDeadlines.map(renderDeadline)
             ) : (
               <p className="text-gray-500 dark:text-gray-400 text-center py-4">
                 No upcoming deadlines
@@ -475,6 +484,42 @@ const TeacherDashboard = () => {
           ))}
         </div>
       </div>
+
+      {/* All Submissions Modal */}
+      <Modal
+        isOpen={showSubmissionsModal}
+        onClose={() => setShowSubmissionsModal(false)}
+        title="All Submissions"
+        size="xl"
+      >
+        <div className="space-y-3 max-h-[60vh] overflow-y-auto">
+          {allSubmissions.length > 0 ? (
+            allSubmissions.map(renderSubmission)
+          ) : (
+            <p className="text-gray-500 dark:text-gray-400 text-center py-8">
+              No submissions yet
+            </p>
+          )}
+        </div>
+      </Modal>
+
+      {/* All Deadlines Modal */}
+      <Modal
+        isOpen={showDeadlinesModal}
+        onClose={() => setShowDeadlinesModal(false)}
+        title="All Upcoming Deadlines"
+        size="xl"
+      >
+        <div className="space-y-3 max-h-[60vh] overflow-y-auto">
+          {allDeadlines.length > 0 ? (
+            allDeadlines.map(renderDeadline)
+          ) : (
+            <p className="text-gray-500 dark:text-gray-400 text-center py-8">
+              No upcoming deadlines
+            </p>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 };
