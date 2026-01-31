@@ -32,7 +32,7 @@ public class AssignmentController {
 
   // GET /api/courses/{courseId}/assignments
   // Get the syllabus (list of assignments) for a course
-  @PreAuthorize("hasAnyRole('TEACHER', 'STUDENT')")
+  @PreAuthorize("hasAnyRole('TEACHER', 'STUDENT', 'ADMIN')")
   @GetMapping("/courses/{courseId}/assignments")
   public ResponseEntity<List<Assignment>> getCourseAssignments(@PathVariable Long courseId) {
     return ResponseEntity.ok(assignmentService.getAssignmentsByCourse(courseId));
@@ -40,7 +40,7 @@ public class AssignmentController {
 
   // GET /api/assignments/{id}
   // Get a single assignment by id
-  @PreAuthorize("hasAnyRole('TEACHER', 'STUDENT')")
+  @PreAuthorize("hasAnyRole('TEACHER', 'STUDENT', 'ADMIN')")
   @GetMapping("/assignments/{id}")
   public ResponseEntity<Assignment> getAssignment(@PathVariable Long id) {
     return ResponseEntity.ok(assignmentService.getAssignmentById(id));
