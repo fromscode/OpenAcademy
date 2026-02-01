@@ -13,5 +13,10 @@
     "name": "security.admin.password",
     "type": "java.lang.String",
     "description": "Master admin password"
+  },
+  {
+    "name": "security.admin.force-reset",
+    "type": "java.lang.String",
+    "description": "A rescue flag to force reset the master admin password"
   }
 ]}

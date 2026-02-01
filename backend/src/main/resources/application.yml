@@ -39,3 +39,5 @@ security:
     email: ${SECURITY_ADMIN_EMAIL}
     # Maps to @Value("${security.admin.password}")
     password: ${SECURITY_ADMIN_PASSWORD}
+    # Rescue flag if password to master admin was forgotten
+    force-reset: ${SECURITY_FORCE_RESET:false}
