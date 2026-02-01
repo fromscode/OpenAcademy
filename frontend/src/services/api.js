@@ -74,22 +74,61 @@ const handleResponse = async (response) => {
 export const authAPI = {
   // Global Login - determines role automatically
   login: async (email, password) => {
-    const response = await fetch(`${BASE_URL}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-    return handleResponse(response);
-  },
-  // Student Authentication
-  student: {
-    login: async (email, password) => {
-      const response = await fetch(`${BASE_URL}/auth/student/login`, {
+    try {
+      const response = await fetch(`${BASE_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
+
+      // For login endpoint, handle 401 specially (invalid credentials, not session expiry)
+      if (response.status === 401) {
+        const text = await response.text();
+        let body;
+        try {
+          body = JSON.parse(text);
+        } catch (e) {
+          body = { message: "Invalid email or password" };
+        }
+        return {
+          success: false,
+          message: body.message || "Invalid email or password",
+        };
+      }
+
       return handleResponse(response);
+    } catch (error) {
+      return { success: false, message: error.message || "Login failed" };
+    }
+  },
+  // Student Authentication
+  student: {
+    login: async (email, password) => {
+      try {
+        const response = await fetch(`${BASE_URL}/auth/student/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+
+        if (response.status === 401) {
+          const text = await response.text();
+          let body;
+          try {
+            body = JSON.parse(text);
+          } catch (e) {
+            body = { message: "Invalid email or password" };
+          }
+          return {
+            success: false,
+            message: body.message || "Invalid email or password",
+          };
+        }
+
+        return handleResponse(response);
+      } catch (error) {
+        return { success: false, message: error.message || "Login failed" };
+      }
     },
 
     register: async (userData) => {
@@ -105,12 +144,31 @@ export const authAPI = {
   // Teacher Authentication
   teacher: {
     login: async (email, password) => {
-      const response = await fetch(`${BASE_URL}/auth/teacher/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      return handleResponse(response);
+      try {
+        const response = await fetch(`${BASE_URL}/auth/teacher/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+
+        if (response.status === 401) {
+          const text = await response.text();
+          let body;
+          try {
+            body = JSON.parse(text);
+          } catch (e) {
+            body = { message: "Invalid email or password" };
+          }
+          return {
+            success: false,
+            message: body.message || "Invalid email or password",
+          };
+        }
+
+        return handleResponse(response);
+      } catch (error) {
+        return { success: false, message: error.message || "Login failed" };
+      }
     },
 
     register: async (userData) => {
@@ -126,12 +184,31 @@ export const authAPI = {
   // Admin Authentication
   admin: {
     login: async (email, password) => {
-      const response = await fetch(`${BASE_URL}/auth/admin/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      return handleResponse(response);
+      try {
+        const response = await fetch(`${BASE_URL}/auth/admin/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+
+        if (response.status === 401) {
+          const text = await response.text();
+          let body;
+          try {
+            body = JSON.parse(text);
+          } catch (e) {
+            body = { message: "Invalid email or password" };
+          }
+          return {
+            success: false,
+            message: body.message || "Invalid email or password",
+          };
+        }
+
+        return handleResponse(response);
+      } catch (error) {
+        return { success: false, message: error.message || "Login failed" };
+      }
     },
 
     register: async (userData) => {

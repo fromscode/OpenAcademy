@@ -201,7 +201,7 @@ public class AdminService {
     if (request.getEmail() != null && !request.getEmail().trim().isEmpty())
       user.setEmail(request.getEmail().trim());
     if (request.getPassword() != null && !request.getPassword().trim().isEmpty())
-      user.setPassword(request.getPassword()); // encrypt in real app
+      user.setPassword(passwordEncoder.encode(request.getPassword()));
 
     userRepository.save(user);
     return adminRepository.save(admin);
