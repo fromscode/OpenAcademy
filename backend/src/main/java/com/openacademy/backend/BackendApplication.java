@@ -26,48 +26,34 @@ public class BackendApplication {
 	@Bean
 	@Transactional
 	public CommandLineRunner resetAdminPassword(
-			UserRepository repo,
+			UserRepository userRepo,
 			PasswordEncoder encoder,
 			AdminRepository adminRepo,
 			// Inject values from properties file
 			@Value("${security.admin.email}") String adminEmail,
 			@Value("${security.admin.password}") String adminPassword) {
 		return args -> {
-			// Use the injected variable, not a hardcoded string
-			User admin = repo.findByEmail(adminEmail).orElse(null);
 
-			if (admin != null) {
-				// Encode the password from properties
-				admin.setPassword(encoder.encode(adminPassword));
-				repo.save(admin);
-
-				System.out.println("------------------------------------------------");
-				System.out.println("ADMIN PASSWORD RESET SUCCESSFUL");
-				System.out.println("Email: " + adminEmail);
-				System.out.println("------------------------------------------------");
-			} else {
-				System.out.println("!!! ADMIN USER NOT FOUND, CREATING NEW MASTER ADMIN ");
-				// 1. Create User
+			// if db doesnot have a single admin, then create a master admin with the env
+			// variables
+			if (userRepo.countByRole(Role.ADMIN) == 0) {
+				System.out.println("!!! 0 ADMIN USERS FOUND, CREATING NEW MASTER ADMIN ");
 				User user = new User();
 				user.setFirstName("Master");
-				user.setMiddleName("Head");
 				user.setLastName("Admin");
 				user.setEmail(adminEmail);
-				user.setPhoneNumber("master phone number");
+				user.setPhoneNumber(adminEmail); // since phone number is not provided, we use email here
 				user.setRole(Role.ADMIN);
 				user.setPassword(encoder.encode(adminPassword)); // Remember to encrypt!
 
-				User savedUser = repo.save(user);
+				User savedUser = userRepo.save(user);
 
 				// 2. Create Admin
 				Admin newAdmin = new Admin();
 				newAdmin.setUser(savedUser);
-
-				adminRepo.save(newAdmin);
-				System.out.println("------------------------------------------------");
-				System.out.println("NEW MASTER ADMIN CREATED");
-				System.out.println("Email: " + adminEmail);
-				System.out.println("------------------------------------------------");
+			} else {
+				System.out.println("DB contains at least one ADMIN");
+				System.out.println("Skipping admin initialization");
 			}
 		};
 	}
