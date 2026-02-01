@@ -15,9 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.openacademy.backend.dto.MessageResponse;
 import com.openacademy.backend.dto.GroupMemberDTO;
 import com.openacademy.backend.entities.ChatGroup;
-import com.openacademy.backend.entities.GroupMember;
 import com.openacademy.backend.service.GroupService;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/chat/groups")

@@ -18,12 +18,6 @@ import com.openacademy.backend.entities.common.Role;
 @SpringBootApplication
 public class BackendApplication {
 
-	private final AdminRepository adminRepository;
-
-	BackendApplication(AdminRepository adminRepository) {
-		this.adminRepository = adminRepository;
-	}
-
 	public static void main(String[] args) {
 		SpringApplication.run(BackendApplication.class, args);
 		System.out.println("Hello World");

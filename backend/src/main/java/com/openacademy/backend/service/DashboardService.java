@@ -9,7 +9,6 @@ import com.openacademy.backend.entities.Enrollment;
 import com.openacademy.backend.entities.User;
 import com.openacademy.backend.repository.AssignmentRepository;
 import com.openacademy.backend.repository.EnrollmentRepository;
-import com.openacademy.backend.repository.SubmissionRepository;
 import com.openacademy.backend.repository.UserRepository;
 
 import java.time.LocalDateTime;
@@ -20,12 +19,12 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class DashboardService {
 
   private final UserRepository userRepository;
   private final EnrollmentRepository enrollmentRepository;
   private final AssignmentRepository assignmentRepository;
-  private final SubmissionRepository submissionRepository;
 
   public StudentDashboardDTO getStudentDashboard(Long studentId) {
     // 1. Get the Student

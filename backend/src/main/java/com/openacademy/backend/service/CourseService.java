@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class CourseService {
 
   private final CourseRepository courseRepository;
@@ -46,7 +47,7 @@ public class CourseService {
   public List<Course> getAllCourses() {
     return courseRepository.findAll();
   }
-  
+
   public List<CourseDTO> getAllCoursesDTO() {
     List<Course> courses = courseRepository.findAll();
     return courses.stream()
@@ -61,11 +62,11 @@ public class CourseService {
   public List<Course> getCoursesByInstructor(Long instructorId) {
     return courseRepository.findByInstructorId(instructorId);
   }
-  
+
   // Helper method to convert Course entity to CourseDTO
   private CourseDTO convertToCourseDTO(Course course) {
     User instructor = course.getInstructor();
-    
+
     return CourseDTO.builder()
         .id(course.getId())
         .title(course.getTitle())
