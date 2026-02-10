@@ -26,13 +26,11 @@ public class PasswordService {
             throw new RuntimeException("Password cannot be blank");
         }
 
-        String encodedPassword = passwordEncoder.encode(request.getNewPassword().trim());
-
-        if (user.getPassword().equals(encodedPassword)) {
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
             throw new RuntimeException("New password cannot be the same as old password");
         }
 
-        user.setPassword(encodedPassword);
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         return userRepository.save(user);
     }
 }
