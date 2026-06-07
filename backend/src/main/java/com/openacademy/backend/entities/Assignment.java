@@ -36,6 +36,10 @@ public class Assignment {
   @Column(name = "max_score", nullable = false)
   private Integer maxScore;
 
+  // Assignment content / instructions
+  @Column(columnDefinition = "TEXT")
+  private String content;
+
   // RELATIONSHIPS ------------------------------------------------
 
   // Link to the Course this assignment belongs to

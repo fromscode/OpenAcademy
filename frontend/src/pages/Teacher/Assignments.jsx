@@ -19,6 +19,7 @@ const TeacherAssignments = () => {
     description: "",
     maxScore: 100,
     dueDate: "",
+    content: "",
   });
   const [saving, setSaving] = useState(false);
 
@@ -80,6 +81,7 @@ const TeacherAssignments = () => {
       description: assignment.description || "",
       maxScore: assignment.maxScore ?? 100,
       dueDate: assignment.dueDate ? assignment.dueDate.slice(0, 16) : "",
+      content: assignment.content || "",
     });
     setEditModalOpen(true);
   };
@@ -94,6 +96,7 @@ const TeacherAssignments = () => {
         description: form.description,
         maxScore: Number(form.maxScore),
         dueDate: form.dueDate, // datetime-local provides ISO-like string (YYYY-MM-DDTHH:mm)
+        content: form.content,
       };
       await assignmentAPI.updateAssignment(editingAssignment.id, payload);
       setEditModalOpen(false);
@@ -219,6 +222,12 @@ const TeacherAssignments = () => {
                           {a.description}
                         </p>
                       )}
+                      {a.content && (
+                        <p className="mt-2 text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 p-2 rounded line-clamp-2">
+                          <span className="font-medium">Content:</span>{" "}
+                          {a.content}
+                        </p>
+                      )}
                       <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-400">
                         <div className="flex items-center">
                           <Calendar className="h-4 w-4 mr-2" /> Due:{" "}
@@ -318,6 +327,18 @@ const TeacherAssignments = () => {
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               />
             </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Content
+            </label>
+            <textarea
+              rows={5}
+              value={form.content}
+              onChange={(e) => setForm({ ...form, content: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+              placeholder="Assignment content, instructions, or requirements..."
+            />
           </div>
           <div className="flex justify-end gap-3 pt-2">
             <button

@@ -28,6 +28,7 @@ public class AssignmentService {
     assignment.setDescription(request.getDescription());
     assignment.setDueDate(request.getDueDate());
     assignment.setMaxScore(request.getMaxScore());
+    assignment.setContent(request.getContent());
 
     // Use the helper method we wrote in the Course entity earlier
     // to ensure relationships are set correctly
@@ -54,6 +55,7 @@ public class AssignmentService {
     assignment.setDescription(request.getDescription());
     assignment.setDueDate(request.getDueDate());
     assignment.setMaxScore(request.getMaxScore());
+    assignment.setContent(request.getContent());
 
     return assignmentRepository.save(assignment);
   }

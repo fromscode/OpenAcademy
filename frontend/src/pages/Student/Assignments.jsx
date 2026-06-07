@@ -375,6 +375,12 @@ const Assignments = () => {
                         <p className="text-sm text-gray-600 dark:text-gray-400">
                           {assignment.description}
                         </p>
+                        {assignment.content && (
+                          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 p-2 rounded line-clamp-3">
+                            <span className="font-medium">Content:</span>{" "}
+                            {assignment.content}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-2">
@@ -491,6 +497,16 @@ const Assignments = () => {
             <p className="text-sm text-gray-600 dark:text-gray-400">
               {selectedAssignment?.description}
             </p>
+            {selectedAssignment?.content && (
+              <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">
+                  Assignment Content:
+                </p>
+                <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                  {selectedAssignment.content}
+                </p>
+              </div>
+            )}
           </div>
 
           <div>

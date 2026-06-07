@@ -9,4 +9,5 @@ public class CreateAssignmentRequest {
   private String description;
   private LocalDateTime dueDate;
   private Integer maxScore;
+  private String content;
 }
