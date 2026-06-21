@@ -1,9 +1,8 @@
-// Test App ID (works without token) - replace with your own
-const APP_ID = "aab8b8f5a8cd4469a63042fcfafe7063";
+// Agora App ID
+const APP_ID = "b9b575649b48443596bba578b214b3ae";
 
 let uid = sessionStorage.getItem("uid");
 if (!uid) {
-    // Generate a more unique UID using timestamp + random number
     uid = String(Date.now() + Math.floor(Math.random() * 10000));
     sessionStorage.setItem("uid", uid);
 }
@@ -11,9 +10,24 @@ console.log("Current user UID:", uid);
 
 let token = null;
 let client;
+let hasJoinedChannel = false; // Guard flag to prevent publish before join
 
-let rtmClient;
-let channel;
+// Fetch a fresh token from our local server
+let fetchToken = async (channelName) => {
+    try {
+        const response = await fetch(`/get-token?channel=${channelName}&uid=${uid}`);
+        if (!response.ok) throw new Error("Token server returned error: " + response.status);
+        const data = await response.json();
+        console.log("Token fetched successfully");
+        return data.token;
+    } catch (err) {
+        console.error("Failed to fetch token:", err);
+        alert("Could not get access token from server. Make sure server.js is running.");
+        return null;
+    }
+};
+
+
 
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
@@ -51,34 +65,42 @@ let joinRoomInit = async () => {
         );
 
         // Check if Agora SDK is loaded
-        if (
-            typeof AgoraRTM === "undefined" ||
-            typeof AgoraRTC === "undefined"
-        ) {
+       if(typeof AgoraRTC === "undefined") {
             console.error("Agora SDK not loaded properly");
             alert("Error: Agora SDK not loaded. Please refresh the page.");
             return;
         }
 
-        rtmClient = await AgoraRTM.createInstance(APP_ID);
-        await rtmClient.login({ uid, token });
-        console.log("RTM login successful");
+        // rtmClient = await AgoraRTM.createInstance(APP_ID);
+        // await rtmClient.login({ uid, token });
+        // console.log("RTM login successful");
 
-        await rtmClient.addOrUpdateLocalUserAttributes({ name: displayName });
+        // await rtmClient.addOrUpdateLocalUserAttributes({ name: displayName });
 
-        channel = await rtmClient.createChannel(roomId);
-        await channel.join();
-        console.log("RTM channel joined successfully");
+        // channel = await rtmClient.createChannel(roomId);
+        // await channel.join();
+        // console.log("RTM channel joined successfully");
 
-        channel.on("MemberJoined", handleMemberJoined);
-        channel.on("MemberLeft", handleMemberLeft);
-        channel.on("ChannelMessage", handleChannelMessage);
+        // channel.on("MemberJoined", handleMemberJoined);
+        // channel.on("MemberLeft", handleMemberLeft);
+        // channel.on("ChannelMessage", handleChannelMessage);
 
-        getMembers();
-        addBotMessageToDom(`Welcome to the room ${displayName}! 👋`);
+        // getMembers();
+        // addBotMessageToDom(`Welcome to the room ${displayName}! 👋`);
+        console.log("Joining RTC room only");
+
+        if(typeof addBotMessageToDom === "function"){
+            addBotMessageToDom(`Welcome to the room ${displayName}! 👋`);
+        }
+
+        // Fetch a fresh token for this channel
+        token = await fetchToken(roomId);
+        if (!token) return;
 
         client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
         await client.join(APP_ID, roomId, token, uid);
+        hasJoinedChannel = true; // ✅ Mark as joined
+        updateMemberCount();
         console.log("Successfully joined RTC channel");
         client.on("user-published", handleUserPublished);
         client.on("user-left", handleUserLeft);
@@ -105,9 +127,9 @@ let joinStream = async () => {
         console.log("Joining stream with UID:", uid);
 
         // Check if we're properly connected first
-        if (!client || !channel) {
-            console.error("Client or channel not initialized");
-            alert("Please refresh the page and try again");
+        if (!client || !hasJoinedChannel) {
+            console.error("Client not ready yet");
+            alert("Still connecting to room, please wait a moment and try again.");
             return;
         }
 
@@ -261,10 +283,18 @@ let switchToCamera = async () => {
     await client.publish([localTracks[0], localTracks[1]]);
 };
 
+// Update participant count display
+let updateMemberCount = () => {
+    const count = Object.keys(remoteUsers).length + 1; // +1 for self
+    const countEl = document.getElementById("members__count");
+    if (countEl) countEl.innerText = count;
+};
+
 let handleUserPublished = async (user, mediaType) => {
     try {
         console.log("User published:", user.uid, "Media type:", mediaType);
         remoteUsers[user.uid] = user;
+        updateMemberCount();
 
         console.log("Subscribing to user:", user.uid, "for", mediaType);
         await client.subscribe(user, mediaType);
@@ -319,6 +349,7 @@ let handleUserPublished = async (user, mediaType) => {
 
 let handleUserLeft = async (user) => {
     delete remoteUsers[user.uid];
+    updateMemberCount();
     let item = document.getElementById(`user-container-${user.uid}`);
     if (item) {
         item.remove();
@@ -338,6 +369,7 @@ let handleUserLeft = async (user) => {
 
 let toggleMic = async (e) => {
     let button = e.currentTarget;
+    if (!localTracks[0]) return; // Not streaming yet
 
     if (localTracks[0].muted) {
         await localTracks[0].setMuted(false);
@@ -351,6 +383,7 @@ let toggleMic = async (e) => {
 
 let toggleCamera = async (e) => {
     let button = e.currentTarget;
+    if (!localTracks[1]) return; // Not streaming yet
 
     if (localTracks[1].muted) {
         await localTracks[1].setMuted(false);
@@ -738,13 +771,16 @@ let leaveStream = async (e) => {
         localTracks[i].close();
     }
 
-    await client.unpublish([localTracks[0], localTracks[1]]);
+    if (localTracks.length > 0) {
+        await client.unpublish([localTracks[0], localTracks[1]]);
+    }
 
     if (localScreenTracks) {
         await client.unpublish([localScreenTracks]);
     }
 
-    document.getElementById(`user-container-${uid}`).remove();
+    const userContainer = document.getElementById(`user-container-${uid}`);
+    if (userContainer) userContainer.remove();
 
     if (userIdInDisplayFrame === `user-container-${uid}`) {
         displayFrame.style.display = null;
@@ -760,9 +796,7 @@ let leaveStream = async (e) => {
     currentCameraIndex = 0;
     availableCameras = [];
 
-    channel.sendMessage({
-        text: JSON.stringify({ type: "user_left", uid: uid }),
-    });
+  
 };
 
 document.getElementById("camera-btn").addEventListener("click", toggleCamera);

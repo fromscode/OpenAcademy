@@ -1,0 +1,15 @@
+{
+  "name": "open-academy",
+  "version": "1.0.0",
+  "description": "Agora video room with WebSocket chat",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "agora-access-token": "^2.0.4",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "ws": "^8.16.0"
+  }
+}

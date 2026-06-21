@@ -2,17 +2,25 @@ let form = document.getElementById("lobby__form");
 
 let displayName = sessionStorage.getItem("display_name");
 if (displayName) {
-  form.name.value = displayName;
+  form.querySelector('input[name="name"]').value = displayName;
 }
 
 form.addEventListener("submit", (e) => {
   e.preventDefault();
 
-  sessionStorage.setItem("display_name", e.target.name.value);
+  let name = form.querySelector('input[name="name"]').value;
+  let inviteCode = form.querySelector('input[name="room"]').value;
 
-  let inviteCode = e.target.room.value;
+  sessionStorage.setItem("display_name", name);
+sessionStorage.setItem("room", inviteCode); // ADD THIS
+
+window.location = `index.html?room=${inviteCode}&name=${name}`;
+
   if (!inviteCode) {
-    inviteCode = String(Math.floor(Math.random() * 10000));
+    inviteCode = String(Math.floor(1000 + Math.random() * 9000));
   }
-  window.location = `index.html?room=${inviteCode}`;
+
+  console.log("Redirecting to:", inviteCode);
+
+  window.location = `index.html?room=${inviteCode}&name=${name}`;
 });
