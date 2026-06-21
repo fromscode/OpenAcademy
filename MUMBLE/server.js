@@ -18,12 +18,18 @@ const APP_CERTIFICATE = "d5ce94da0b0a4475953eea7efb5e0f06";
 app.get("/get-token", (req, res) => {
   const channelName = req.query.channel;
   const uid = parseInt(req.query.uid) || 0;
-  if (!channelName) return res.status(400).json({ error: "Channel name is required" });
+  if (!channelName)
+    return res.status(400).json({ error: "Channel name is required" });
 
   const role = RtcRole.PUBLISHER;
   const privilegeExpiredTs = Math.floor(Date.now() / 1000) + 3600;
   const token = RtcTokenBuilder.buildTokenWithUid(
-    APP_ID, APP_CERTIFICATE, channelName, uid, role, privilegeExpiredTs
+    APP_ID,
+    APP_CERTIFICATE,
+    channelName,
+    uid,
+    role,
+    privilegeExpiredTs
   );
   console.log(`✅ RTC Token generated for channel: ${channelName}`);
   res.json({ token });
@@ -33,7 +39,7 @@ app.get("/get-token", (req, res) => {
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
-// Store clients per room: { roomName: Set of ws }
+// Store clients per room: { roomName: Map(ws -> name) }
 const rooms = {};
 
 wss.on("connection", (ws) => {
@@ -47,10 +53,24 @@ wss.on("connection", (ws) => {
       // User joins a room
       if (msg.type === "join") {
         userRoom = msg.room;
-        userName = msg.name;
-        if (!rooms[userRoom]) rooms[userRoom] = new Set();
-        rooms[userRoom].add(ws);
+        // Use provided name, fallback to a generated one
+        userName =
+          msg.name || `User ${msg.uid || Math.floor(Math.random() * 1000000)}`;
+        if (!rooms[userRoom]) rooms[userRoom] = new Map();
+        rooms[userRoom].set(ws, userName);
         console.log(`✅ ${userName} joined room: ${userRoom}`);
+
+        // Broadcast updated members list to everyone in the room
+        const memberList = Array.from(rooms[userRoom].values()).map((name) => ({
+          name,
+        }));
+        const membersPayload = JSON.stringify({
+          type: "members",
+          members: memberList,
+        });
+        rooms[userRoom].forEach((_, clientWs) => {
+          if (clientWs.readyState === 1) clientWs.send(membersPayload);
+        });
       }
 
       // User sends a chat message
@@ -58,16 +78,15 @@ wss.on("connection", (ws) => {
         const payload = JSON.stringify({
           type: "chat",
           from: userName,
-          text: msg.text
+          text: msg.text,
         });
         // Broadcast to everyone else in the same room
-        rooms[userRoom].forEach((client) => {
+        rooms[userRoom].forEach((clientName, client) => {
           if (client !== ws && client.readyState === 1) {
             client.send(payload);
           }
         });
       }
-
     } catch (err) {
       console.error("WS message error:", err);
     }
@@ -77,6 +96,23 @@ wss.on("connection", (ws) => {
     if (userRoom && rooms[userRoom]) {
       rooms[userRoom].delete(ws);
       console.log(`❌ ${userName} left room: ${userRoom}`);
+
+      // Broadcast updated members list
+      if (rooms[userRoom].size > 0) {
+        const memberList = Array.from(rooms[userRoom].values()).map((name) => ({
+          name,
+        }));
+        const membersPayload = JSON.stringify({
+          type: "members",
+          members: memberList,
+        });
+        rooms[userRoom].forEach((_, clientWs) => {
+          if (clientWs.readyState === 1) clientWs.send(membersPayload);
+        });
+      } else {
+        // No clients left, clean up room
+        delete rooms[userRoom];
+      }
     }
   });
 });
