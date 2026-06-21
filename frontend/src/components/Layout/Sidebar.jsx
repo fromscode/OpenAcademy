@@ -65,7 +65,7 @@ const Sidebar = ({ isOpen, onClose }) => {
               {
                 icon: Video,
                 label: "Start Meeting",
-                path: "https://deeppati2005.github.io/mumble/",
+                path: "https://mumble-zx9f.onrender.com",
                 external: true,
               },
               {
@@ -114,7 +114,7 @@ const Sidebar = ({ isOpen, onClose }) => {
               {
                 icon: Video,
                 label: "Start Meeting",
-                path: "https://deeppati2005.github.io/mumble/",
+                path: "https://mumble-zx9f.onrender.com",
                 external: true,
               },
               {
@@ -158,7 +158,7 @@ const Sidebar = ({ isOpen, onClose }) => {
               {
                 icon: Video,
                 label: "Start Meeting",
-                path: "https://deeppati2005.github.io/mumble/",
+                path: "https://mumble-zx9f.onrender.com",
                 external: true,
               },
               {

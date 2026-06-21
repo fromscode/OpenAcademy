@@ -168,8 +168,7 @@ const LandingPage = () => {
 
               <button
                 onClick={() =>
-                  (window.location.href =
-                    "https://deeppati2005.github.io/mumble/")
+                  (window.location.href = "https://mumble-zx9f.onrender.com")
                 }
                 className="group flex items-center px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-full font-semibold text-lg transition-all duration-300 shadow-2xl hover:shadow-green-500/30"
               >
