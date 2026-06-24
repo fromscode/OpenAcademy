@@ -13,6 +13,7 @@ import { useAuth } from "../../context/AuthContext";
 import { courseAPI, assignmentAPI, submissionAPI } from "../../services/api";
 import LoadingSpinner from "../../components/Common/LoadingSpinner";
 import Modal from "../../components/Common/Modal";
+import { formatDateTimeDDMMYYYY } from "../../utils/date";
 
 const Assignments = () => {
   const { user } = useAuth();
@@ -375,12 +376,6 @@ const Assignments = () => {
                         <p className="text-sm text-gray-600 dark:text-gray-400">
                           {assignment.description}
                         </p>
-                        {assignment.content && (
-                          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 p-2 rounded line-clamp-3">
-                            <span className="font-medium">Content:</span>{" "}
-                            {assignment.content}
-                          </p>
-                        )}
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-2">
@@ -415,7 +410,7 @@ const Assignments = () => {
                     <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                       <Calendar className="h-4 w-4 mr-2" />
                       <span>
-                        Due: {new Date(assignment.dueDate).toLocaleString()}
+                        Due: {formatDateTimeDDMMYYYY(assignment.dueDate)}
                       </span>
                       {overdue && (
                         <span className="ml-2 text-red-600 dark:text-red-400 font-medium">
@@ -497,16 +492,6 @@ const Assignments = () => {
             <p className="text-sm text-gray-600 dark:text-gray-400">
               {selectedAssignment?.description}
             </p>
-            {selectedAssignment?.content && (
-              <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-                <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">
-                  Assignment Content:
-                </p>
-                <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
-                  {selectedAssignment.content}
-                </p>
-              </div>
-            )}
           </div>
 
           <div>
@@ -644,9 +629,9 @@ const Assignments = () => {
             {(gradeDetails?.gradedAt || selectedSubmission?.gradedAt) && (
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 Graded on:{" "}
-                {new Date(
+                {formatDateTimeDDMMYYYY(
                   gradeDetails?.gradedAt || selectedSubmission?.gradedAt
-                ).toLocaleString()}
+                )}
               </p>
             )}
           </div>

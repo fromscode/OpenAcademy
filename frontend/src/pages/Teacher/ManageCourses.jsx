@@ -4,6 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import { courseAPI } from "../../services/api";
 import LoadingSpinner from "../../components/Common/LoadingSpinner";
 import Modal from "../../components/Common/Modal";
+import { formatDateDDMMYYYY } from "../../utils/date";
 
 const ManageCourses = () => {
   const { user } = useAuth();
@@ -28,7 +29,6 @@ const ManageCourses = () => {
     description: "",
     maxScore: 100,
     dueDate: "",
-    content: "",
   });
   const [submitting, setSubmitting] = useState(false);
 
@@ -131,7 +131,6 @@ const ManageCourses = () => {
       description: "",
       maxScore: 100,
       dueDate: "",
-      content: "",
     });
   };
 
@@ -315,8 +314,8 @@ const ManageCourses = () => {
                 <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                   <Calendar className="h-4 w-4 mr-2" />
                   <span>
-                    {new Date(course.startDate).toLocaleDateString()} -{" "}
-                    {new Date(course.endDate).toLocaleDateString()}
+                    {formatDateDDMMYYYY(course.startDate)} -{" "}
+                    {formatDateDDMMYYYY(course.endDate)}
                   </span>
                 </div>
 
@@ -573,24 +572,6 @@ const ManageCourses = () => {
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               />
             </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Assignment Content
-            </label>
-            <textarea
-              value={assignmentFormData.content}
-              onChange={(e) =>
-                setAssignmentFormData({
-                  ...assignmentFormData,
-                  content: e.target.value,
-                })
-              }
-              rows={5}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter assignment content, instructions, or requirements..."
-            />
           </div>
 
           <div className="flex gap-3 justify-end pt-4">

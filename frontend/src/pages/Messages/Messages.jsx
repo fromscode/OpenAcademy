@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import {
   Send,
   Search,
-  MoreVertical,
   Plus,
   Users,
   Wifi,
@@ -13,16 +12,17 @@ import {
   X,
   LogOut,
   Trash2,
+  ArrowLeft,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import useChat from "../../hooks/useChat";
 import chatAPI from "../../services/chatAPI";
+import { formatDateDDMMYYYY, formatDateTimeDDMMYYYY } from "../../utils/date";
 
 const Messages = () => {
   const { user, isLoading: authLoading } = useAuth();
   const {
     groups,
-    isLoading: chatLoading,
     isConnected,
     error,
     sendMessage,
@@ -61,18 +61,19 @@ const Messages = () => {
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
-  // Auto-scroll to bottom when new messages arrive
-  useEffect(() => {
-    scrollToBottom();
-  }, [selectedGroup]);
+  // No auto-selection: user controls which group to view
 
-  // Auto-select first group if available
+  const selectedMessageCount = selectedGroup
+    ? getGroupMessages(selectedGroup.id).length
+    : 0;
+
+  // Keep the newest message in view when opening a chat or receiving a message.
   useEffect(() => {
-    if (groups.length > 0 && !selectedGroup) {
-      setSelectedGroup(groups[0]);
-      joinGroup(groups[0].id);
-    }
-  }, [groups, selectedGroup, joinGroup]);
+    const frame = requestAnimationFrame(() => scrollToBottom());
+    return () => cancelAnimationFrame(frame);
+  }, [selectedGroup?.id, selectedMessageCount]);
+
+  // Removed auto-select logic to prevent automatic group selection
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -203,6 +204,16 @@ const Messages = () => {
     }
   };
 
+  const handleBackToGroups = () => {
+    if (selectedGroup && isTyping) {
+      sendTypingIndicator(selectedGroup.id, false);
+    }
+    clearTimeout(typingTimeoutRef.current);
+    setIsTyping(false);
+    setNewMessage("");
+    setSelectedGroup(null);
+  };
+
   const handleLeaveGroup = async () => {
     if (!selectedGroup) return;
 
@@ -211,14 +222,7 @@ const Messages = () => {
       await leaveGroup(selectedGroup.id);
       setShowLeaveConfirm(false);
       setSelectedGroup(null);
-      // If there are other groups, select the first one
-      if (groups.length > 1) {
-        const remainingGroups = groups.filter((g) => g.id !== selectedGroup.id);
-        if (remainingGroups.length > 0) {
-          setSelectedGroup(remainingGroups[0]);
-          joinGroup(remainingGroups[0].id);
-        }
-      }
+      // Do not auto-select another group after leaving
     } catch (error) {
       console.error("Failed to leave group:", error);
       alert(error.message || "Failed to leave group");
@@ -301,7 +305,7 @@ const Messages = () => {
 
   if (isLoading) {
     return (
-      <div className="h-[calc(100vh-8rem)] flex items-center justify-center bg-white dark:bg-gray-800 rounded-lg shadow">
+      <div className="h-[calc(100dvh-5rem)] sm:h-[calc(100vh-7rem)] flex items-center justify-center bg-white dark:bg-gray-800 rounded-2xl shadow">
         <div className="text-center">
           <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-primary-600" />
           <p className="text-gray-600 dark:text-gray-400">Loading chat...</p>
@@ -314,15 +318,18 @@ const Messages = () => {
   }
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex flex-col bg-white dark:bg-gray-800 rounded-lg shadow">
+    <div className="h-[calc(100dvh-5rem)] sm:h-[calc(100vh-7rem)] flex flex-col overflow-hidden bg-white dark:bg-gray-800 sm:rounded-2xl shadow-xl ring-1 ring-black/5 dark:ring-white/10">
       {/* Status Banner */}
       {!isConnected && (
-        <div className="flex-shrink-0 bg-blue-50 dark:bg-blue-900/20 border-b border-blue-200 dark:border-blue-800 px-4 py-2">
-          <div className="flex items-center text-sm text-blue-700 dark:text-blue-300">
-            <AlertCircle className="h-4 w-4 mr-2 flex-shrink-0" />
-            <span>
+        <div className="flex-shrink-0 bg-amber-50 dark:bg-amber-950/40 border-b border-amber-200 dark:border-amber-900 px-3 sm:px-4 py-2">
+          <div className="flex items-center text-xs sm:text-sm text-amber-800 dark:text-amber-200">
+            <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-2 flex-shrink-0" />
+            <span className="truncate">
               Running in local mode. Messages and groups are stored locally.
-              Connect backend server for persistence and real-time sync.
+              <span className="hidden sm:inline">
+                {" "}
+                Connect backend server for persistence and real-time sync.
+              </span>
             </span>
           </div>
         </div>
@@ -330,26 +337,31 @@ const Messages = () => {
 
       {/* Main Chat Container */}
       <div className="flex-1 flex min-h-0">
-        {/* Groups List */}
-        <div className="w-1/3 border-r border-gray-200 dark:border-gray-700 flex flex-col min-h-0">
+        {/* Groups List - Hidden on mobile when chat is selected */}
+        <div
+          className={`${
+            selectedGroup ? "hidden lg:flex" : "flex"
+          } lg:w-[22rem] xl:w-[24rem] lg:flex-none w-full border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex-col min-h-0`}
+        >
           {/* Header */}
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-                <Users className="h-5 w-5 mr-2" />
-                Chat Groups
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                <Users className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                <span className="hidden sm:inline">Chat Groups</span>
+                <span className="sm:hidden">Groups</span>
               </h2>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-1 sm:space-x-2">
                 {/* Connection Status */}
                 <div className="flex items-center">
                   {isConnected ? (
                     <Wifi
-                      className="h-4 w-4 text-green-500"
+                      className="h-3 w-3 sm:h-4 sm:w-4 text-green-500"
                       title="Connected"
                     />
                   ) : (
                     <WifiOff
-                      className="h-4 w-4 text-red-500"
+                      className="h-3 w-3 sm:h-4 sm:w-4 text-red-500"
                       title="Disconnected"
                     />
                   )}
@@ -358,40 +370,40 @@ const Messages = () => {
                 {/* Refresh Button */}
                 <button
                   onClick={refresh}
-                  className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  className="inline-flex items-center justify-center rounded-full p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-200 dark:hover:text-gray-200 dark:hover:bg-gray-700 min-h-[40px] min-w-[40px] touch-manipulation"
                   title="Refresh"
                 >
-                  <RefreshCw className="h-4 w-4" />
+                  <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4" />
                 </button>
 
                 {/* Browse Groups Button */}
                 <button
                   onClick={handleBrowseGroups}
-                  className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  className="inline-flex items-center justify-center rounded-full p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-200 dark:hover:text-gray-200 dark:hover:bg-gray-700 min-h-[40px] min-w-[40px] touch-manipulation"
                   title="Browse Groups"
                 >
-                  <UserPlus className="h-4 w-4" />
+                  <UserPlus className="h-3 w-3 sm:h-4 sm:w-4" />
                 </button>
 
                 {/* Create Group Button */}
                 <button
                   onClick={() => setShowCreateGroup(true)}
-                  className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  className="inline-flex items-center justify-center rounded-full p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-200 dark:hover:text-gray-200 dark:hover:bg-gray-700 min-h-[40px] min-w-[40px] touch-manipulation"
                   title="Create Group"
                 >
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
                 </button>
               </div>
             </div>
 
             {/* Search */}
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+              <div className="absolute inset-y-0 left-0 pl-2 sm:pl-3 flex items-center pointer-events-none">
+                <Search className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 dark:text-gray-500" />
               </div>
               <input
                 type="text"
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                className="block w-full min-h-[42px] pl-9 sm:pl-10 pr-4 py-2 text-sm border-0 rounded-full leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 shadow-sm ring-1 ring-gray-200 dark:ring-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 placeholder="Search groups..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -407,7 +419,7 @@ const Messages = () => {
                 </div>
                 {error.includes("backend") && (
                   <p className="text-xs text-red-500 dark:text-red-400 mt-1">
-                    Make sure the backend server is running on localhost:8080
+                    Make sure the backend server is running and accessible
                   </p>
                 )}
               </div>
@@ -416,41 +428,43 @@ const Messages = () => {
 
           {/* Create Group Form */}
           {showCreateGroup && (
-            <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-750">
+            <div className="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
               <form onSubmit={handleCreateGroup}>
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-col sm:flex-row sm:flex-nowrap items-stretch sm:items-center gap-2 sm:min-w-0">
                   <input
                     type="text"
-                    className="flex-1 min-w-0 w-full sm:w-auto border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className="flex-1 min-w-0 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-xs sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                     placeholder="Group name..."
                     value={newGroupName}
                     onChange={(e) => setNewGroupName(e.target.value)}
                     autoFocus
                   />
-                  <button
-                    type="submit"
-                    disabled={!newGroupName.trim()}
-                    className="px-3 py-2 whitespace-nowrap bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50"
-                  >
-                    Create
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowCreateGroup(false);
-                      setNewGroupName("");
-                    }}
-                    className="px-3 py-2 whitespace-nowrap border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
-                  >
-                    Cancel
-                  </button>
+                  <div className="flex gap-2 flex-shrink-0">
+                    <button
+                      type="submit"
+                      disabled={!newGroupName.trim()}
+                      className="px-4 py-2 text-xs sm:text-sm bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50 min-h-[36px] touch-manipulation"
+                    >
+                      Create
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowCreateGroup(false);
+                        setNewGroupName("");
+                      }}
+                      className="min-h-[44px] sm:min-h-[36px] px-3 sm:px-4 py-2 text-xs sm:text-sm whitespace-nowrap border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
               </form>
             </div>
           )}
 
           {/* Groups List */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto overscroll-contain">
             {filteredGroups.length > 0 ? (
               filteredGroups.map((group) => {
                 const groupMessages = getGroupMessages(group.id);
@@ -460,32 +474,32 @@ const Messages = () => {
                   <div
                     key={group.id}
                     onClick={() => handleGroupSelect(group)}
-                    className={`p-4 border-b border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                    className={`min-h-[72px] p-3 sm:px-4 border-b border-gray-100 dark:border-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${
                       selectedGroup?.id === group.id
-                        ? "bg-primary-50 dark:bg-primary-900 border-primary-200 dark:border-primary-700"
+                        ? "bg-gray-100 dark:bg-gray-800"
                         : ""
                     }`}
                   >
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-2 sm:space-x-3">
                       <div className="flex-shrink-0">
-                        <div className="h-10 w-10 rounded-full bg-primary-100 dark:bg-primary-800 flex items-center justify-center">
-                          <Users className="h-5 w-5 text-primary-600 dark:text-primary-300" />
+                        <div className="h-11 w-11 sm:h-12 sm:w-12 rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center shadow-sm">
+                          <Users className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                         </div>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center min-w-0 flex-1 pr-2">
+                            <p className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate">
                               {group.name || "Unnamed Group"}
                             </p>
                             {(group.isDemo || group.isLocal) && (
-                              <span className="ml-2 px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-800 text-blue-600 dark:text-blue-300 rounded">
+                              <span className="ml-1 sm:ml-2 px-1 sm:px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-800 text-blue-600 dark:text-blue-300 rounded flex-shrink-0">
                                 {group.isDemo ? "Demo" : "Local"}
                               </span>
                             )}
                           </div>
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
-                            {group.memberCount || 0} members
+                          <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">
+                            {group.memberCount || 0}
                           </span>
                         </div>
                         {group.description && (
@@ -494,14 +508,14 @@ const Messages = () => {
                           </p>
                         )}
                         {lastMessage ? (
-                          <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">
                             {lastMessage.senderId === user.id
                               ? "You: "
                               : `${lastMessage.senderName}: `}
                             {lastMessage.message}
                           </p>
                         ) : (
-                          <p className="text-sm text-gray-400 dark:text-gray-500 italic">
+                          <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-500 italic">
                             No messages yet
                           </p>
                         )}
@@ -511,27 +525,29 @@ const Messages = () => {
                 );
               })
             ) : (
-              <div className="p-4 text-center text-gray-500 dark:text-gray-400">
-                <Users className="h-12 w-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
+              <div className="p-3 sm:p-4 text-center text-gray-500 dark:text-gray-400">
+                <Users className="h-8 w-8 sm:h-12 sm:w-12 mx-auto mb-2 sm:mb-4 text-gray-300 dark:text-gray-600" />
                 {error ? (
                   <div>
-                    <p className="mb-2">Unable to load groups</p>
-                    <p className="text-sm text-red-500 dark:text-red-400 mb-3">
+                    <p className="mb-2 text-xs sm:text-sm">
+                      Unable to load groups
+                    </p>
+                    <p className="text-xs sm:text-sm text-red-500 dark:text-red-400 mb-3">
                       Backend connection required
                     </p>
                     <button
                       onClick={refresh}
-                      className="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400"
+                      className="min-h-[44px] text-xs sm:text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 px-2 py-2 rounded"
                     >
                       Try again
                     </button>
                   </div>
                 ) : (
                   <div>
-                    <p className="mb-2">No groups found</p>
+                    <p className="mb-2 text-xs sm:text-sm">No groups found</p>
                     <button
                       onClick={() => setShowCreateGroup(true)}
-                      className="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400"
+                      className="min-h-[44px] text-xs sm:text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 px-2 py-2 rounded"
                     >
                       Create your first group
                     </button>
@@ -543,57 +559,73 @@ const Messages = () => {
         </div>
 
         {/* Chat Area */}
-        <div className="flex-1 flex flex-col min-h-0">
+        <div
+          className={`${
+            selectedGroup ? "flex" : "hidden"
+          } lg:flex flex-1 flex-col min-w-0 min-h-0 bg-[#efeae2] dark:bg-gray-950`}
+        >
           {selectedGroup ? (
             <>
               {/* Chat Header */}
-              <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="h-10 w-10 rounded-full bg-primary-100 dark:bg-primary-800 flex items-center justify-center">
-                    <Users className="h-5 w-5 text-primary-600 dark:text-primary-300" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                      {selectedGroup.name || "Unnamed Group"}
-                    </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {selectedGroup.memberCount || 0} members
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  {!isConnected && (
-                    <div className="flex items-center text-blue-500 text-sm">
-                      <WifiOff className="h-4 w-4 mr-1" />
-                      <span>Local Mode</span>
+              <div className="flex-shrink-0 px-2 sm:px-4 py-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 shadow-sm z-10">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1 pr-2">
+                    {/* Back Button */}
+                    <button
+                      onClick={handleBackToGroups}
+                      className="min-h-[44px] min-w-[44px] px-2 inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-900 dark:text-emerald-400 dark:hover:text-emerald-300 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex-shrink-0"
+                      title="Back to Groups"
+                      aria-label="Back to groups"
+                    >
+                      <ArrowLeft className="h-5 w-5" />
+                      <span className="text-sm font-semibold">Groups</span>
+                    </button>
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+                      <Users className="h-5 w-5 text-white" />
                     </div>
-                  )}
-                  {isConnected && (
-                    <div className="flex items-center text-green-500 text-sm">
-                      <Wifi className="h-4 w-4 mr-1" />
-                      <span>Connected</span>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-sm sm:text-lg font-medium text-gray-900 dark:text-white truncate">
+                        {selectedGroup.name || "Unnamed Group"}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                        {selectedGroup.memberCount || 0} members
+                      </p>
                     </div>
-                  )}
-                  <button
-                    onClick={() => fetchGroupMembers(selectedGroup.id)}
-                    className="p-2 text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
-                    title="View Members"
-                    disabled={loadingMembers}
-                  >
-                    <Users className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={() => setShowLeaveConfirm(true)}
-                    className="p-2 text-red-400 hover:text-red-600 dark:hover:text-red-300"
-                    title="Leave Group"
-                  >
-                    <LogOut className="h-5 w-5" />
-                  </button>
+                  </div>
+                  <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
+                    {!isConnected && (
+                      <div className="hidden sm:flex items-center text-blue-500 text-xs sm:text-sm mr-2">
+                        <WifiOff className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                        <span className="hidden sm:inline">Local</span>
+                      </div>
+                    )}
+                    {isConnected && (
+                      <div className="hidden sm:flex items-center text-green-500 text-xs sm:text-sm mr-2">
+                        <Wifi className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                        <span className="hidden sm:inline">Connected</span>
+                      </div>
+                    )}
+                    <button
+                      onClick={() => fetchGroupMembers(selectedGroup.id)}
+                      className="min-h-[44px] min-w-[44px] p-2 text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 rounded-md hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
+                      title="View Members"
+                      disabled={loadingMembers}
+                    >
+                      <Users className="h-4 w-4 sm:h-5 sm:w-5" />
+                    </button>
+                    <button
+                      onClick={() => setShowLeaveConfirm(true)}
+                      className="min-h-[44px] min-w-[44px] p-2 text-red-400 hover:text-red-600 dark:hover:text-red-300 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                      title="Leave Group"
+                    >
+                      <LogOut className="h-4 w-4 sm:h-5 sm:w-5" />
+                    </button>
+                  </div>
                 </div>
               </div>
 
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
+              <div className="flex-1 overflow-y-auto overscroll-contain px-2 sm:px-5 py-4 space-y-2 min-h-0 bg-[radial-gradient(circle_at_center,_rgba(120,113,108,0.08)_1px,_transparent_1px)] bg-[length:18px_18px]">
                 {(() => {
                   const messages = getGroupMessages(selectedGroup.id);
                   const typingUsers = getTypingUsers(selectedGroup.id);
@@ -609,7 +641,7 @@ const Messages = () => {
                               isOwnMessage ? "justify-end" : "justify-start"
                             }`}
                           >
-                            <div className="max-w-xs lg:max-w-md">
+                            <div className="max-w-[88%] sm:max-w-[75%] lg:max-w-[65%]">
                               {!isOwnMessage && (
                                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 ml-1">
                                   {message.senderName || "Unknown User"}
@@ -621,18 +653,20 @@ const Messages = () => {
                                 }`}
                               >
                                 <div
-                                  className={`px-4 py-2 rounded-lg ${
+                                  className={`relative px-3 py-2 rounded-xl break-words shadow-sm ${
                                     isOwnMessage
-                                      ? "bg-primary-600 text-white"
-                                      : "bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white"
+                                      ? "bg-[#d9fdd3] dark:bg-[#005c4b] text-gray-900 dark:text-white rounded-tr-sm"
+                                      : "bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-tl-sm"
                                   }`}
                                 >
-                                  <p className="text-sm">{message.message}</p>
+                                  <p className="text-sm leading-relaxed">
+                                    {message.message}
+                                  </p>
                                   <p
                                     className={`text-xs mt-1 ${
                                       isOwnMessage
-                                        ? "text-primary-200"
-                                        : "text-gray-500"
+                                        ? "text-emerald-700 dark:text-emerald-200 text-right"
+                                        : "text-gray-500 dark:text-gray-400 text-right"
                                     }`}
                                   >
                                     {new Date(
@@ -647,7 +681,7 @@ const Messages = () => {
                                 {isOwnMessage && (
                                   <button
                                     onClick={() => setMessageToDelete(message)}
-                                    className="p-1 text-red-400 hover:text-red-600 dark:hover:text-red-300 opacity-0 group-hover/message:opacity-100 transition-opacity flex-shrink-0 mt-1"
+                                    className="min-h-[40px] min-w-[40px] p-2 text-gray-500 hover:text-red-600 dark:hover:text-red-300 opacity-80 sm:opacity-0 sm:group-hover/message:opacity-100 focus:opacity-100 transition-opacity flex-shrink-0 rounded-full hover:bg-white/70 dark:hover:bg-gray-800"
                                     title="Delete message"
                                   >
                                     <Trash2 className="h-4 w-4" />
@@ -662,12 +696,12 @@ const Messages = () => {
                       {/* Typing Indicator */}
                       {typingUsers.length > 0 && (
                         <div className="flex justify-start">
-                          <div className="max-w-xs lg:max-w-md">
+                          <div className="max-w-[85%] sm:max-w-xs lg:max-w-md">
                             <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 ml-1">
                               {typingUsers.map((u) => u.userName).join(", ")}{" "}
                               typing...
                             </p>
-                            <div className="bg-gray-200 dark:bg-gray-700 px-4 py-2 rounded-lg">
+                            <div className="bg-gray-200 dark:bg-gray-700 px-3 sm:px-4 py-2 rounded-lg">
                               <div className="flex space-x-1">
                                 <div className="w-2 h-2 bg-gray-500 rounded-full animate-pulse"></div>
                                 <div
@@ -687,21 +721,26 @@ const Messages = () => {
                       <div ref={messagesEndRef} />
                     </>
                   ) : (
-                    <div className="text-center text-gray-500 dark:text-gray-400 mt-8">
-                      <Users className="h-16 w-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
-                      <p>No messages yet. Start the conversation!</p>
+                    <div className="text-center text-gray-500 dark:text-gray-400 mt-4 sm:mt-8 px-4">
+                      <Users className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-2 sm:mb-4 text-gray-300 dark:text-gray-600" />
+                      <p className="text-sm sm:text-base">
+                        No messages yet. Start the conversation!
+                      </p>
                     </div>
                   );
                 })()}
               </div>
 
               {/* Message Input */}
-              <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-                <form onSubmit={handleSendMessage} className="flex space-x-4">
+              <div className="flex-shrink-0 px-2 sm:px-4 py-2.5 border-t border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 pb-[max(0.625rem,env(safe-area-inset-bottom))]">
+                <form
+                  onSubmit={handleSendMessage}
+                  className="flex items-end gap-2"
+                >
                   <div className="flex-1">
                     <input
                       type="text"
-                      className="block w-full border border-gray-300 dark:border-gray-600 rounded-md px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      className="block w-full min-h-[46px] border-0 rounded-full px-4 py-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm"
                       placeholder={
                         isConnected ? "Type a message..." : "Connecting..."
                       }
@@ -713,30 +752,32 @@ const Messages = () => {
                   <button
                     type="submit"
                     disabled={!newMessage.trim() || !isConnected || isSending}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="h-[46px] w-[46px] flex-shrink-0 inline-flex items-center justify-center border-0 rounded-full text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
                   >
                     {isSending ? (
                       <RefreshCw className="h-4 w-4 animate-spin" />
                     ) : (
-                      <Send className="h-4 w-4" />
+                      <Send className="h-5 w-5" />
                     )}
                   </button>
                 </form>
               </div>
             </>
           ) : (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center text-gray-500 dark:text-gray-400">
-                <Users className="h-16 w-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            <div className="flex-1 flex items-center justify-center p-4">
+              <div className="text-center text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
+                <Users className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-2 sm:mb-4 text-gray-300 dark:text-gray-600" />
+                <h3 className="text-base sm:text-lg font-medium text-gray-900 dark:text-white mb-2">
                   Select a group
                 </h3>
-                <p>Choose a group from the list to start messaging</p>
+                <p className="text-sm sm:text-base mb-4">
+                  Choose a group from the list to start messaging
+                </p>
                 {groups.length === 0 && (
                   <div className="mt-4">
                     <button
                       onClick={() => setShowCreateGroup(true)}
-                      className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
+                      className="min-h-[44px] inline-flex items-center px-4 py-2 bg-primary-600 text-white text-sm sm:text-base rounded-md hover:bg-primary-700 transition-colors"
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       Create Group
@@ -752,17 +793,17 @@ const Messages = () => {
       {/* Leave Group Confirmation Modal */}
       {showLeaveConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <div className="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
                 Leave Group?
               </h3>
             </div>
 
             {/* Modal Body */}
-            <div className="p-6">
-              <p className="text-gray-600 dark:text-gray-400">
+            <div className="p-4 sm:p-6">
+              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                 Are you sure you want to leave{" "}
                 <span className="font-semibold text-gray-900 dark:text-white">
                   {selectedGroup?.name}
@@ -772,18 +813,18 @@ const Messages = () => {
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
+            <div className="px-4 sm:px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:justify-end space-y-2 sm:space-y-0 sm:space-x-3">
               <button
                 onClick={() => setShowLeaveConfirm(false)}
                 disabled={leavingGroup}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
+                className="min-h-[44px] w-full sm:w-auto px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm sm:text-base text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleLeaveGroup}
                 disabled={leavingGroup}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 flex items-center space-x-2"
+                className="min-h-[44px] w-full sm:w-auto px-4 py-2 bg-red-600 text-white text-sm sm:text-base rounded-md hover:bg-red-700 disabled:opacity-50 flex items-center justify-center space-x-2 transition-colors"
               >
                 {leavingGroup ? (
                   <>
@@ -805,26 +846,26 @@ const Messages = () => {
       {/* Browse Groups Modal */}
       {showBrowseGroups && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[85vh] sm:max-h-[80vh] overflow-hidden mx-4">
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <div className="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
                 Browse Available Groups
               </h3>
               <button
                 onClick={() => setShowBrowseGroups(false)}
-                className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="min-h-[44px] min-w-[44px] p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             {/* Modal Body */}
-            <div className="p-6 overflow-y-auto max-h-[60vh]">
+            <div className="p-4 sm:p-6 overflow-y-auto max-h-[70vh] sm:max-h-[60vh]">
               {loadingAllGroups ? (
-                <div className="flex items-center justify-center py-8">
-                  <RefreshCw className="h-6 w-6 animate-spin text-primary-600" />
-                  <span className="ml-2 text-gray-600 dark:text-gray-400">
+                <div className="flex items-center justify-center py-6 sm:py-8">
+                  <RefreshCw className="h-5 w-5 sm:h-6 sm:w-6 animate-spin text-primary-600" />
+                  <span className="ml-2 text-sm sm:text-base text-gray-600 dark:text-gray-400">
                     Loading groups...
                   </span>
                 </div>
@@ -833,15 +874,15 @@ const Messages = () => {
                   {allGroups.map((group) => (
                     <div
                       key={group.id}
-                      className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-primary-300 dark:hover:border-primary-700 transition-colors"
+                      className="p-3 sm:p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-primary-300 dark:hover:border-primary-700 transition-colors"
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3 flex-1">
-                          <div className="h-10 w-10 rounded-full bg-primary-100 dark:bg-primary-800 flex items-center justify-center flex-shrink-0">
-                            <Users className="h-5 w-5 text-primary-600 dark:text-primary-300" />
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+                        <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
+                          <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-primary-100 dark:bg-primary-800 flex items-center justify-center flex-shrink-0">
+                            <Users className="h-4 w-4 sm:h-5 sm:w-5 text-primary-600 dark:text-primary-300" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                            <p className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate">
                               {group.name || "Unnamed Group"}
                             </p>
                             <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -857,7 +898,7 @@ const Messages = () => {
                         <button
                           onClick={() => handleJoinGroup(group.id)}
                           disabled={joiningGroupId === group.id}
-                          className="ml-4 px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 flex-shrink-0"
+                          className="min-h-[44px] w-full sm:w-auto sm:ml-4 px-4 py-2 bg-primary-600 text-white text-sm sm:text-base rounded-md hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 flex-shrink-0 transition-colors"
                         >
                           {joiningGroupId === group.id ? (
                             <>
@@ -876,13 +917,13 @@ const Messages = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8">
-                  <Users className="h-12 w-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
-                  <p className="text-gray-600 dark:text-gray-400">
+                <div className="text-center py-6 sm:py-8">
+                  <Users className="h-8 w-8 sm:h-12 sm:w-12 mx-auto mb-2 sm:mb-4 text-gray-300 dark:text-gray-600" />
+                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                     No new groups available to join
                   </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
-                    You're already a member of all existing groups
+                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-500 mt-2">
+                    You&apos;re already a member of all existing groups
                   </p>
                 </div>
               )}
@@ -894,16 +935,16 @@ const Messages = () => {
       {/* Group Members Modal */}
       {showMembersModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[85vh] sm:max-h-[80vh] overflow-hidden mx-4">
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Users className="h-5 w-5 text-primary-600 dark:text-primary-400" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <div className="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+              <div className="flex items-center space-x-2 min-w-0 flex-1 pr-2">
+                <Users className="h-4 w-4 sm:h-5 sm:w-5 text-primary-600 dark:text-primary-400 flex-shrink-0" />
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
                   Group Members
                 </h3>
                 {selectedGroup && (
-                  <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
+                  <span className="ml-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400 flex-shrink-0">
                     ({groupMembers.length}{" "}
                     {groupMembers.length === 1 ? "member" : "members"})
                   </span>
@@ -911,18 +952,18 @@ const Messages = () => {
               </div>
               <button
                 onClick={() => setShowMembersModal(false)}
-                className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="min-h-[44px] min-w-[44px] p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex-shrink-0"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             {/* Modal Body */}
-            <div className="p-6 overflow-y-auto max-h-[60vh]">
+            <div className="p-4 sm:p-6 overflow-y-auto max-h-[70vh] sm:max-h-[60vh]">
               {loadingMembers ? (
-                <div className="flex items-center justify-center py-8">
-                  <RefreshCw className="h-6 w-6 animate-spin text-primary-600" />
-                  <span className="ml-2 text-gray-600 dark:text-gray-400">
+                <div className="flex items-center justify-center py-6 sm:py-8">
+                  <RefreshCw className="h-5 w-5 sm:h-6 sm:w-6 animate-spin text-primary-600" />
+                  <span className="ml-2 text-sm sm:text-base text-gray-600 dark:text-gray-400">
                     Loading members...
                   </span>
                 </div>
@@ -931,12 +972,12 @@ const Messages = () => {
                   {groupMembers.map((member, index) => (
                     <div
                       key={member.userId || index}
-                      className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                      className="p-3 sm:p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                     >
                       <div className="flex items-start justify-between">
-                        <div className="flex items-start space-x-3 flex-1">
-                          <div className="h-10 w-10 rounded-full bg-primary-100 dark:bg-primary-800 flex items-center justify-center flex-shrink-0">
-                            <span className="text-primary-600 dark:text-primary-300 font-semibold text-sm">
+                        <div className="flex items-start space-x-2 sm:space-x-3 flex-1 min-w-0">
+                          <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-primary-100 dark:bg-primary-800 flex items-center justify-center flex-shrink-0">
+                            <span className="text-primary-600 dark:text-primary-300 font-semibold text-xs sm:text-sm">
                               {member.fullName
                                 ? member.fullName
                                     .split(" ")
@@ -948,30 +989,19 @@ const Messages = () => {
                             </span>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center space-x-2">
-                              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2">
+                              <p className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate">
                                 {member.fullName || "Unknown User"}
                               </p>
                               {member.role && member.role !== "MEMBER" && (
-                                <span className="px-2 py-0.5 text-xs bg-primary-100 dark:bg-primary-800 text-primary-600 dark:text-primary-300 rounded">
+                                <span className="mt-1 sm:mt-0 inline-block px-2 py-0.5 text-xs bg-primary-100 dark:bg-primary-800 text-primary-600 dark:text-primary-300 rounded flex-shrink-0">
                                   {member.role}
                                 </span>
                               )}
                             </div>
-                            {member.email && (
-                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                {member.email}
-                              </p>
-                            )}
-                            {member.phoneNumber && (
-                              <p className="text-xs text-gray-500 dark:text-gray-400">
-                                {member.phoneNumber}
-                              </p>
-                            )}
                             {member.joinedAt && (
                               <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                                Joined{" "}
-                                {new Date(member.joinedAt).toLocaleDateString()}
+                                Joined {formatDateDDMMYYYY(member.joinedAt)}
                               </p>
                             )}
                           </div>
@@ -981,9 +1011,9 @@ const Messages = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8">
-                  <Users className="h-12 w-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
-                  <p className="text-gray-600 dark:text-gray-400">
+                <div className="text-center py-6 sm:py-8">
+                  <Users className="h-8 w-8 sm:h-12 sm:w-12 mx-auto mb-2 sm:mb-4 text-gray-300 dark:text-gray-600" />
+                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                     No members found
                   </p>
                 </div>
@@ -991,10 +1021,10 @@ const Messages = () => {
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+            <div className="px-4 sm:px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
               <button
                 onClick={() => setShowMembersModal(false)}
-                className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
+                className="min-h-[44px] px-4 py-2 bg-primary-600 text-white text-sm sm:text-base rounded-md hover:bg-primary-700 transition-colors"
               >
                 Close
               </button>
@@ -1006,43 +1036,43 @@ const Messages = () => {
       {/* Delete Message Confirmation Modal */}
       {messageToDelete && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <div className="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
                 Delete Message?
               </h3>
             </div>
 
             {/* Modal Body */}
-            <div className="p-6">
-              <p className="text-gray-600 dark:text-gray-400 mb-3">
+            <div className="p-4 sm:p-6">
+              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-3">
                 Are you sure you want to delete this message? This action cannot
                 be undone.
               </p>
               <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg">
-                <p className="text-sm text-gray-900 dark:text-white">
+                <p className="text-sm text-gray-900 dark:text-white break-words">
                   {messageToDelete.message}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  {new Date(messageToDelete.timestamp).toLocaleString()}
+                  {formatDateTimeDDMMYYYY(messageToDelete.timestamp)}
                 </p>
               </div>
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
+            <div className="px-4 sm:px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:justify-end space-y-2 sm:space-y-0 sm:space-x-3">
               <button
                 onClick={() => setMessageToDelete(null)}
                 disabled={deletingMessageId === messageToDelete.id}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
+                className="min-h-[44px] w-full sm:w-auto px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm sm:text-base text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteMessage}
                 disabled={deletingMessageId === messageToDelete.id}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 flex items-center space-x-2"
+                className="min-h-[44px] w-full sm:w-auto px-4 py-2 bg-red-600 text-white text-sm sm:text-base rounded-md hover:bg-red-700 disabled:opacity-50 flex items-center justify-center space-x-2 transition-colors"
               >
                 {deletingMessageId === messageToDelete.id ? (
                   <>

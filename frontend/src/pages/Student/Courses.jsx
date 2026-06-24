@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { courseAPI } from "../../services/api";
+import { formatDateDDMMYYYY } from "../../utils/date";
 import LoadingSpinner from "../../components/Common/LoadingSpinner";
 import Modal from "../../components/Common/Modal";
 
@@ -66,19 +67,10 @@ const Courses = () => {
       setError(null);
     } catch (err) {
       console.error("Failed to enroll in course:", err);
-      // Check if the error is about already being enrolled
-      if (err.message && err.message.includes("already enrolled")) {
-        setError("You are already enrolled in this course.");
-      } else {
-        setError("Failed to enroll in course. Please try again.");
-      }
+      setError("Failed to enroll in course. Please try again.");
     } finally {
       setEnrolling(false);
     }
-  };
-
-  const isEnrolled = (courseId) => {
-    return studentCourses.some((course) => course.id === courseId);
   };
 
   const handleCourseClick = (course) => {
@@ -121,21 +113,21 @@ const Courses = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex justify-between items-start mb-4">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
                 My Courses
               </h1>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                 View and manage your enrolled courses
               </p>
             </div>
             <button
               onClick={() => setShowEnrollModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base min-h-[44px] w-full sm:w-auto"
             >
               <Plus className="h-4 w-4" />
               Enroll in Course
@@ -144,48 +136,48 @@ const Courses = () => {
 
           {/* Search Bar */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
             <input
               type="text"
               placeholder="Search courses..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-9 sm:pl-10 pr-4 py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
         </div>
 
         {error && (
-          <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-3 sm:px-4 py-3 rounded text-sm">
             {error}
           </div>
         )}
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-1">
                   Enrolled Courses
                 </p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                   {studentCourses.length}
                 </p>
               </div>
-              <div className="h-12 w-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-                <BookOpen className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              <div className="h-10 w-10 sm:h-12 sm:w-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center flex-shrink-0">
+                <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-1">
                   Active Courses
                 </p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                   {
                     studentCourses.filter((c) => {
                       const now = new Date();
@@ -196,19 +188,19 @@ const Courses = () => {
                   }
                 </p>
               </div>
-              <div className="h-12 w-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
-                <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+              <div className="h-10 w-10 sm:h-12 sm:w-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center flex-shrink-0">
+                <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 text-green-600 dark:text-green-400" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 sm:col-span-2 lg:col-span-1">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-1">
                   Total Instructors
                 </p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                   {
                     new Set(
                       studentCourses.map(
@@ -218,15 +210,15 @@ const Courses = () => {
                   }
                 </p>
               </div>
-              <div className="h-12 w-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
-                <Award className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+              <div className="h-10 w-10 sm:h-12 sm:w-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Award className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600 dark:text-purple-400" />
               </div>
             </div>
           </div>
         </div>
 
         {/* Courses Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {filteredCourses.map((course) => (
             <div
               key={course.id}
@@ -269,8 +261,8 @@ const Courses = () => {
                 <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                   <Calendar className="h-4 w-4 mr-2" />
                   <span>
-                    {new Date(course.startDate).toLocaleDateString()} -{" "}
-                    {new Date(course.endDate).toLocaleDateString()}
+                    {formatDateDDMMYYYY(course.startDate)} -{" "}
+                    {formatDateDDMMYYYY(course.endDate)}
                   </span>
                 </div>
               </div>
@@ -284,7 +276,7 @@ const Courses = () => {
                         Start Date:
                       </span>
                       <span className="text-gray-900 dark:text-white font-medium">
-                        {new Date(course.startDate).toLocaleDateString()}
+                        {formatDateDDMMYYYY(course.startDate)}
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -292,7 +284,7 @@ const Courses = () => {
                         End Date:
                       </span>
                       <span className="text-gray-900 dark:text-white font-medium">
-                        {new Date(course.endDate).toLocaleDateString()}
+                        {formatDateDDMMYYYY(course.endDate)}
                       </span>
                     </div>
                   </div>
@@ -327,49 +319,29 @@ const Courses = () => {
         <div className="space-y-4">
           <p className="text-gray-600 dark:text-gray-400">Available courses:</p>
           <div className="max-h-96 overflow-y-auto space-y-2">
-            {allCourses.map((course) => {
-              const enrolled = isEnrolled(course.id);
-              return (
-                <div
-                  key={course.id}
-                  className={`p-4 border rounded-lg ${
-                    enrolled
-                      ? "border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 opacity-60"
-                      : "border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
-                  }`}
+            {allCourses.map((course) => (
+              <div
+                key={course.id}
+                className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+              >
+                <h4 className="font-semibold text-gray-900 dark:text-white">
+                  {course.title}
+                </h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {course.courseCode}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                  {course.description}
+                </p>
+                <button
+                  onClick={() => handleEnrollCourse(course.id)}
+                  disabled={enrolling}
+                  className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <h4 className="font-semibold text-gray-900 dark:text-white">
-                    {course.title}
-                  </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {course.courseCode}
-                  </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                    {course.description}
-                  </p>
-                  {enrolled && (
-                    <p className="mt-2 text-sm font-medium text-green-600 dark:text-green-400">
-                      ✓ Already enrolled
-                    </p>
-                  )}
-                  <button
-                    onClick={() => handleEnrollCourse(course.id)}
-                    disabled={enrolling || enrolled}
-                    className={`mt-3 px-4 py-2 rounded-lg font-medium transition-colors ${
-                      enrolled
-                        ? "bg-gray-400 text-white cursor-not-allowed"
-                        : "bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    }`}
-                  >
-                    {enrolled
-                      ? "Already Enrolled"
-                      : enrolling
-                      ? "Enrolling..."
-                      : "Enroll"}
-                  </button>
-                </div>
-              );
-            })}
+                  {enrolling ? "Enrolling..." : "Enroll"}
+                </button>
+              </div>
+            ))}
           </div>
         </div>
       </Modal>

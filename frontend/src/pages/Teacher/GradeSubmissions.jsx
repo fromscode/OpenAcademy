@@ -12,6 +12,7 @@ import { useAuth } from "../../context/AuthContext";
 import { courseAPI, assignmentAPI, submissionAPI } from "../../services/api";
 import LoadingSpinner from "../../components/Common/LoadingSpinner";
 import Modal from "../../components/Common/Modal";
+import { formatDateTimeDDMMYYYY } from "../../utils/date";
 
 const GradeSubmissions = () => {
   const { user } = useAuth();
@@ -353,7 +354,7 @@ const GradeSubmissions = () => {
                         <span className="text-sm text-gray-600 dark:text-gray-400">
                           Submitted:{" "}
                           {submission.submittedAt
-                            ? new Date(submission.submittedAt).toLocaleString()
+                            ? formatDateTimeDDMMYYYY(submission.submittedAt)
                             : "--"}
                         </span>
                       </div>

@@ -13,6 +13,7 @@ import { useAuth } from "../../context/AuthContext";
 import { courseAPI, assignmentAPI } from "../../services/api";
 import LoadingSpinner from "../../components/Common/LoadingSpinner";
 import Modal from "../../components/Common/Modal";
+import { formatDateDDMMYYYY } from "../../utils/date";
 
 const TeacherDashboard = () => {
   const { user } = useAuth();
@@ -194,14 +195,14 @@ const TeacherDashboard = () => {
     return (
       <div
         key={submission.id}
-        className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
+        className="flex items-center space-x-3 p-2 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
       >
         <div className="flex-shrink-0">
           {avatarUrl ? (
             <img
               src={avatarUrl}
               alt={studentName}
-              className="h-8 w-8 rounded-full object-cover"
+              className="h-6 w-6 sm:h-8 sm:w-8 rounded-full object-cover"
               referrerPolicy="no-referrer"
               onError={(e) => {
                 e.currentTarget.style.display = "none";
@@ -211,24 +212,24 @@ const TeacherDashboard = () => {
             />
           ) : null}
           <div
-            className="h-8 w-8 rounded-full bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-100 flex items-center justify-center text-xs font-semibold"
+            className="h-6 w-6 sm:h-8 sm:w-8 rounded-full bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-100 flex items-center justify-center text-xs font-semibold"
             style={{ display: avatarUrl ? "none" : "flex" }}
           >
             {initials(studentName)}
           </div>
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+          <p className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate">
             {assignment?.title}
           </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             {studentName} •{" "}
-            {submittedDate ? new Date(submittedDate).toLocaleDateString() : ""}
+            {submittedDate ? formatDateDDMMYYYY(submittedDate) : ""}
           </p>
         </div>
         <div className="flex-shrink-0">
           <span
-            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+            className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
               status === "graded"
                 ? "bg-green-100 text-green-800"
                 : status === "submitted"
@@ -252,22 +253,22 @@ const TeacherDashboard = () => {
     return (
       <div
         key={assignment.id}
-        className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
+        className="flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
       >
         <div className="flex-shrink-0">
           {isUrgent ? (
-            <AlertCircle className="h-5 w-5 text-red-500" />
+            <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
           ) : (
-            <Clock className="h-5 w-5 text-yellow-500" />
+            <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+          <p className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate">
             {assignment.title}
           </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             {assignment.courseName} • Due{" "}
-            {new Date(assignment.dueDate).toLocaleDateString()}
+            {formatDateDDMMYYYY(assignment.dueDate)}
           </p>
         </div>
         <div className="flex-shrink-0">
@@ -286,22 +287,22 @@ const TeacherDashboard = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-3 sm:px-4 py-3 rounded text-sm">
           {error}
         </div>
       )}
 
       {/* Welcome Header */}
       <div className="bg-gradient-to-r from-primary-600 to-primary-700 rounded-lg shadow">
-        <div className="px-6 py-8">
-          <div className="flex items-center">
-            <div className="h-16 w-16 rounded-full bg-white flex items-center justify-center">
-              <Users className="h-8 w-8 text-primary-600" />
+        <div className="px-4 sm:px-6 py-6 sm:py-8">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0">
+            <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-white flex items-center justify-center flex-shrink-0">
+              <Users className="h-6 w-6 sm:h-8 sm:w-8 text-primary-600" />
             </div>
-            <div className="ml-6">
-              <h1 className="text-3xl font-bold text-white">
+            <div className="sm:ml-6 text-center sm:text-left">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">
                 Good morning, Professor {user?.firstName || user?.name}!
               </h1>
             </div>
@@ -310,28 +311,31 @@ const TeacherDashboard = () => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <div key={stat.name} className="card">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className={`p-3 rounded-lg ${stat.color}`}>
-                    <Icon className="h-6 w-6 text-white" />
+            <div
+              key={stat.name}
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 sm:p-6"
+            >
+              <div className="flex flex-col sm:flex-row items-center sm:items-start">
+                <div className="flex-shrink-0 mb-2 sm:mb-0">
+                  <div className={`p-2 sm:p-3 rounded-lg ${stat.color}`}>
+                    <Icon className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
                   </div>
                 </div>
-                <div className="ml-5 w-0 flex-1">
+                <div className="sm:ml-4 lg:ml-5 w-full flex-1 text-center sm:text-left">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
+                    <dt className="text-xs sm:text-sm font-medium text-gray-500 truncate">
                       {stat.name}
                     </dt>
-                    <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-gray-900 dark:text-white">
+                    <dd className="flex items-baseline justify-center sm:justify-start">
+                      <div className="text-lg sm:text-2xl font-semibold text-gray-900 dark:text-white">
                         {stat.value}
                       </div>
                       <div
-                        className={`ml-2 flex items-baseline text-sm font-semibold ${
+                        className={`ml-1 sm:ml-2 flex items-baseline text-xs sm:text-sm font-semibold ${
                           stat.changeType === "increase"
                             ? "text-green-600"
                             : "text-red-600"
@@ -349,57 +353,57 @@ const TeacherDashboard = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="card">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
+        <h3 className="text-base sm:text-lg font-medium text-gray-900 dark:text-white mb-4">
           Quick Actions
         </h3>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Link
             to="/dashboard/teacher/courses"
-            className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-primary-300 hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-800"
+            className="p-3 sm:p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-primary-300 hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-800 text-center sm:text-left"
           >
-            <BookOpen className="h-8 w-8 text-primary-600 mb-2" />
-            <h4 className="font-medium text-gray-900 dark:text-white">
+            <BookOpen className="h-6 w-6 sm:h-8 sm:w-8 text-primary-600 mb-2 mx-auto sm:mx-0" />
+            <h4 className="text-sm sm:text-base font-medium text-gray-900 dark:text-white">
               Manage Courses
             </h4>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
               View and edit course content
             </p>
           </Link>
 
           <Link
             to="/dashboard/teacher/grade-submissions"
-            className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-primary-300 hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-800"
+            className="p-3 sm:p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-primary-300 hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-800 text-center sm:text-left"
           >
-            <Award className="h-8 w-8 text-primary-600 mb-2" />
-            <h4 className="font-medium text-gray-900 dark:text-white">
+            <Award className="h-6 w-6 sm:h-8 sm:w-8 text-primary-600 mb-2 mx-auto sm:mx-0" />
+            <h4 className="text-sm sm:text-base font-medium text-gray-900 dark:text-white">
               Grade Submissions
             </h4>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
               Review and grade student work
             </p>
           </Link>
 
           <Link
             to="/dashboard/teacher/courses"
-            className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-primary-300 hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-800"
+            className="p-3 sm:p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-primary-300 hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-800 text-center sm:text-left"
           >
-            <Users className="h-8 w-8 text-primary-600 mb-2" />
-            <h4 className="font-medium text-gray-900 dark:text-white">
+            <Users className="h-6 w-6 sm:h-8 sm:w-8 text-primary-600 mb-2 mx-auto sm:mx-0" />
+            <h4 className="text-sm sm:text-base font-medium text-gray-900 dark:text-white">
               View Courses
             </h4>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
               Manage course information
             </p>
           </Link>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Recent Submissions */}
-        <div className="card">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+            <h3 className="text-base sm:text-lg font-medium text-gray-900 dark:text-white">
               Recent Submissions
             </h3>
             <button
@@ -407,16 +411,16 @@ const TeacherDashboard = () => {
                 e.preventDefault();
                 setShowSubmissionsModal(true);
               }}
-              className="text-sm text-primary-600 hover:text-primary-700 cursor-pointer"
+              className="text-xs sm:text-sm text-primary-600 hover:text-primary-700 cursor-pointer"
             >
               View all
             </button>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {recentSubmissions.length > 0 ? (
               recentSubmissions.map(renderSubmission)
             ) : (
-              <p className="text-gray-500 dark:text-gray-400 text-center py-4">
+              <p className="text-gray-500 dark:text-gray-400 text-center py-4 text-sm">
                 No recent submissions
               </p>
             )}
@@ -424,9 +428,9 @@ const TeacherDashboard = () => {
         </div>
 
         {/* Upcoming Deadlines */}
-        <div className="card">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+            <h3 className="text-base sm:text-lg font-medium text-gray-900 dark:text-white">
               Upcoming Deadlines
             </h3>
             <button
@@ -434,16 +438,16 @@ const TeacherDashboard = () => {
                 e.preventDefault();
                 setShowDeadlinesModal(true);
               }}
-              className="text-sm text-primary-600 hover:text-primary-700 cursor-pointer"
+              className="text-xs sm:text-sm text-primary-600 hover:text-primary-700 cursor-pointer"
             >
               View all
             </button>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {upcomingDeadlines.length > 0 ? (
               upcomingDeadlines.map(renderDeadline)
             ) : (
-              <p className="text-gray-500 dark:text-gray-400 text-center py-4">
+              <p className="text-gray-500 dark:text-gray-400 text-center py-4 text-sm">
                 No upcoming deadlines
               </p>
             )}
@@ -452,31 +456,29 @@ const TeacherDashboard = () => {
       </div>
 
       {/* My Courses */}
-      <div className="card">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
+        <h3 className="text-base sm:text-lg font-medium text-gray-900 dark:text-white mb-4">
           My Courses
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {teacherCourses.map((course) => (
             <div
               key={course.id}
-              className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow bg-white dark:bg-gray-800"
+              className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow bg-white dark:bg-gray-800"
             >
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-medium text-gray-900 dark:text-white">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
+                <h4 className="text-sm sm:text-base font-medium text-gray-900 dark:text-white truncate">
                   {course.title}
                 </h4>
-                <span className="text-xs text-gray-500 dark:text-gray-400">
+                <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 sm:mt-0">
                   {course.courseCode}
                 </span>
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
                 {course.startDate && course.endDate
-                  ? `${new Date(
+                  ? `${formatDateDDMMYYYY(
                       course.startDate
-                    ).toLocaleDateString()} - ${new Date(
-                      course.endDate
-                    ).toLocaleDateString()}`
+                    )} - ${formatDateDDMMYYYY(course.endDate)}`
                   : ""}
               </p>
               {/* View-only: no manage controls here */}
