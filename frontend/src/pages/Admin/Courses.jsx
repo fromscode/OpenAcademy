@@ -10,6 +10,7 @@ import {
 import { courseAPI } from "../../services/api";
 import LoadingSpinner from "../../components/Common/LoadingSpinner";
 import Modal from "../../components/Common/Modal";
+import { formatDateDDMMYYYY, formatDateTimeDDMMYYYY } from "../../utils/date";
 
 const AdminCourses = () => {
   const [courses, setCourses] = useState([]);
@@ -64,7 +65,7 @@ const AdminCourses = () => {
       (course) =>
         course.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         course.courseCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course.description?.toLowerCase().includes(searchTerm.toLowerCase())
+        course.description?.toLowerCase().includes(searchTerm.toLowerCase()),
     );
   };
 
@@ -79,11 +80,11 @@ const AdminCourses = () => {
   }).length;
 
   const upcomingCourses = courses.filter(
-    (c) => new Date(c.startDate) > new Date()
+    (c) => new Date(c.startDate) > new Date(),
   ).length;
 
   const completedCourses = courses.filter(
-    (c) => new Date(c.endDate) < new Date()
+    (c) => new Date(c.endDate) < new Date(),
   ).length;
 
   if (isLoading) {
@@ -244,10 +245,10 @@ const AdminCourses = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900 dark:text-white">
-                          {new Date(course.startDate).toLocaleDateString()}
+                          {formatDateDDMMYYYY(course.startDate)}
                         </div>
                         <div className="text-sm text-gray-500 dark:text-gray-400">
-                          to {new Date(course.endDate).toLocaleDateString()}
+                          to {formatDateDDMMYYYY(course.endDate)}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -347,8 +348,8 @@ const AdminCourses = () => {
                   Duration
                 </p>
                 <p className="text-gray-900 dark:text-white font-medium">
-                  {new Date(selectedCourse.startDate).toLocaleDateString()} -{" "}
-                  {new Date(selectedCourse.endDate).toLocaleDateString()}
+                  {formatDateDDMMYYYY(selectedCourse.startDate)} -{" "}
+                  {formatDateDDMMYYYY(selectedCourse.endDate)}
                 </p>
               </div>
 
@@ -386,10 +387,7 @@ const AdminCourses = () => {
                               {assignment.maxScore} pts
                             </p>
                             <p className="text-xs text-gray-500 dark:text-gray-400">
-                              Due:{" "}
-                              {new Date(
-                                assignment.dueDate
-                              ).toLocaleDateString()}
+                              Due: {formatDateTimeDDMMYYYY(assignment.dueDate)}
                             </p>
                           </div>
                         </div>
